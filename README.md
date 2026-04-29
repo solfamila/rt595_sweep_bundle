@@ -1,6 +1,8 @@
 # RT595 Sweep Bundle
 
 This folder is a portable sweep bundle for `master_i3c_sdma_seed_tail_len_sweep`.
+It also includes the focused `master_i3c_rx_request_semantics_probe` used to
+validate CPU, bulk DMA, and chained RX behavior on the RT595 master.
 It vendors the passing sweep harness, the RT595 SDK payloads, the shared
 SmartDMA driver used by the passing replay, the local macOS arm64 Arm GNU
 toolchain copy, the local LinkServer copy, and the TRACE32 helper binaries and
@@ -9,6 +11,8 @@ wrappers that were used during validation.
 ## Included
 
 - `master_i3c_sdma_seed_tail_len_sweep/` with the passing harness sources.
+- `master_i3c_rx_request_semantics_probe/` with the focused RX request-semantics
+  probe sources.
 - `sdk/` with the vendored RT595 master and slave build payloads.
 - `src/master/drivers/fsl_i3c_smartdma.c` and `.h` with the shared driver fix
   that removed the `COMPLETE|RXPEND` SmartDMA IRQ spin.
@@ -16,9 +20,14 @@ wrappers that were used during validation.
   with the validated compiler used to rebuild the sweep.
 - `.local/linkserver/` with the validated LinkServer payload used to flash the
   slave during the standalone flow.
+- `.local/lauterbach-mcp-venv/` with the Lauterbach TRACE32 MCP server runtime.
+- `.local/rt595-trace-venv/` with the Python dependencies used by the
+  `rt595-trace` MCP server.
+- `.local/rt595-trace/rt595_trace.duckdb` with the bundled RT595 trace query
+  database used by the `rt595-trace` MCP server.
 - `.local/trace32/` with the local TRACE32 wrapper binaries and sources.
-- `trace32/` with bundle-local shell entrypoints for the long-settle and
-  5-second replay flows.
+- `trace32/` with bundle-local shell entrypoints for the long-settle,
+  5-second replay, and RX request-semantics probe flows.
 
 No source files outside this folder are required by the bundle build.
 
@@ -35,11 +44,20 @@ you move the bundle to a host that cannot run those binaries, point
 `RT595_TOOLCHAIN_ROOT`, `RT595_CC`, `RT595_OBJCOPY`, `RT595_GDB`, and
 `LINKSERVER_BIN` at host-compatible equivalents.
 
-## VS Code MCP Server
+## VS Code MCP Servers
 
 The bundle now includes the Lauterbach TRACE32 MCP server under
 `.local/lauterbach-mcp-venv/` plus a relocatable launcher at
 `.local/bin/lauterbachdebugger-mcp`.
+
+The bundle also includes the `rt595-trace` MCP server runtime under
+`.local/rt595-trace-venv/`, the bundled query database at
+`.local/rt595-trace/rt595_trace.duckdb`, and a relocatable launcher at
+`.local/bin/rt595-trace`.
+
+The `rt595_trace` source code itself is not copied into the bundle. By default,
+the launcher and generated `.vscode/mcp.json` point back to the hidden-gibbon
+repo source at `/Users/foxy/intent/workspaces/hidden-gibbon/repo/src`.
 
 To install the VS Code MCP config for this bundle, run:
 
@@ -47,10 +65,11 @@ To install the VS Code MCP config for this bundle, run:
 ./setup_vscode_mcp.sh
 ```
 
-That writes `.vscode/mcp.json` for this folder and points it at the bundled
-launcher. Run it again if you move or unzip the bundle to a different path.
+That writes `.vscode/mcp.json` for this folder and points it at both bundled
+MCP launchers. Run it again if you move or unzip the bundle to a different
+path.
 
-What the launcher does:
+What the Lauterbach launcher does:
 
 1. Uses the bundled Lauterbach MCP Python environment when available.
 2. Falls back to `python3` or `python` if needed.
@@ -58,10 +77,26 @@ What the launcher does:
 4. Uses `T32SYS` from the environment if you already set it.
 5. Otherwise tries common TRACE32 install locations such as `~/t32/files`.
 
+What the `rt595-trace` launcher does:
+
+1. Uses the bundled `rt595-trace` Python environment when available.
+2. Adds the hidden-gibbon `rt595_trace` source tree to `PYTHONPATH` instead of
+  copying that source into the bundle.
+3. Uses the bundled `.local/rt595-trace/rt595_trace.duckdb` database by default
+  when started with no arguments.
+4. Still accepts normal CLI arguments, so you can run `--help` or override the
+  subcommand manually.
+
+If the hidden-gibbon repo is in a different location, set
+`RT595_TRACE_SOURCE_ROOT` before starting VS Code or edit `.vscode/mcp.json`
+after running the setup script.
+
 Quick local check:
 
 ```bash
 ./.local/bin/lauterbachdebugger-mcp --help
+./.local/bin/rt595-trace --help
+./.local/bin/rt595-trace serve --db ./.local/rt595-trace/rt595_trace.duckdb --help
 ```
 
 If your TRACE32 installation is not under `~/t32` or `~/t32/files`, export
@@ -184,6 +219,49 @@ continue window stops.
 ```bash
 ./trace32/probe_master_i3c_sdma_seed_tail_len_sweep_failure_state.sh
 ```
+
+## RX Request-Semantics Probe
+
+Use this flow to reproduce the verified RT595 RX result where all three cases
+pass on hardware:
+
+1. CPU write plus plain CPU read of 4 bytes.
+2. CPU write plus bulk RX DMA read of 4 bytes.
+3. CPU write plus chained one-byte RX DMA descriptors.
+
+### Build the RX probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_request_semantics_probe
+```
+
+This leaves the slave running and prepares the master ELF at:
+
+```text
+/Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_rx_request_semantics_probe/_build/master/evkmimxrt595_ezhb.axf
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_request_semantics_probe.sh
+```
+
+The validated passing signature is:
+
+```text
+rxProbe= pc=20281800 mode=3 stage=0A result=0 dmaInta=1 dataIrqDelta=0 protocolIrqDelta=0 ibiIrqDelta=0 status=1000 err=0 mdatactrl=80000030 d0=1 d1=2 d2=3 d3=4
+```
+
+Interpretation:
+
+1. `mode=3` means the probe reached the chained RX DMA case.
+2. `stage=0A` means the full probe completed successfully.
+3. `result=0` means no error was latched.
+4. `dataIrqDelta=0`, `protocolIrqDelta=0`, and `ibiIrqDelta=0` show the
+  passing path did not depend on CM33 IRQ cleanup.
+5. `d0..d3 = 1,2,3,4` confirms the returned payload matches the transmitted
+  data.
 
 ### Very long settle variant
 

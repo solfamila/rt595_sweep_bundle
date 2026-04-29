@@ -8,6 +8,13 @@
         "T32_PORT": "20000",
         "T32_PROTOCOL": "TCP"
       }
+    },
+    "rt595-trace": {
+      "type": "stdio",
+      "command": "/Users/foxy/Downloads/rt595_sweep_bundle/.local/bin/rt595-trace",
+      "env": {
+        "RT595_TRACE_SOURCE_ROOT": "/Users/foxy/intent/workspaces/hidden-gibbon/repo/src"
+      }
     }
   }
 }

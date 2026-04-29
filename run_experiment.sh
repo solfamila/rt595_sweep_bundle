@@ -478,12 +478,15 @@ compile_master() {
     defines+=("${extra_master_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_rx_request_semantics_probe" ]]; then
     master_driver_source="$REPO_DIR/src/master/drivers/fsl_i3c_smartdma.c"
     includes=(
       "$shared_master_driver_include"
       "${includes[@]}"
     )
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
@@ -735,6 +738,9 @@ validate_master_output() {
       ;;
     master_i3c_sdma_seed_tail_len_sweep)
       grep -q 'I3C SDMA seed tail length sweep successful' "$output_file"
+      ;;
+    master_i3c_rx_request_semantics_probe)
+      grep -q 'I3C RX request semantics probe successful' "$output_file"
       ;;
     master_led_smoke)
       grep -q 'LED smoke starting: raw GPIO forever' "$output_file" && grep -q 'readback:' "$output_file"

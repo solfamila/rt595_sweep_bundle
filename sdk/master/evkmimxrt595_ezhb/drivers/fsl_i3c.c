@@ -8,10 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX)
 extern uint8_t *g_txBuff;
 extern uint32_t g_txSize;
-#endif
+extern volatile bool g_slaveIbiRequestSent;
+extern volatile bool g_slavePostIbiAddressMatched;
+extern volatile bool g_slavePostIbiEchoPending;
+extern volatile bool g_slavePostIbiEchoArmed;
 
 /*******************************************************************************
  * Definitions
@@ -152,9 +154,7 @@ typedef struct _i3c_slave_txready_debug
 __attribute__((section(".usb_ram"), used, aligned(4))) volatile i3c_slave_txready_debug_t g_i3cSlaveTxReadyDebug;
 
 #if defined(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX)
-extern volatile bool g_slaveIbiRequestSent;
 extern volatile bool g_slaveIbiIssued;
-extern volatile bool g_slavePostIbiAddressMatched;
 #endif
 
 /*
@@ -3708,11 +3708,25 @@ static bool I3C_SlaveTransferHandleGetStatusFlags(I3C_Type *base,
     assert(NULL != base && NULL != handle && NULL != stateParams);
     /* Check for a valid handle in case of a spurious interrupt. */
     uint32_t errFlags;
+    const uint32_t recoverableReplyErrFlags =
+        (uint32_t)kI3C_SlaveErrorUnderrunFlag | (uint32_t)kI3C_SlaveErrorUnderrunNakFlag;
+
     stateParams->flags = I3C_SlaveGetStatusFlags(base);
     errFlags           = I3C_SlaveGetErrorStatusFlags(base);
 
     stateParams->pendingInts = I3C_SlaveGetPendingInterrupts(base);
     stateParams->enabledInts = I3C_SlaveGetEnabledInterrupts(base);
+
+    if ((0UL != errFlags) && ((errFlags & ~recoverableReplyErrFlags) == 0U) &&
+        (g_slaveIbiRequestSent || g_slavePostIbiEchoPending || g_slavePostIbiEchoArmed ||
+         g_slavePostIbiAddressMatched) &&
+        (0UL != (stateParams->flags &
+                 ((uint32_t)kI3C_SlaveBusStartFlag | (uint32_t)kI3C_SlaveMatchedFlag |
+                  (uint32_t)kI3C_SlaveTxReadyFlag))))
+    {
+        I3C_SlaveClearErrorStatusFlags(base, errFlags);
+        errFlags = 0U;
+    }
 
     if (0UL != (errFlags & (uint32_t)kSlaveErrorFlags))
     {
@@ -3734,20 +3748,53 @@ static void I3C_SlaveTransferHandleBusStart(I3C_Type *base,
                                             uint32_t flags,
                                             uint32_t *pendingInts)
 {
-    (void)handle;
     (void)flags;
-#if defined(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX)
-    if (g_slaveIbiRequestSent && (xfer->txData != NULL) && (xfer->txDataSize != 0UL))
+    if ((g_slaveIbiRequestSent || g_slavePostIbiEchoPending) && (xfer->txData != NULL) && (xfer->txDataSize != 0UL) &&
+        g_slavePostIbiEchoArmed)
     {
-        /* Preserve a pre-armed post-IBI reply across the start that begins
-         * the controller readback.
-         */
         g_i3cSlaveTxReadyDebug.prearmAtBusStart = xfer->txDataSize;
         I3C_SlaveEnableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
         (*pendingInts) |= (uint32_t)kI3C_SlaveTxReadyFlag;
         return;
     }
-#endif
+
+    if ((g_slaveIbiRequestSent || g_slavePostIbiEchoPending) && (g_txBuff != NULL) && (g_txSize != 0U))
+    {
+        /* Preserve a pre-armed post-IBI reply across the start that begins
+         * the controller readback.
+         */
+        size_t txCount;
+
+        xfer->txData = g_txBuff;
+        xfer->txDataSize = g_txSize;
+        handle->transferredCount = 0U;
+        g_slavePostIbiEchoArmed = true;
+        g_i3cSlaveTxReadyDebug.prearmAtBusStart = xfer->txDataSize;
+
+        I3C_SlaveGetFifoCounts(base, NULL, &txCount);
+        assert(handle->txFifoSize >= txCount);
+        txCount = handle->txFifoSize - txCount;
+
+        if ((xfer->txDataSize != 0UL) && (txCount != 0U))
+        {
+            if (xfer->txDataSize > 1UL)
+            {
+                base->SWDATAB = *xfer->txData++;
+            }
+            else
+            {
+                base->SWDATABE = *xfer->txData++;
+            }
+
+            xfer->txDataSize--;
+            handle->transferredCount++;
+        }
+
+        g_slavePostIbiEchoArmed = true;
+        I3C_SlaveEnableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
+        (*pendingInts) |= (uint32_t)kI3C_SlaveTxReadyFlag;
+        return;
+    }
     base->SDATACTRL |= I3C_SDATACTRL_FLUSHTB_MASK;
     g_i3cSlaveTxReadyDebug.prearmAtBusStart = 0U;
     xfer->txData = NULL;
@@ -3896,6 +3943,47 @@ static void I3C_SlaveTransferHandleBusStop(I3C_Type *base,
             handle->callback(base, &handle->transfer, handle->userData);
         }
 
+        if (!handle->wasTransmit && g_slavePostIbiEchoPending && (g_txBuff != NULL) && (g_txSize != 0U))
+        {
+            size_t txCount;
+
+            handle->transfer.txData = g_txBuff;
+            handle->transfer.txDataSize = g_txSize;
+            handle->transferredCount = 0U;
+            handle->rxDataBase = NULL;
+            handle->rxDataSize = 0U;
+            handle->wasTransmit = true;
+            g_slavePostIbiEchoArmed = true;
+
+            I3C_SlaveGetFifoCounts(base, NULL, &txCount);
+            assert(handle->txFifoSize >= txCount);
+            txCount = handle->txFifoSize - txCount;
+
+            while ((handle->transfer.txDataSize != 0UL) && (txCount != 0U))
+            {
+                if (handle->transfer.txDataSize > 1UL)
+                {
+                    base->SWDATAB = *handle->transfer.txData++;
+                }
+                else
+                {
+                    base->SWDATABE = *handle->transfer.txData++;
+                }
+
+                handle->transfer.txDataSize--;
+                handle->transferredCount++;
+                txCount--;
+            }
+
+            if (handle->transfer.txDataSize != 0UL)
+            {
+                I3C_SlaveEnableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
+                stateParams->pendingInts |= (uint32_t)kI3C_SlaveTxReadyFlag;
+            }
+
+            return;
+        }
+
         /* Clean up transfer info on completion, after the callback has been invoked. */
         (void)memset(&handle->transfer, 0, sizeof(handle->transfer));
         handle->rxDataBase = NULL;
@@ -3918,7 +4006,6 @@ static void I3C_SlaveTransferHandleMatched(I3C_Type *base,
         handle->callback(base, xfer, handle->userData);
     }
 
-#if defined(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX)
     g_i3cSlaveTxReadyDebug.matchedFlags = flags;
     g_i3cSlaveTxReadyDebug.matchedSeedTriggered = 0U;
     g_i3cSlaveTxReadyDebug.matchedSeedTxDataSizeBeforeWrite = xfer->txDataSize;
@@ -3926,7 +4013,8 @@ static void I3C_SlaveTransferHandleMatched(I3C_Type *base,
     g_i3cSlaveTxReadyDebug.matchedSeedTransferredCountAfterWrite = handle->transferredCount;
     g_i3cSlaveTxReadyDebug.matchedSeedTxDataSizeAfterWrite = xfer->txDataSize;
 
-    if (g_slaveIbiRequestSent && (xfer->txData != NULL) && (xfer->txDataSize != 0UL))
+    if ((g_slaveIbiRequestSent || g_slavePostIbiAddressMatched) && (xfer->txData != NULL) &&
+        (xfer->txDataSize != 0UL))
     {
         size_t txCount;
 
@@ -3958,14 +4046,14 @@ static void I3C_SlaveTransferHandleMatched(I3C_Type *base,
         g_i3cSlaveTxReadyDebug.matchedSeedTxDataSizeAfterWrite = xfer->txDataSize;
     }
 
-    if (g_slaveIbiRequestSent)
+    if (g_slaveIbiRequestSent || g_slavePostIbiAddressMatched)
     {
         if (xfer->txDataSize != 0UL)
         {
             I3C_SlaveEnableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
             /*
-             * Defer the remaining bytes until the actual required-read phase.
-             * Servicing TxReady immediately in the address-match IRQ drains the reply too early.
+             * Seed one byte at address match, then defer the remaining bytes until
+             * the required-read TxReady phase.
              */
             (*pendingInts) &= ~(uint32_t)kI3C_SlaveTxReadyFlag;
         }
@@ -3975,7 +4063,6 @@ static void I3C_SlaveTransferHandleMatched(I3C_Type *base,
             (*pendingInts) &= ~(uint32_t)kI3C_SlaveTxReadyFlag;
         }
     }
-#endif
 
     g_i3cSlaveTxReadyDebug.prearmAtMatched = xfer->txDataSize;
 }
@@ -4073,9 +4160,19 @@ static void I3C_SlaveTransferHandleTxReady(I3C_Type *base,
         g_i3cSlaveTxReadyDebug.postIbiReqReadTxDataSizeAfterWrite = handle->transfer.txDataSize;
     }
 
-    if (((stateParams->flags & (uint32_t)kI3C_SlaveRequiredReadFlag) == 0U) && !handle->wasTransmit &&
-        !g_slavePostIbiAddressMatched)
+    if (((stateParams->flags & (uint32_t)kI3C_SlaveRequiredReadFlag) == 0U) && !handle->wasTransmit)
     {
+        if ((g_slavePostIbiAddressMatched || g_slaveIbiRequestSent) &&
+            (g_i3cSlaveTxReadyDebug.matchedSeedWritesAttempted != 0U))
+        {
+            return;
+        }
+
+        if (g_slavePostIbiAddressMatched)
+        {
+            return;
+        }
+
         return;
     }
 
