@@ -1,0 +1,14 @@
+OS=
+SYS=/Users/foxy/Downloads/t32/files
+TMP=/tmp
+ID=tts_master_trace32
+
+PBI=
+USB
+CONNECTIONMODE=AUTOCONNECT
+
+RCL=NETTCP
+PORT=20000
+
+SCREEN=
+HEADER=TRACE32 Master Debug

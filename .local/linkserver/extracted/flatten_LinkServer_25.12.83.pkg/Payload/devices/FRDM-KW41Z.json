@@ -1,0 +1,42 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KW41Z",
+      "device": {
+        "id": "MKW41Z512xxx4",
+        "name": "MKW41Z4",
+        "family": "KW4x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "FTFA_2K.cfx"
+          },
+          {
+            "location": "0x1fff8000",
+            "size": "0x00020000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "kinetisconnect.scp",
+        "preconnect-script": "LS_preconnect_KW4x.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

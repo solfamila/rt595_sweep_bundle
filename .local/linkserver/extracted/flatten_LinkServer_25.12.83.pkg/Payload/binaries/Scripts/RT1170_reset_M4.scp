@@ -1,0 +1,141 @@
+1 REM ======================================
+2 REM Copyright 2020-2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM IMXRT1170 Reset script (use only when CM4 is configured as boot core)
+
+110  REM When RT1170 Rev B is reset via SYSRESET_REQ under debugger control, bootROM will
+120  REM not boot an existent flash application, instead it will enter a debug loop at a
+130  REM fixed PC address (0x00223104 for rev B / 0x002231FC for rev C). The debugger then
+140  REM needs to initialise the execution context in order to jump to the user application.
+150  REM RT1170 Rev A does not present this functionality, so it is allowed to continue
+160  REM the booting process without any other intervention post reset.
+
+170  REM When a reset script is used, it overrides any other reset configuration in the IDE.
+180  REM Therefore, it needs to handle the most common scenarios:
+190  REM  - used post flash programming (in this case it performs a system reset)
+200  REM  - used for RAM-based application (in this case it performs a soft reset)
+
+210  REM The script is given some useful information like the current context SP (b%), PC (a%),
+220  REM PSR (c%) and VTOR or image address in case of RAM applications (d%) and it passes back
+230  REM updated reset context to the debugger
+240  REM The vector table address is assumed 0x08002000 for flash images
+
+250  REM Find the probe index
+260  p% = ProbeFirstFound
+265  REM Core index is expected to be already selected
+270  THIS
+
+280  REM If VTOR is in flash (0x08000000) or bootROM (0x00200000) or 0x0 (after VECTRESET) ranges do a system reset
+290  IF (d% & 0xFF000000 == 0x08000000) || (d% & 0xFFFC0000 == 0x00200000) || (d% == 0x0) Then GOTO 400
+
+300  REM RAM-based application - perform a SOFT reset
+310  PRINT "SOFT Reset (RAM)"
+320  b% = Peek32 This d%
+330  t% = d% + 4
+340  a% = Peek32 This t%
+350  c% = 0x01000000
+360  GOTO  1000
+
+400  REM Flash application - perform SYSTEM reset (via boot core)
+410  PRINT "SYSTEM Reset"
+415  SelectProbeCore p% 1
+420  CMResetVectorCatchSet This
+422  x% = WireGetSpeed p%
+424  WireSetSpeed p% 1000
+430  CMSysResetReq This
+432  WireSetSpeed p% x%
+440  WireSWDConnect This
+450  APList This
+460  CMInitApDp This
+470  CMResetVectorCatchClear This
+
+480  REM Initialise M7
+490  GOSUB 2000
+
+500  a% = CMReadReg This 15
+
+510  REM Check RT1170 Rev: no special handling for Rev A
+520  v% = Peek32 This 0x40C84800
+530  IF v% & 0x00FFFFF0 == 0x1170A0 Then GOTO 700
+
+540  REM Check PC in debug loop: no special handling otherwise
+550  IF ((v% & 0x00FFFFF0 == 0x1170B0) && (a% != 0x00223104)) || ((v% & 0x00FFFFF0 >= 0x1170C0) && (a% != 0x002231FC)) Then GOTO 700
+
+600  REM Initialise reset context from vector table @0x08002000
+610  b% = Peek32 This 0x08002000
+620  a% = Peek32 This 0x08002004
+630  c% = 0x01000000
+640  d% = 0x08002000
+650  CMWriteReg This 13 b%
+660  CMWriteReg This 15 a%
+670  CMWriteReg This 16 c%
+680  GOTO 1000
+
+700  REM Use PC, SP, PSR, VTOR from target after reset
+710  b% = CMReadReg This 13
+720  c% = CmReadReg This 16
+730  d% = Peek32 This 0xe000ed08
+
+1000 PRINT "Vector table SP/PC is the reset context."
+1010 PRINT "PC = "; ~a%
+1020 PRINT "SP = "; ~b%
+1030 PRINT "XPSR = "; ~c%
+1040 PRINT "VTOR = "; ~d%
+
+1050 REM Enable trace and halting debug trap on faults"
+1060 z% = Peek32 this 0xE000EDFC
+1070 z% = z% | 0x10007f1
+1080 PRINT "Set DEMCR = " ~z%
+1090 Poke32 this 0xE000EDFC z%
+1100 END
+
+2000 REM ====================SUB: Set up M7=====================================
+2010 REM The M7 AP is not visible while the core is held in reset
+2020 REM Prepare a spin code in RAM and wake up / reset the M7 to it
+2030 REM This enables the M7 AP, required for debug visibility
+2040 REM   - enables the M7 AP, required for debug visibility
+2050 REM   - prevents M7 code from interfering with flash programming on M7
+2060 REM =======================================================================
+2130 REM Prepare spin code
+2140 GOSUB 2400
+2150 REM =======================================================================
+2160 PRINT "Setting M7 clock"
+2170 REM Set m7_clk_root to OSC_RC_48M / 2: CLOCK_ROOT0 = mux(0), div(1)
+2180 Poke32 this 0x40CC0000 0x001
+2190 PRINT "Resetting M7 core"
+2200 REM Save current reset SRMR and prevent M7 SW reset affecting the system
+2210 s% = Peek32 this 0x40C04004
+2220 Poke32 this 0x40C04004 0x00003000
+2230 Poke32 this 0x40C042A4 0x1
+2240 Poke32 this 0x40C04004 s%
+2250 REM =======================================================================
+2260 REM Release M7 if needed
+2270 s% = Peek32 this 0x40c04000
+2280 IF s% & 2 == 2 THEN GOTO 2330
+2290 PRINT "Releasing M7"
+2300 s% = s% | 2
+2310 Poke32 this 0x40c04000 s%
+2320 REM =======================================================================
+2330 PRINT "View cores on the DAP AP"
+2340 WireSwdConnect p%
+2350 CoreList p%
+2360 SelectProbeCore p% 1
+2390 RETURN
+
+2400 REM ==================== SUB: Set up M7 spin code ========================
+2410 REM Setup some spin code into an area of OCRAM1 (0x2024FF00)
+2420 REM Condensed vector table format taking up 2 words of memory:
+2430 REM   - x00: SP (dummy), two back-to-back branch-to-self opcodes (b 0)
+2440 REM   - x04: PC - points to address x00 (+1 Thumb)
+2450 PRINT "Setting M7 spin code"
+2460 Poke32 this 0x2024FF00 0xE7FEE7FE
+2470 Poke32 this 0x2024FF04 0x2024FF01
+2480 REM Set addr >> 7 into CM7 VTOR iomuxc_lpsr_GPR26 (RevB) or 0x400e404c (Rev A)
+2490 IF v% & 0x00FFFFF0 == 0x1170A0 Then GOTO 2520
+2500 Poke32 this 0x40C0C068 0x4049FE
+2510 GOTO 2530
+2520 Poke32 this 0x400E404C 0x4049FE
+2530 RETURN

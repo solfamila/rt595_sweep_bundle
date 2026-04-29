@@ -1,0 +1,12 @@
+<#if extraSections?has_content>
+<#if memory??>
+<#assign memName = memory.name>
+<#else>
+<#assign memName = DATA>
+</#if>
+<#list extraSections as extralinksect>
+<#if (extralinksect.region == memName && extralinksect.type == ".noinit")>
+       ${extralinksect.isd}
+</#if>
+</#list>
+</#if>

@@ -1,0 +1,9 @@
+        ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+        ASSERT(/* Memory ranges seen at same address by the primary and secondary cores */
+               (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}) ||
+               /* Memory ranges seen at different addresses by the main core and secondary cores */
+               /* radio core flash region (primary core <-> secondary core) alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x48800000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) < 0x48880000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x00000000 - 0x48800000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] radio core flash region (primary core <-> secondary core) alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x58800000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) < 0x58880000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x10000000 - 0x58800000) == __vectors_start__${slave.textSectionNormalized}))
+               , "${slave.name} execute address differs from address provided in source image");

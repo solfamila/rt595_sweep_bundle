@@ -1,0 +1,22 @@
+<#if configMemory?has_content>
+<#list configMemory as memory>
+<#if memory.RAM && memory.defaultRAM>
+
+    /* MAIN BSS SECTION */
+    .bss (NOLOAD) : ALIGN(${bss_align})
+    {
+        _bss = .;
+        PROVIDE(__start_bss_${memory.alias} = .) ;
+        PROVIDE(__start_bss_${memory.name} = .) ;
+<#include "extrasections_bss.ldt">
+<#include "main_bss.ldt">
+        *(COMMON)
+        . = ALIGN(${bss_align}) ;
+        _ebss = .;
+        PROVIDE(__end_bss_${memory.alias} = .) ;
+        PROVIDE(__end_bss_${memory.name} = .) ;
+        PROVIDE(end = .);
+    } > ${DATA} AT> ${DATA}
+</#if>
+</#list>
+</#if>

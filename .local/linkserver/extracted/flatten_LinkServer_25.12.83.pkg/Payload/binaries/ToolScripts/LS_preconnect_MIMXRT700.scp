@@ -1,0 +1,32 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM ----------------------------------------------------------------------
+102  REM i.MX RT700 Preconnect Script
+104  REM ----------------------------------------------------------------------
+106  REM a% = 1
+108  REM Skip if we're already connected from another session
+110  ProbeCloseByIndex a%
+120  t% = ProbeIsOpen a%
+130  IF t% THEN GOTO 300
+140  ProbeOpenByIndex a%
+150  WireTimedReset a% 50
+160  WireSWDConnect a%
+170  APList a%
+180  REM ----------------------------------------------------------------------
+190  REM Debug Mailbox AP Index is 2
+200  REM ----------------------------------------------------------------------
+210  SelectProbeCore a% 2
+220  REM ----------------------------------------------------------------------
+230  REM DEBUG_SESSION_REQ: 7
+240  REM ----------------------------------------------------------------------
+250  r% = 7
+260  REM ----------------------------------------------------------------------
+270  PRINT "Issuing Debug Session Request... ";r%
+280  PRINT "";
+290  DebugMailboxReq this r%
+300  CoreList a%
+310  SelectProbeCore a% 0

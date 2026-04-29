@@ -1,0 +1,47 @@
+1 REM ======================================
+2 REM Copyright 2021, 2023-2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100   REM ================================================================
+110   REM PN76xx_reset.scp
+150   REM ================================================================
+160   Print "PN76xx Reset Script"
+
+165   p% = ProbeFirstFound
+
+170   REM If VTOR is not in RAM (0x20003000-0x20008A40) ranges do a SYSRESET
+180   IF (d% < 0x20003000) || (d% >= 0x20008A40) Then GOTO 300
+
+190   REM RAM-based application - perform a SOFT reset
+200   PRINT "SOFT Reset (RAM)"
+210   b% = Peek32 This d%
+220   t% = d% + 4
+230   a% = Peek32 This t%
+240   c% = 0x01000000
+245   Print "PC=" ~a%
+250   Print "SP=" ~b%
+255   Print "VTOR=" ~d%
+260   End
+
+300   Cmhalt this
+302   SelectProbeCore p% 0
+305   REM Set breakpoint at ResetISR
+310   r% = peek32 this 0x218004
+320   If (r% < 0x218000) || (r% > 0x235FFF) Then Goto 340
+330   Cmbreakset this r%
+335   REM BootROM jumps to this address if no valid firmware
+340   Cmbreakset this 0x20003002
+350   Print "Breakpoints before reset"
+360   Cmbreaklist this
+370   Print "Sending CMSYSRESETREQ"
+372   x% = WireGetSpeed p%
+374   WireSetSpeed p% 1000
+380   Cmsysresetreq this
+382   WireSetSpeed p% x%
+390   Print "Registers after reset"
+400   Cmregs this
+410   Cmbreakclear this r%
+420   Cmbreakclear this 0x20003002
+430   End

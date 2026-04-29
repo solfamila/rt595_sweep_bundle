@@ -1,0 +1,12 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 REM Connect Script
+20 REM
+30 p% = probefirstfound
+40 print "Set recommended Redlink Probe wire speed setting..."
+50 wiresetspeed p% 6000000
+60 end

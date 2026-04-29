@@ -1,0 +1,7 @@
+    .uninit_RESERVED (NOLOAD) : ALIGN(${data_align})
+    {
+        _start_uninit_RESERVED = .;
+        KEEP(*(.bss.$RESERVED*))
+       . = ALIGN(${bss_align}) ;
+        _end_uninit_RESERVED = .;
+    } > ${DATA} AT> ${DATA}

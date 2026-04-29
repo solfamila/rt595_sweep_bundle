@@ -1,0 +1,7369 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M0",
+        "id": "Generic-M0",
+        "family": "Generic-M0",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M0plus",
+        "id": "Generic-M0plus",
+        "family": "Generic-M0plus",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M23",
+        "id": "Generic-M23",
+        "family": "Generic-M23",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm23"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M3",
+        "id": "Generic-M3",
+        "family": "Generic-M3",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M33",
+        "id": "Generic-M33",
+        "family": "Generic-M33",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M4",
+        "id": "Generic-M4",
+        "family": "Generic-M4",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "Generic-M7",
+        "id": "Generic-M7",
+        "family": "Generic-M7",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm7"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "CTN732",
+        "id": "CTN732",
+        "family": "CTNxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x27800",
+            "type": "Flash",
+            "flash-driver": "CTNxxx_158k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "CTNxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "CTNxxx_Connect.scp",
+        "reset-script": "CTNxxx_Reset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "CTN730",
+        "id": "CTN730",
+        "family": "CTNxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x14000",
+            "type": "Flash",
+            "flash-driver": "CTNxxx_80k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "CTNxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "CTNxxx_Connect.scp",
+        "reset-script": "CTNxxx_Reset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1102",
+        "id": "LPC1102",
+        "family": "LPC1102",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1104",
+        "id": "LPC1104",
+        "family": "LPC1102",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1125/303",
+        "id": "LPC1125/303",
+        "family": "LPC112x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1124/303",
+        "id": "LPC1124/303",
+        "family": "LPC112x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E68",
+        "id": "LPC11E68",
+        "family": "LPC11E6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_256K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E67",
+        "id": "LPC11E67",
+        "family": "LPC11E6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_128K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E66",
+        "id": "LPC11E66",
+        "family": "LPC11E6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_64K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E11/101",
+        "id": "LPC11E11/101",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E12/201",
+        "id": "LPC11E12/201",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E13/301",
+        "id": "LPC11E13/301",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E14/401",
+        "id": "LPC11E14/401",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E35/501",
+        "id": "LPC11E35/501",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E36/501",
+        "id": "LPC11E36/501",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x18000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_96K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E37/501",
+        "id": "LPC11E37/501",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11E37H/401",
+        "id": "LPC11E37H/401",
+        "family": "LPC11Exx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U68",
+        "id": "LPC11U68",
+        "family": "LPC11U6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_256K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U67",
+        "id": "LPC11U67",
+        "family": "LPC11U6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_128K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U66",
+        "id": "LPC11U66",
+        "family": "LPC11U6x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11U6x_64K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U12/201",
+        "id": "LPC11U12/201",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U13/201",
+        "id": "LPC11U13/201",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U14/201",
+        "id": "LPC11U14/201",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U23/301",
+        "id": "LPC11U23/301",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U24/301",
+        "id": "LPC11U24/301",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U24/401",
+        "id": "LPC11U24/401",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U34/311",
+        "id": "LPC11U34/311",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xa000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_40K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U34/421",
+        "id": "LPC11U34/421",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U35/401",
+        "id": "LPC11U35/401",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U35/501",
+        "id": "LPC11U35/501",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U36/401",
+        "id": "LPC11U36/401",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x18000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_96K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U37/401",
+        "id": "LPC11U37/401",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U37/501",
+        "id": "LPC11U37/501",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11U37H/401",
+        "id": "LPC11U37H/401",
+        "family": "LPC11Uxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/101",
+        "id": "LPC1111/101",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/201",
+        "id": "LPC1111/201",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/101",
+        "id": "LPC1112/101",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/201",
+        "id": "LPC1112/201",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11C12/301",
+        "id": "LPC11C12/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/201",
+        "id": "LPC1113/201",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/301",
+        "id": "LPC1113/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/201",
+        "id": "LPC1114/201",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/301",
+        "id": "LPC1114/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11C14/301",
+        "id": "LPC11C14/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/102",
+        "id": "LPC1111/102",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/202",
+        "id": "LPC1111/202",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/102",
+        "id": "LPC1112/102",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/202",
+        "id": "LPC1112/202",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/202",
+        "id": "LPC1113/202",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/302",
+        "id": "LPC1113/302",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/202",
+        "id": "LPC1114/202",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/302",
+        "id": "LPC1114/302",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11C22/301",
+        "id": "LPC11C22/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11C24/301",
+        "id": "LPC11C24/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11D14/301",
+        "id": "LPC11D14/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11D14/302",
+        "id": "LPC11D14/302",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1110FD",
+        "id": "LPC1110FD",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x1000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_4K_1K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x400",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111FD/002",
+        "id": "LPC1111FD/002",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112FD/102",
+        "id": "LPC1112FD/102",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114FD/102",
+        "id": "LPC1114FD/102",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114FN/102",
+        "id": "LPC1114FN/102",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/103",
+        "id": "LPC1111/103",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1111/203",
+        "id": "LPC1111/203",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/103",
+        "id": "LPC1112/103",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112/203",
+        "id": "LPC1112/203",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/203",
+        "id": "LPC1113/203",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1113/303",
+        "id": "LPC1113/303",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/203",
+        "id": "LPC1114/203",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/303",
+        "id": "LPC1114/303",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/323",
+        "id": "LPC1114/323",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114/333",
+        "id": "LPC1114/333",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xe000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_56K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1115/303",
+        "id": "LPC1115/303",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "EM773/301",
+        "id": "EM773/301",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "EM773/302",
+        "id": "EM773/302",
+        "family": "LPC11xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1311",
+        "id": "LPC1311",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1313",
+        "id": "LPC1313",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1311/01",
+        "id": "LPC1311/01",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1313/01",
+        "id": "LPC1313/01",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1342",
+        "id": "LPC1342",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1343",
+        "id": "LPC1343",
+        "family": "LPC13xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1549",
+        "id": "LPC1549",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_256K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2004000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2008000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1548",
+        "id": "LPC1548",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_128K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2002000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2004000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1547",
+        "id": "LPC1547",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_64K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2001000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2002000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1519",
+        "id": "LPC1519",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_256K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2004000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2008000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1518",
+        "id": "LPC1518",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_128K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2002000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2004000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1517",
+        "id": "LPC1517",
+        "family": "LPC15xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC15xx_64K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2001000",
+            "size": "0x1000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2002000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC15RunBootRomConnect.scp",
+        "reset-script": "LPC15RunBootRomReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC54102J256",
+        "id": "LPC54102J256",
+        "family": "LPC5410x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC5410x_256K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2010000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x3400000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC54101J512",
+        "id": "LPC54101J512",
+        "family": "LPC5410x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC5410x_512K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2010000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x3400000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC54101J256",
+        "id": "LPC54101J256",
+        "family": "LPC5410x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC5410x_256K.cfx"
+          },
+          {
+            "location": "0x2000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2010000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x3400000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC54113J256",
+        "id": "LPC54113J256",
+        "family": "LPC5411x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC5411x_256K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20010000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20020000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x4000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC54113J128",
+        "id": "LPC54113J128",
+        "family": "LPC5411x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC5411x_128K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x4000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC822",
+        "id": "LPC822",
+        "family": "LPC82x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC800_16.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC834",
+        "id": "LPC834",
+        "family": "LPC82x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC800_32.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC832",
+        "id": "LPC832",
+        "family": "LPC82x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC800_16.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC844",
+        "id": "LPC844",
+        "family": "LPC84x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC84x_64.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "NHS3100",
+        "id": "NHS3100",
+        "family": "NHS3xxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x7800",
+            "type": "Flash",
+            "flash-driver": "NSS_30k_8k_IAP.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1ff0",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "NHS3152",
+        "id": "NHS3152",
+        "family": "NHS3xxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x7800",
+            "type": "Flash",
+            "flash-driver": "NSS_30k_8k_IAP.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1ff0",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "NHS3153",
+        "id": "NHS3153",
+        "family": "NHS3xxx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x7800",
+            "type": "Flash",
+            "flash-driver": "NSS_30k_8k_IAP.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1ff0",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A02UK",
+        "id": "LPC11A02UK",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC11AXXConnect.scp",
+        "reset-script": "LPC11AXXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A04UK",
+        "id": "LPC11A04UK",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC11AXXConnect.scp",
+        "reset-script": "LPC11AXXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A11/001",
+        "id": "LPC11A11/001",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_8K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A12/101",
+        "id": "LPC11A12/101",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A13/201",
+        "id": "LPC11A13/201",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x6000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_24K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC11A14/301",
+        "id": "LPC11A14/301",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "EM783",
+        "id": "EM783",
+        "family": "LPC11Axx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1101LV",
+        "id": "LPC1101LV",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1102LV",
+        "id": "LPC1102LV",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112LV/003",
+        "id": "LPC1112LV/003",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1112LV/103",
+        "id": "LPC1112LV/103",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x4000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_16K_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114LV/103",
+        "id": "LPC1114LV/103",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1114LV/303",
+        "id": "LPC1114LV/303",
+        "family": "LPC11xxLV",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1224/101",
+        "id": "LPC1224/101",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1224/121",
+        "id": "LPC1224/121",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1224/201",
+        "id": "LPC1224/201",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1224/221",
+        "id": "LPC1224/221",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_4K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x1000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1225/301",
+        "id": "LPC1225/301",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1225/321",
+        "id": "LPC1225/321",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x14000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_80K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1226/301",
+        "id": "LPC1226/301",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x18000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_96K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1227/301",
+        "id": "LPC1227/301",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC12D27/301",
+        "id": "LPC12D27/301",
+        "family": "LPC1200",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_128K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "LPC12XXConnect.scp",
+        "reset-script": "LPC12XXReset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1315",
+        "id": "LPC1315",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1316",
+        "id": "LPC1316",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1317",
+        "id": "LPC1317",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1345",
+        "id": "LPC1345",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_32K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1346",
+        "id": "LPC1346",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0xc000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_48K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1347",
+        "id": "LPC1347",
+        "family": "LPC13xx (12bit ADC)",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC11_12_13_64K_8K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x800",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1788",
+        "id": "LPC1788",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1787",
+        "id": "LPC1787",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1786",
+        "id": "LPC1786",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1785",
+        "id": "LPC1785",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1778",
+        "id": "LPC1778",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1777",
+        "id": "LPC1777",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1776",
+        "id": "LPC1776",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1774",
+        "id": "LPC1774",
+        "family": "LPC177x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_128.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1769",
+        "id": "LPC1769",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1768",
+        "id": "LPC1768",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1767",
+        "id": "LPC1767",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1766",
+        "id": "LPC1766",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1765",
+        "id": "LPC1765",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1764",
+        "id": "LPC1764",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_128.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1763",
+        "id": "LPC1763",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1759",
+        "id": "LPC1759",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1758",
+        "id": "LPC1758",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1756",
+        "id": "LPC1756",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1754",
+        "id": "LPC1754",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_128.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2007c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1752",
+        "id": "LPC1752",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x10000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_64.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1751",
+        "id": "LPC1751",
+        "family": "LPC17xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x8000",
+            "type": "Flash",
+            "flash-driver": "LPC175x_6x_32.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1850",
+        "id": "LPC1850",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC18S50",
+        "id": "LPC18S50",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1830",
+        "id": "LPC1830",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC18S30",
+        "id": "LPC18S30",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1820",
+        "id": "LPC1820",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1810",
+        "id": "LPC1810",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC18S10",
+        "id": "LPC18S10",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1857",
+        "id": "LPC1857",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC18S57",
+        "id": "LPC18S57",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1853",
+        "id": "LPC1853",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1837",
+        "id": "LPC1837",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC18S37",
+        "id": "LPC18S37",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1833",
+        "id": "LPC1833",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1827",
+        "id": "LPC1827",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1825",
+        "id": "LPC1825",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1823",
+        "id": "LPC1823",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1822",
+        "id": "LPC1822",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x2_43x2_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1817",
+        "id": "LPC1817",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1815",
+        "id": "LPC1815",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1813",
+        "id": "LPC1813",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC1812",
+        "id": "LPC1812",
+        "family": "LPC18xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x2_43x2_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm3"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4088",
+        "id": "LPC4088",
+        "family": "LPC407x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4078",
+        "id": "LPC4078",
+        "family": "LPC407x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4076",
+        "id": "LPC4076",
+        "family": "LPC407x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_256.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x10000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4074",
+        "id": "LPC4074",
+        "family": "LPC407x_8x",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x20000",
+            "type": "Flash",
+            "flash-driver": "LPC177x_8x_407x_8x_128.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x2000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4367",
+        "id": "LPC4367",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0sub"
+          },
+          {
+            "name": "cm0app"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S67",
+        "id": "LPC43S67",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0sub"
+          },
+          {
+            "name": "cm0app"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4370",
+        "id": "LPC4370",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0sub"
+          },
+          {
+            "name": "cm0app"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S70",
+        "id": "LPC43S70",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18004000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0sub"
+          },
+          {
+            "name": "cm0app"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4350",
+        "id": "LPC4350",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S50",
+        "id": "LPC43S50",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4330",
+        "id": "LPC4330",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S30",
+        "id": "LPC43S30",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x20000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x12000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4320",
+        "id": "LPC4320",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S20",
+        "id": "LPC43S20",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4310",
+        "id": "LPC4310",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x18000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43ExternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4357",
+        "id": "LPC4357",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S57",
+        "id": "LPC43S57",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4353",
+        "id": "LPC4353",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4337",
+        "id": "LPC4337",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC43S37",
+        "id": "LPC43S37",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4333",
+        "id": "LPC4333",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4327",
+        "id": "LPC4327",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4325",
+        "id": "LPC4325",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4323",
+        "id": "LPC4323",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4322",
+        "id": "LPC4322",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x2_43x2_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4317",
+        "id": "LPC4317",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x7_43x7_2x512_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4315",
+        "id": "LPC4315",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x60000",
+            "type": "Flash",
+            "flash-driver": "LPC18x5_43x5_2x384_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4313",
+        "id": "LPC4313",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootA.cfx"
+          },
+          {
+            "location": "0x1b000000",
+            "size": "0x40000",
+            "type": "Flash",
+            "flash-driver": "LPC18x3_43x3_2x256_BootB.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC4312",
+        "id": "LPC4312",
+        "family": "LPC43xx",
+        "memory": [
+          {
+            "location": "0x1a000000",
+            "size": "0x80000",
+            "type": "Flash",
+            "flash-driver": "LPC18x2_43x2_512.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x8000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0xa000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x4000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2000c000",
+            "size": "0x4000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "reset-script": "LPC18LPC43InternalFLASHBootResetscript.scp",
+        "protocol": "jtag"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC811",
+        "id": "LPC811",
+        "family": "LPC8xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x2000",
+            "type": "Flash",
+            "flash-driver": "LPC800_8.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "LPC810",
+        "id": "LPC810",
+        "family": "LPC8xx",
+        "memory": [
+          {
+            "location": "0x0",
+            "size": "0x1000",
+            "type": "Flash",
+            "flash-driver": "LPC800_4.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x400",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {}
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "PN7362AU-C3-00",
+        "id": "PN7362AU-C3-00",
+        "family": "PN73xxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x27800",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_158k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "PN7xxxxx_Connect.scp",
+        "reset-script": "PN7xxxxx_Reset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "PN7360AU-C3-00",
+        "id": "PN7360AU-C3-00",
+        "family": "PN73xxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x14000",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_80k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "PN7xxxxx_Connect.scp",
+        "reset-script": "PN7xxxxx_Reset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "PN7462AU-C2-00",
+        "id": "PN7462AU-C2-00",
+        "family": "PN74xxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x26800",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_154k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "PN7xxxxx_Connect.scp",
+        "reset-script": "PN7xxxxx_Reset.scp"
+      }
+    },
+    {
+      "board": "",
+      "device": {
+        "name": "PN7462AU-C3-00",
+        "id": "PN7462AU-C3-00",
+        "family": "PN74xxxx",
+        "memory": [
+          {
+            "location": "0x203000",
+            "size": "0x27800",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_158k.cfx"
+          },
+          {
+            "location": "0x100020",
+            "size": "0x2ee0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x201200",
+            "size": "0xe00",
+            "type": "Flash",
+            "flash-driver": "PN7xxxxx_EE_3_5k.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "name": "cm0"
+          }
+        ]
+      },
+      "debug": {
+        "connect-script": "PN7xxxxx_Connect.scp",
+        "reset-script": "PN7xxxxx_Reset.scp"
+      }
+    }
+  ]
+}

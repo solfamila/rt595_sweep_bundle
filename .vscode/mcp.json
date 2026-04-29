@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "lauterbach-trace32": {
+      "type": "stdio",
+      "command": "/Users/foxy/Downloads/rt595_sweep_bundle/.local/bin/lauterbachdebugger-mcp",
+      "env": {
+        "T32_HOST": "localhost",
+        "T32_PORT": "20000",
+        "T32_PROTOCOL": "TCP"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+<#-- Only insert header if Flash region starts at true base address -->
+<#if (MemUtils.location(CODE) == Utils.strToInt("0x08000000")) >
+    /* Offset .text by 0x1000 bytes, which whill be added by the image tool*/
+    .boot_hdr : ALIGN(${text_align})
+    {
+        FILL(0xFF)
+        . = 0x400;
+        __FLASH_BASE = .;
+        KEEP(*(.flash_conf))
+        . = 0x1000;
+    } > ${CODE}
+
+ </#if>

@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "PNEV76FAMA",
+      "device": {
+        "id": "PN7640",
+        "name": "PN7640",
+        "family": "PN76",
+        "memory": [
+          {
+            "location": "0x00218000",
+            "size": "0x0001e000",
+            "type": "Flash",
+            "flash-driver": "PN76xx.cfx"
+          },
+          {
+            "location": "0x20003000",
+            "size": "0x00005000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20008100",
+            "size": "0x00000940",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33_nodsp",
+            "name": "cm33_nodsp"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "PN76xx_connect.scp",
+        "reset-script": "PN76xx_reset.scp"
+      }
+    }
+  ]
+}

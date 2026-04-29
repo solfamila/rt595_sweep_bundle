@@ -1,0 +1,82 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MIMXRT735S",
+        "name": "MIMXRT735S",
+        "family": "MIMXRT700",
+        "memory": [
+          {
+            "location": "0x00080000",
+            "size": "0x00380000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00580000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00600000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x00380000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10580000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10600000",
+            "size": "0x00080000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33_core0",
+            "primary": true
+          },
+          {
+            "type": "cm33",
+            "name": "cm33_core1"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50002094",
+        "connect-script": "RT700_connect.scp",
+        "reset-script": "RT700_reset.scp",
+        "core-options": {
+          "cm33_core0": {
+            "cachelib": "libahb_xcache.so"
+          }
+        },
+        "preconnect-script": "LS_preconnect_MIMXRT700.scp"
+      }
+    }
+  ]
+}

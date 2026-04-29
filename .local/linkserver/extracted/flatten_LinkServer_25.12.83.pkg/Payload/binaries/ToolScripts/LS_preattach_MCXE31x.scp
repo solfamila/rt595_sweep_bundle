@@ -1,0 +1,112 @@
+1 REM ======================================
+2 REM Copyright 2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+110   REM a% = 1
+115   REM ProbeList
+120   ProbeOpenByIndex a%
+125   APLimit a% 5
+
+400   REM ================================================================
+440   WireSwdConnect a%
+450   APList a%
+500   REM ================================================================
+510   REM SDA-AP(7) APID
+520   REM ================================================================
+530   SelectProbeCore a% 7
+540   CMWriteDP this 2 0x070000F0
+545   CMWriteAP this 1 0x000000FC
+550   v% = CMReadAP this 3
+560   Print "SDA-AP(7) APID: "; ~v%
+570   v% = v% & 0x00FF00F0
+580   if v% != 0x001C0040 Then Goto 8500
+590   REM ================================================================
+600   REM SDA-AP(7) APID - clear RSTRELTLCM7x bits in SDAAPRSTCTRL
+610   r% = 0x90
+620   v% = 0x00000000
+630   GOSUB 8800
+650   REM ================================================================
+
+800   REM ================================================================
+810   REM Unlock application debug
+820   GOSUB 9000
+830   REM ================================================================
+
+900   REM SDA-AP(7) APID - enable debug for M7 cores in DBGENCTRL
+910   r% = 0x80
+920   v% = 0x300000F0
+930   GOSUB 8800
+
+1500  REM ================================================================
+1510  WireSwdConnect a%
+1520  APList a%
+1530  CoreList a%
+
+7000  REM ================================================================
+7777  End
+
+
+8500  REM ================================================================
+8510  Print "SDA-AP Not Found"
+8520  End
+
+8800  REM ================================================================
+8810  REM Write SDA-AP(7) register r with value v
+8820  REM ================================================================
+8830  REM SelectProbeCore a% 7
+8840  CMWriteDP this 2 (0x07000000 | r%)
+8850  CMWriteAP this 1 r%
+8860  CMWriteAP this 0 v%
+8870  v% = CMReadAP this 0
+8880  REM Print "SDA AP(7) wr reg @ "; ~r%; " = "; ~v%
+8890  Return
+
+9000  REM ================================================================
+9010  Print "Unlock application debug (authentication)..."
+9020  REM ================================================================
+9030  SelectProbeCore a% 7
+9040  CMWriteDP this 2 0x07000000
+9050  CMWriteAP this 1 0x00000000
+9060  v% = CMReadAP this 0
+9070  Print "SDA AP(7)  r reg @ 0x0 = "; ~v%
+9080  REM Check APPDBGEN bit in AUTHSTTS register
+9090  if (v% & 0x40000000) != 0x40000000 Then Goto 9200
+9100  Print "... application debug already enabled (authentication not required)"
+9110  Return
+9200  Print "... NOTE: Challenge/Response authentication is not supported!"
+9210  Print "... unlock the device using keys (edit the file to set the required values)"
+9300  r% = 0x40
+9301  v% = 0x00000000
+9302  Print "... KEY0 = "; ~v%
+9305  GOSUB 8800
+9310  r% = 0x44
+9311  v% = 0x00000000
+9312  Print "... KEY1 = "; ~v%
+9315  GOSUB 8800
+9320  r% = 0x48
+9321  v% = 0x00000000
+9322  Print "... KEY2 = "; ~v%
+9325  GOSUB 8800
+9330  r% = 0x4C
+9331  v% = 0x00000000
+9332  Print "... KEY3 = "; ~v%
+9335  GOSUB 8800
+9340  r% = 0x50
+9341  v% = 0x00000000
+9342  Print "... KEY4 = "; ~v%
+9345  GOSUB 8800
+9350  r% = 0x54
+9351  v% = 0x00000000
+9352  Print "... KEY5 = "; ~v%
+9355  GOSUB 8800
+9360  r% = 0x58
+9361  v% = 0x00000000
+9362  Print "... KEY6 = "; ~v%
+9365  GOSUB 8800
+9370  r% = 0x5C
+9371  v% = 0x00000000
+9372  Print "... KEY7 = "; ~v%
+9375  GOSUB 8800
+9390  Return

@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright 2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MIMXRT1043xxxxB",
+        "name": "MIMXRT1043",
+        "family": "MIMXRT1040",
+        "memory": [
+          {
+            "location": "0x20000000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20200000",
+            "size": "0x00100000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x60000000",
+            "size": "0x00800000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT1040_SFDP_QSPI.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7"
+          }
+        ]
+      },
+      "debug": {
+        "no-packed": true,
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "RT1040_connect.scp"
+      }
+    }
+  ]
+}

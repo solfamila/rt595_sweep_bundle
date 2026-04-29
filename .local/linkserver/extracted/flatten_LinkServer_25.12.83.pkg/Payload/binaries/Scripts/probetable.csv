@@ -1,0 +1,72 @@
+// Copyright 2018-2022, 2024-2025 NXP
+// SPDX-License-Identifier: BSD-3-Clause
+//
+// Format (comma separated values, one line for each supported probe):
+// VID, PID, Pkt_Sz, SWD, JTAG, SWV, ETM, BOOTCTRL, Descriptor, Usage_Pg, Intf_Num, Dev_RelNum
+// Where:
+// - VID       : Vendor ID
+// - PID       : Product ID
+// - Pkt_Sz    : USB packet size (no longer used, automatically determined)
+// - SWD       : Supports SWD debug (0/1)
+// - JTAG      : Supports JTAG debug (0/1)
+// - SWV       : Supports Serial Wire Viewer - (Red Trace) - no longer used
+// - ETM       : Supports ETM (0/1) - no longer used
+// - BOOTCTLR  : Supports target boot control via multiple ISP CTRL pins
+// - Descriptor: Text (partial) string used either to set the connection type or
+//               to match against the probe product string.
+//               For legacy probes, the connection type is set as follows:
+//                 - "HID" → USB HID probe LPC-Link1 or RDB-Link
+//                 - "WINUSB" → WINUSB probe LPC-Link1 or RDB-Link
+//               Otherwise CMSIS-DAP probes are assumed. "CMSIS-DAP#WINUSB"
+//               describes a CMSIS-DAP over WINUSB (bulk endpoints) probe.
+//               If the descriptor is not empty, the probe device USB descriptor
+//               is expected to include that substring. If the descriptor is not
+//               given and the USB descriptor includes "CMSIS-DAP" as part of the
+//               product string, a CMSIS-DAP type of probe is assumed as well.
+//               For CMSIS-DAP probes, the subsequent fields can be used to only
+//               match the relevant interface for the debug connection.
+// - Usage_Pg  : Usage page, or 0 if don’t care (only relevant for USB HID probes)
+// - Int_Num   : Interface number, or -1 if don’t care
+// - Dev_RelNum: bcdDevice field in the USB Device Descriptor, or -1 if don't care
+//
+// Legacy probe types LPC-Link1 (HID), LPC-Link1 (WINUSB), and RDB-Link
+// (HID or WINUSB) need to be grouped together by their respective types, and
+// ordered first in the probe table. The rest are CMSIS-DAP based probes.
+// CMSIS-DAP#WINUSB is a convention to specify CMSIS-DAP over WINUSB.
+//
+0x1FC9, 0x0007, 512,1, 1, 0, 0, 0, "HID", 0x0000, -1, -1
+0x21BD, 0x0001, 512,1, 0, 0, 0, 0, "HID", 0x0000, 0, -1
+0x21BD, 0x0001, 512,1, 0, 0, 0, 0, "WINUSB", 0x0000, 0, -1
+0x1FC9, 0x0009, 512,1, 1, 0, 0, 0, "WINUSB", 0x0000, -1, -1
+0x1FC9, 0x0090, 1024, 1, 1, 0, 0, 0, "CMSIS-DAP", 0xFF00, 0, -1
+0x1FC9, 0x0143, 1024, 1, 1, 0, 0, 0, "CMSIS-DAP", 0xFF00, 0, -1
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0204
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0206
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0214
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0216
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0224
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0226
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0234
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0236
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0304
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0306
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0314
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0316
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0324
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0326
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0334
+0x1FC9, 0x0143, 1024, 0, 0, 0, 0, 0, "CMSIS-DAP", 0xFFEB, -1, 0x0336
+0x1FC9, 0x0143, 512, 1, 1, 0, 0, 1, "CMSIS-DAP#WINUSB", 0x0000, 0, -1
+0x1FC9, 0x001D, 64, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0x1FC9, 0x0132, 64, 1, 1, 0, 0, 0, "", 0x0000, -1, -1
+0x0D28, 0x0019, 64, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0x0D28, 0x0204, 64, 1, 1, 0, 0, 0, "", 0x0000, 3, -1
+0xC251, 0x2722, 64, 1, 1, 0, 0, 0, "", 0x0000, -1, -1
+0xC251, 0x2723, 64, 1, 1, 0, 0, 0, "", 0x0000, -1, -1
+0xC251, 0xF001, 1024, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0xC251, 0xF002, 1024, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0xC251, 0xF006, 1024, 1, 1, 0, 0, 0, "", 0x0000, -1, -1
+0x2786, 0xF00B, 64, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0x21BD, 0x0007, 512, 1, 1, 0, 0, 0, "", 0x0000, -1, -1
+0x21BD, 0x0008, 64, 1, 0, 0, 0, 0, "", 0x0000, -1, -1
+0xC251, 0x2751, 1024, 1, 1, 0, 0, 0, "", 0x0000, -1, -1

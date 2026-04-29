@@ -1,0 +1,248 @@
+1 REM ======================================
+2 REM Copyright 2022-2025 NXP
+3 REM 
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM RT1180_connect_M33_wake_M7_OC2.scp
+170  REM =======================================================================
+180  PRINT "RT1180 Connect M33 and Wake M7 to OC2 Script"
+190  REM =======================================================================
+
+200  REM =======================================================================
+210  REM The M7 AP is not visible while the core is held in reset
+220  REM Prepare a spin code in a RAM memory area and wake up the M7 to it
+230  REM to enable the M7 AP, required for debug visibility.
+240  REM On rev A0, once initialized, M7's VTOR cannot be changed anymore. So we
+250  REM MUST set the landing zone at the same address as the application's VTOR
+260  REM There are several versions of this connect script, one for each region
+270  REM of RAM that the CM7 application could be linked to.
+280  REM Use the appropriate version based on CM7's application link address!
+290  REM =======================================================================
+
+300  REM d% is the intended M7 VTOR address (as seen by M7 core)
+310  REM c% is the intended M7 VTOR address (as seen by M33 core)
+320  REM =======================================================================
+330  REM CM7 VTOR in OCRAM2
+340  REM =======================================================================
+350  d% = 0x20500000 
+360  c% = 0x20500000
+
+370  REM =======================================================================
+380  REM When targeting the M7 core, if it is not released already, perform a
+390  REM system reset and release it.
+400  REM When targeting the M33 core, M7 core is not released
+410  REM b% is pre-initilized with the reqested core index (2 = M7, 3 = M33)
+420  REM =======================================================================
+
+500  REM Uncomment ProbeList for standalone script use (outside the stub)
+510  REM =======================================================================
+520  REM ProbeList
+530  p% = ProbeFirstFound
+540  REM ProbeOpenByIndex p%
+550  WireSwdConnect p%
+
+560  SelectProbeCore p% 3
+570  CMInitApDp this
+
+580  CMHalt this
+590  REM CMRegs this
+
+600  PRINT "************ runBootLoader to enter serial downloader mode *************"
+605  REM Get scratch area and runBootLoader location via ROM API root pointer
+610  GOSUB 5000
+615  m% = Peek32 this 0x1000001c
+620  m% = Peek32 this m%
+625  REM Set runBootLoader arg, initialize PC to runBootLoader, and call it
+630  Poke32 this s% 0xeb100000
+635  CMWriteReg this 0 s%
+640  CMWriteReg this 15 (m% & 0xfffffffe)
+650  CMStep this
+655  CMRun this
+660  Wait 100
+
+665  WireSwdConnect p%
+670  SelectProbeCore p% 3
+675  CMInitApDp this
+680  CMHalt this
+685  CMReadReg this 15
+
+690  REM Check CM7 core already released (SRC->SCR)
+695  t% = Peek32 this 0x54460010
+
+700  PRINT "********** Initialize CM33 ************"
+
+710  REM PRINT "**** Invalidate and disable XCACHEs ****"
+715  REM XCACHE_PC->CCR
+720  Poke32 this 0x54400000 0x85000000
+725  REM XCACHE_PS->CCR
+730  Poke32 this 0x54400800 0x85000000
+
+740  REM PRINT "*********** Clear CM33 NVICs *************"
+750  s% = 0xe000e180
+760  l% = 0x00000040
+770  f% = 0xffffffff
+780  GOSUB 4000
+810  s% = 0xe000e280
+820  GOSUB 4000
+
+830  REM PRINT "*********** Init CM33 TCMs *************"
+840  f% = 0x00000000
+850  REM LocalMem-to-DMA: 0x0ffc0000->0x201c0000 
+860  s% = 0x201e0000
+870  l% = 0x00020000
+880  GOSUB 3000
+890  REM LocalMem-to-DMA: 0x20000000->0x20200000
+900  s% = 0x20200008
+910  l% = 0x00020000 - 0x8
+920  GOSUB 3000
+
+930  IF (b% != 2) THEN GOTO 999
+
+940  PRINT "************* Enable CM7  **************"
+950  GOSUB 2000
+
+960  CmInitApDp p% 2
+970  CMHalt p% 2
+980  REM Disable CM7 caches (SCB->CCR)
+990  Poke32 p% 2 0xe000ed14 0x00000000
+
+
+999  END
+
+
+2000 REM ==================== SUB: Enable CM7  ====================================
+
+2010 PRINT "************ Prepare Clock *************"
+2015 REM ANADIG->OSC_RC24M_CTRL
+2020 Poke32 this 0x54484310 0x007901F2
+2025 REM ANADIG->OSC_24M_CTRL
+2030 Poke32 this 0x54484320 0x40000014
+2035 REM CCM->CLOCK_ROOT_1(CM33) - OSC_RC_24M, DIV=0
+2040 Poke32 this 0x54450080 0x00000000
+2050 Wait 50
+2055 REM PHY_LDO->CTRL0 LinReg 1V
+2060 Poke32 this 0x54484680 0x00000105
+2070 Wait 50
+2080 Poke32 this 0x54484710 0x00000070
+2085 REM ARM_PLL_CTL - ARM_PLL_GATE, POWER_UP
+2090 Poke32 this 0x54484000 0x400020a6
+2100 Wait 50
+2105 REM ARM_PLL_CTL - ARM_PLL_GATE, POWER_UP, ENABLE
+2110 Poke32 this 0x54484000 0x000060a6
+
+2120 REM DCDC_SetVDD1P0BuckModeTargetVoltage(DCDC, kDCDC_1P0Target1P1V);
+2130 Poke32 this 0x5452000C 0x00980000
+2140 Poke32 this 0x54520024 0x00100C14
+
+2150 REM M7 Clk - CCM->CLOCK_ROOT_0
+2160 IF (b% == 2) && (t% == 1) THEN GOTO 2180
+2170 Poke32 this 0x54450000 0x00000201
+
+2175 REM CCM->LPCG0 - ON
+2180 Poke32 this 0x54458000 0x00000001
+
+2190 Wait 50
+
+2200 REM BLK_CTRL_S_AON->M7_CFG = VTOR | WAIT
+2210 Poke32 this 0x544F0080 (((d% >> 7) << 7) | 0x00000010)
+
+2220 REM Release CM7 (SRC->SCR)
+2230 Poke32 this 0x54460010 0x00000001
+
+2400  PRINT "******** Creating Landing Zone *********"
+
+2410 REM PRINT "*********** Init CM7 TCMs *************"
+2420 s% = 0x303c0000
+2430 l% = 0x00020000
+2440 GOSUB 3000
+
+2450 s% = 0x303e0000
+2460 GOSUB 3000
+
+2470 s% = 0x30400000
+2480 GOSUB 3000
+
+2490 s% = 0x30420000
+2500 GOSUB 3000
+
+2510 Poke32 this (c% + 0x00) (d% + 0x2000)
+2520 Poke32 this (c% + 0x04) (d% + 0x09)
+2530 Poke32 this (c% + 0x08) 0xe7fee7fe
+2540 Poke32 this (c% + 0x0c) 0xe7fee7fe
+
+2550 WAIT 200
+
+2560 PRINT "************* Kickoff CM7 **************"
+
+2570 REM PRINT "******** EdgeLock APC Request **********"
+2580 Poke32 this 0x57520200 0x17d20106
+2590 Wait 200
+2600 r% = Peek32 this 0x57520280
+2610 PRINT "Resp1 : "; ~r%
+2620 r% = Peek32 this 0x57520284
+2630 PRINT "Resp2 : "; ~r%
+2640 Poke32 this 0x544F0080 ((d% >> 7) << 7)
+
+2650 WAIT 200
+2660 APLIST p%
+
+2670 RETURN
+
+
+3000 REM ==================== SUB: DMA Fill memory area  ====================================
+3010 REM Fills a memory area by DMA4 transfers (64-bits)
+3020 REM Expects s% = start address, l% = length, f% = fill value
+3030 REM (uses 8 bytes scratch area in CM33 D-TCM @ 0x20000000)
+3040 PRINT "Filling "; ~s%; " + "; ~l%; " with "; ~f%
+3050 Poke32 this 0x20000000 f%
+3060 Poke32 this 0x20000004 f%
+3070 Poke32 this 0x52010020 0x20200000
+3080 Poke32 this 0x52010030 s%
+3090 Poke32 this 0x52010028 l%
+3100 Poke16 this 0x52010036 0x1
+3110 Poke16 this 0x5201003E 0x1
+3120 Poke16 this 0x52010026 0x0303
+3130 Poke16 this 0x52010024 0x0
+3140 Poke16 this 0x52010034 0x8
+3150 Poke32 this 0x52010000 0x7
+3160 Poke16 this 0x5201003C 0x8
+3170 Poke16 this 0x5201003C 0x9
+3180 Poke32 this 0x52010000 0x40000006
+3190 Wait 50
+3200 Poke32 this 0x52010000 0x40000000
+3210 RETURN
+
+
+4000 REM ==================== SUB: Fill memory area  ====================================
+4010 REM Fills a memory area by regular 32-bit writes
+4020 REM Expects s% = start address, l% = length, f% = fill value
+4030 PRINT "Filling "; ~s%; " + "; ~l%; " with "; ~f%
+4040 m% = s%
+4050 REPEAT
+4060    Poke32 this m% f%
+4070    m% = m% + 4
+4080 UNTIL m% >= s% + l%
+4100 RETURN
+
+5000 REM ==================== SUB: Find scratch area  ===================================
+5010 REM Find a writable RAM scratch memory area
+5020 REM Sets s% = scratch address; Clobbers m%
+5030 REM ELE might have locked write access to some memory areas, so try a few variants.
+5040 REM Use addresses towards the end of the areas to maximize chances of allowed access.
+5050 s% = 0x2001fff0
+5060 Poke32 this s% 0xe7fee7fe
+5070 m% = Peek32 this s%
+5080 IF m% == 0xe7fee7fe THEN GOTO 5200
+5090 s% = 0x0ffffff0
+5100 Poke32 this s% 0xe7fee7fe
+5110 m% = Peek32 this s%
+5120 IF m% == 0xe7fee7fe THEN GOTO 5200
+5130 s% = 0x204ffff0
+5140 Poke32 this s% 0xe7fee7fe
+5150 m% = Peek32 this s%
+5160 IF m% == 0xe7fee7fe THEN GOTO 5200
+5170 s% = 0x2053fff0
+5200 PRINT "Using scratch area ";~s%
+5210 RETURN

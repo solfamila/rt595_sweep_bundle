@@ -1,0 +1,37 @@
+1 REM ======================================
+2 REM Copyright 2020-2021, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM ----------------------------------------------------------------------
+110  REM i.MX RT600 Rev B0 Preconnect Script
+120  REM ----------------------------------------------------------------------
+130  REM a% = 1
+140  ProbeOpenByIndex a%
+150  WireTimedReset a% 50
+160  WireSWDConnect a%
+170  APList a%
+180  REM ----------------------------------------------------------------------
+190  REM Debug Mailbox AP Index is 2
+200  REM ----------------------------------------------------------------------
+210  SelectProbeCore a% 2
+220  REM ----------------------------------------------------------------------
+230  REM DEBUG_SESSION_REQ: 7
+240  REM ----------------------------------------------------------------------
+250  r% = 7
+260  REM ----------------------------------------------------------------------
+270  PRINT "Issuing Debug Session Request... ";r%
+280  PRINT "";
+290  DebugMailboxReq this r%
+300  CoreList a%
+310  SelectProbeCore a% 0
+320  REM ----------------------------------------------------------------------
+330  REM Setup FlexSPI Flash reset info for BootROM
+340  REM WARNING: GPIO PORT and PIN must match the actual board configuration!!
+350  REM ----------------------------------------------------------------------
+360  PRINT "Using PIO2_12 pin for FlexSPI flash reset"
+370  REM SHADOW_OTP BOOT_CFG[1] = (1 << 14) | (PORT << 15) | (PIN << 18) 
+380  POKE32 this 0x40130184 0x00314000
+390  REM ----------------------------------------------------------------------
+400  REM ProbeCloseByIndex a%

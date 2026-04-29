@@ -1,0 +1,59 @@
+1 REM ======================================
+2 REM Copyright 2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  Print "MCXL25x Connect Script"
+110  REM Uncomment ProbeList for standalone script use (outside the stub)
+120  REM ProbeList
+130  a% = ProbeFirstFound
+140  if a% == 0 Then Goto 800
+150  Print "Connecting to Probe Index = "; a%
+160  REM Uncomment ProbeOpenByIndex for standalone script use
+170  REM ProbeOpenByIndex a%
+
+200  WireSwdConnect a%
+210  SelectProbeCore a% 0
+215  This
+220  CMInitApDp this
+230  CMHalt this
+240  REM CMRegs this
+
+310  Print "... Update SRAM_XEN_DP"
+320  Print "... WriteEN index2"
+330  Poke32 this 0x40091D00 0x00060000
+340  Poke32 this 0x40091D00 0x00020002
+350  Poke32 this 0x40091D00 0x00010002
+360  Poke32 this 0x40091D04 0x00290000
+370  Poke32 this 0x40091D00 0x00020002
+380  Poke32 this 0x40091D04 0x00280000
+390  Poke32 this 0x40091D00 0x00000002
+400  Print "... SRAM_XEN=0x3FF"
+410  Poke32 this 0x40091E58 0x000003FF
+420  Poke32 this 0x40091E5C 0x000003FF
+500  Wait 100
+600  GOSUB 1000
+700  End
+
+800  Print "Probe Not Found"
+810  End
+
+1000 REM === SUB: prepare M0+ ===
+1010 REM Check AON RST_SUB_BLK.CM0P_RST_REL
+1020 v% = Peek32 this 0xa0099010
+1025 REM Print "... AON RST_SUB_BLK.CM0P_RST_REL = " ~v%
+1030 if (v% & 0x10) == 0x10 Then Goto 1280
+1100 Print "... releasing M0+"
+1110 Poke32 this 0xa1001000 0x1000
+1120 Poke32 this 0xa1000004 0x101
+1130 Poke32 this 0xa1000100 0xe7fee7fe
+1140 REM AON__CGU->PER_CLK_EN
+1150 Poke32 this 0xa009900c 0x7ee7
+1160 Wait 100
+1170 v% = Peek32 this 0xa0099010
+1180 REM AON__CGU->RST_SUB_BLK |= CGU_RST_SUB_BLK_CM0P_RST_REL_MASK
+1190 Poke32 this 0xa0099010 (v% | 0x10)
+1200 Wait 50
+1280 Print "... M0+ released"
+1290 Return

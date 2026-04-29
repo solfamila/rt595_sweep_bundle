@@ -1,0 +1,47 @@
+1 REM ======================================
+2 REM Copyright 2022-2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100   REM ================================================================
+110   REM PN7642_connect.scp
+150   REM ================================================================
+160   Print "PN7642 Connect Script"
+170   REM ================================================================
+180   REM Uncomment ProbeList for standalone script use (outside the stub)
+190   REM ================================================================
+200   REM ProbeList
+210   REM a% = ProbeFirstFound
+220   if a% == 0 Then Goto 1890
+235   print "Connecting to Probe Index = ";a%
+236   this
+230   REM ================================================================
+240   REM Uncomment ProbeOpenByIndex for standalone script use
+250   REM ================================================================
+260   REM ProbeOpenByIndex a%
+270   WireSwdConnect a%
+280   SelectProbeCore a% b%
+300   Cmhalt this
+305   REM Set breakpoint at ResetISR
+310   r% = peek32 this 0x208004
+320   If (r% < 0x208000) || (r% > 0x234FFF) Then Goto 340
+330   Cmbreakset this r%
+335   REM BootROM jumps to this address if no valid firmware
+340   Cmbreakset this 0x20003002
+350   Print "Breakpoints before reset"
+360   Cmbreaklist this
+370   Print "Sending CMSYSRESETREQ"
+372   x% = WireGetSpeed a%
+374   WireSetSpeed a% 1000
+380   Cmsysresetreq this
+382   WireSetSpeed a% x%
+385   WireSwdConnect this
+390   Print "Registers after reset"
+400   Cmregs this
+410   Cmbreakclear this r%
+420   Cmbreakclear this 0x20003002
+430   End
+1880  REM ================================================================
+1890  Print "Probe Not Found"
+1900  End

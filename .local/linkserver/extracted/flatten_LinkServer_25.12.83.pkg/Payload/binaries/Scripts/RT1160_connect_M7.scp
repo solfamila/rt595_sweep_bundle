@@ -1,0 +1,43 @@
+1 REM ======================================
+2 REM Copyright 2020-2021, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM RT1160_connect_M7.scp - used for M7 single-core derivatives
+150  REM =======================================================================
+160  PRINT "RT1160 Connect M7 Script"
+170  REM =======================================================================
+180  REM Uncomment ProbeList for standalone script use (outside the stub)
+190  REM =======================================================================
+200  REM ProbeList
+210  p% = ProbeFirstFound
+220  REM ProbeOpenByIndex p%
+230  WireSwdConnect p%
+240  SelectProbeCore p% 0
+250  CMInitApDp this
+500  REM =======================================================================
+510  PRINT "View cores on the DAP AP"
+520  CoreList p%
+600  REM =======================================================================
+610  REM Potentially FlexRAM might need to be set to ensure TCMs are available
+620  REM Uncomment next line if needed
+630  REM GOSUB 700
+640  REM =======================================================================
+650  REM Finished - 0 to select the M7
+660  d% = 0
+670  END
+700  REM ====================== SUB: Configure FlexRAM ========================
+710  PRINT "Configuring FlexRAM for 256KB I-TCM, 256KB D-TCM, 0KB OCRAM"
+720  REM FlexRAM TCM_CTRL - force RAM clocking ON and set fast mode = b100
+730  Poke32 this 0x40028000 0x4
+740  REM IOMUXC_GPR17/18 FlexRAM 32KB banks allocation - I(b11), D(b10), OC(b01)
+750  Poke32 this 0x400E4044 0x0000AAFF
+760  Poke32 this 0x400E4048 0x0000AAFF
+770  REM IOMUXC_GPR16 Enable FLEXRAM_BANK_CFG in GPR16/17
+780  s% = Peek32 this 0x400E4040
+790  s% = s% | 4
+800  Poke32 this 0x400E4040 s%
+810  RETURN
+820 REM =======================================================================

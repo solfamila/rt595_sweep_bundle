@@ -1,0 +1,96 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "LPCXpresso54S018M",
+      "device": {
+        "id": "LPC54S018J2M",
+        "name": "LPC54S018J2M",
+        "family": "LPC540xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x00200000",
+            "type": "Flash",
+            "flash-driver": "LPC540xx_SPIFI_SFDP.cfx"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00030000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00028000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40100000",
+            "size": "0x00002000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x40000040",
+        "connect-reset": "default",
+        "flash-driver-reset": "soft"
+      }
+    },
+    {
+      "board": "LPCXpresso54S018M",
+      "device": {
+        "id": "LPC54S018J4M",
+        "name": "LPC54S018J4M",
+        "family": "LPC540xx",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x00400000",
+            "type": "Flash",
+            "flash-driver": "LPC540xx_SPIFI_SFDP.cfx"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00030000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00028000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40100000",
+            "size": "0x00002000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x40000040",
+        "connect-reset": "default",
+        "flash-driver-reset": "soft"
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "copyright": "Copyright 2023-2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "TWR-KV58F220M",
+      "device": {
+        "id": "MKV58F1M0xxx24",
+        "name": "MKV58F24",
+        "family": "KV5x",
+        "memory": [
+          {
+            "location": "0x10000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "FTFE_8K_KV.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x2f000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x00001000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "reset": "core",
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

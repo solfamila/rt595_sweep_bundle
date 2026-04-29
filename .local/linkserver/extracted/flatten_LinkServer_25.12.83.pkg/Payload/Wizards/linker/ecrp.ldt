@@ -1,0 +1,65 @@
+<#if eCRP??>
+
+<#if eCRP != "Simple">
+    /* ## *********************************************** ## */
+    /*
+     * Enhanced boot block must be at the end of Flash
+     */
+    .eb.hdr : ALIGN(${text_align})
+    {
+        . = ALIGN(4) ;
+        FILL(0xff)
+        __enhanced_image_hdr_start = .;
+        __eb_hdr_start = .;
+        KEEP(*(.eb.hdr))
+        __eb_hdr_end = .;
+    } > ${CODE}
+
+<#if eCRP?startsWith("Signed")>
+    /*
+     * The public key is after the enhanced block header
+     */
+    .secure.key : ALIGN(${text_align})
+    {
+        . = ALIGN(4) ;
+       FILL(0xff)
+        __secure_key_start = .;
+        KEEP(*(.secure.key))
+        __secure_key_end = .;
+    } > ${CODE}
+
+</#if>
+<#if eCRP == "SignedWithCertificate">
+    /*
+     * The optional certificate is after the public key
+     */
+    .secure.cert : ALIGN(${text_align})
+    {
+        . = ALIGN(4) ;
+       /* FILL(0xff) */
+        __secure_cert_start = .;
+        KEEP(*(.secure.cert))
+         __secure_cert_end = .;
+    } > ${CODE}
+
+</#if>
+<#if eCRP?startsWith("Signed")>
+    /*
+     * The signature is after the public key (and the optional certificate)
+     */
+    secure.sig : ALIGN(${text_align})
+    {
+        . = ALIGN(64) ;
+        FILL(0xff)
+        __secure_sig_start = .;
+        KEEP(*(.secure.sig))
+        __secure_sig_end = .;
+    } > ${CODE}
+</#if>
+
+    __enhanced_image_hdr_end = .;
+
+    /*************************************************/
+
+</#if>
+</#if>

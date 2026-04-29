@@ -1,0 +1,101 @@
+{
+  "copyright": "Copyright 2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "KW47B42Z83xxxA",
+        "name": "KW47B42Z83",
+        "family": "KW4x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "KW47B42.cfx",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "KW47B42_S.cfx",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0003A000",
+            "type": "RAM",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x48800000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "KW47B42_NBU.cfx",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x58800000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "KW47B42_NBU_S.cfx",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x00100000",
+            "size": "0x00000800",
+            "type": "RAM",
+            "core-name": "cm33_core1"
+          },
+          {
+            "location": "0x00140000",
+            "size": "0x00014000",
+            "type": "RAM",
+            "core-name": "cm33_core1"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x0003A000",
+            "type": "RAM",
+            "core-name": "cm33_core0"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33_core0"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33_core0",
+            "primary": true
+          },
+          {
+            "type": "cm33_nodsp",
+            "name": "cm33_core1"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "KW47B42_connect.scp",
+        "bootromstall": "0xE000ED08",
+        "apindex-limit": 2,
+        "preconnect-script": "LS_preconnect_KW4x.scp"
+      }
+    }
+  ]
+}

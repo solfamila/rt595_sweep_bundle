@@ -1,0 +1,67 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KW36",
+      "device": {
+        "id": "MKW36Z512xxx4",
+        "name": "MKW36Z4",
+        "family": "KW3x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00040000",
+            "type": "Flash",
+            "flash-driver": "FTFE_2K.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00040000",
+            "type": "Flash",
+            "flash-driver": "FTFE_2K_D.cfx"
+          },
+          {
+            "location": "0x20000008",
+            "size": "0x0000bff8",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1fffc400",
+            "size": "0x00003c00",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00002000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1fffc000",
+            "size": "0x00000400",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00000008",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "RD-RW612-BGA",
+      "device": {
+        "id": "RW612",
+        "name": "RW612",
+        "family": "RW61X",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00130000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x08000000",
+            "size": "0x00800000",
+            "type": "ExtFlash",
+            "flash-driver": "RW61X_FlexSPI_A_SFDP_QSPI.cfx"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x00800000",
+            "type": "ExtFlash",
+            "flash-driver": "RW61X_FlexSPI_A_SFDP_QSPI_S.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00130000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33_nodsp",
+            "name": "cm33_nodsp"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50002034",
+        "connect-script": "RW61x_connect.scp",
+        "preconnect-script": "LS_preconnect_RW61X.scp"
+      }
+    }
+  ]
+}

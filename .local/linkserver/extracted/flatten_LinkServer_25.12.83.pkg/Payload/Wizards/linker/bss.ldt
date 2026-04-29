@@ -1,0 +1,4 @@
+       *(.bss.$${memory.alias})
+       *(.bss.$${memory.name})
+       *(.bss.$${memory.alias}.*)
+       *(.bss.$${memory.name}.*)

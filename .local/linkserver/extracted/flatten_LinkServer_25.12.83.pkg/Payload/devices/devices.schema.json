@@ -1,0 +1,282 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Devices data",
+  "description": "Devices data - schema (devices data model)",
+  "type": "object",
+  "required": [ "version", "vendor", "devices" ],
+  "additionalProperties": false,
+  "properties": {
+    "copyright": {
+      "description": "Devices data - Copyright 2022-2025 NXP",
+      "type": "string"
+    },
+    "license": {
+      "description": "Devices data - SPDX-License-Identifier: BSD-3-Clause",
+      "type": "string"
+    },
+    "version": {
+      "description": "Devices data - schema version (recommended 1.1.1)",
+      "enum": ["1.1.1", "1.1.0", "1.0.0", "0.0.1" ]
+    },
+    "vendor": {
+      "description": "Devices data - vendor",
+      "type": "string"
+    },
+    "devices": {
+      "description": "List of devices",
+      "type": "array",
+      "items": {
+        "description": "Device data",
+        "type": "object",
+        "required": [ "board", "device", "debug" ],
+        "additionalProperties": false,
+        "properties": {
+          "board": {
+            "description": "Board name. It can be an empty string if board name is not needed.",
+            "$comment": "key_b - (SDK: boards->board->name [+ other_specific_info (fuse_config, custom_flash ...)])",
+            "type": "string"
+          },
+          "device": {
+            "description": "Device specific information",
+            "type": "object",
+            "required": ["family", "memory", "cores" ],
+            "anyOf" :[
+              {"required" : ["id"]},
+              {"required" : ["name"]}
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "description": "Device id",
+                "$comment": "key_d1 - (SDK: devices->device->id). unique key = (key_b + key_d1) = (board + device->id)",
+                "type": "string"
+              },
+              "name": {
+                "description": "User-friendly device name",
+                "$comment": "key_d2. unique key = (key_b + key_d2) = (board + device->name)",
+                "type": "string"
+              },
+              "family": {
+                "description": "Device family",
+                "$comment": "(SDK: devices->device->family)",
+                "type": "string"
+              },
+              "memory": {
+                "description": "Device memory map - flash/ram regions",
+                "$comment": "(SDK: (devices->device)/(boards->board)->memory->memoryBlock entries, (devices->device)/(boards->board)->debug_configurations...->drivers)",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "description": "Memory region info",
+                  "type": "object",
+                  "required": [ "location", "size", "type" ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "location": {
+                      "description": "Start address (format: hex)",
+                      "type": "string",
+                      "pattern": "^0x([a-fA-F0-9])+$"
+                    },
+                    "size": {
+                      "description": "Region size (format: hex)",
+                      "type": "string",
+                      "pattern": "^0x([a-fA-F0-9])+$"
+                    },
+                    "type": {
+                      "description": "Memory type",
+                      "enum": [ "Flash", "ExtFlash", "RAM" ]
+                    },
+                    "flash-driver": {
+                      "description": "Flash driver file name (*.cfx)",
+                      "$comment": "(SDK: (devices->device)/(boards->board)->debug_configurations...->drivers... driverBinary...files mask)",
+                      "type": "string"
+                    },
+                    "core-name": {
+                      "description": "Core specific memory region. If needed, must be one of the keys from devices.cores",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "cores": {
+                "description": "Cores topology (ordered by access port or TAP)",
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "description": "Core information",
+                  "type": "object",
+                  "required": [ "name" ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "description": "Core name, unique per device",
+                      "$comment": "(SDK: devices->device->core->name or devices->device->core->type for single core devices)",
+                      "type": "string",
+                      "format": "^[A-Za-z0-9_\\-]$"
+                    },
+                    "type": {
+                      "description": "Core type",
+                      "$comment": "(SDK: devices->device->core->type)",
+                      "type": "string"
+                    },
+                    "primary": {
+                      "description": "Is primary boot core. Only one core is allowed to be a primary boot core.",
+                      "$comment": "(SDK: devices->device->core->boot_role)",
+                      "type": "boolean"
+                    },
+                    "index": {
+                      "description": "Core index, used to specify a custom value or to change the default index. (format: n or n_ap:n_tap. Where n_ap = n divided by 16, n_tap = n_t modulo 16. n, n_ap, n_tap are decimal numbers.)",
+                      "$comment": "(SDK: not available in the manifest data) (launcher: to be added for the parts that require this)",
+                      "type": "string",
+                      "examples": ["1", "1:2"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "debug": {
+            "description": "Debug specific information",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "core-options": {
+                "description": "Debug specific core options. The key must be a core name from device.cores",
+                "type": "object",
+                "patternProperties": {
+                  "^[A-Za-z0-9_\\-]$": {
+                    "description": "Debug information for this core",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cachelib": {
+                        "description": "I-Cache/D-Cache handler library",
+                        "$comment": "(SDK: devices->device->debug_configurations->params: misc.options...--cachelib <lib>.so)",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "connect-reset": {
+                "description": "Reset method on initial connection",
+                "$comment": "(SDK: devices->device->debug_configurations->params: vector.catch. Set this to default if vector.catch=true, ignored otherwise.) (launcher/stub: --vc --connect-reset <method>)",
+                "enum": [ "system", "core", "default" ]
+              },
+              "flash-driver-reset": {
+                "description": "Reset method before running the RAM-loaded flash driver",
+                "$comment": "(SDK: devices->device->debug_configurations->params: flash.driver.reset)",
+                "enum": [ "system", "core", "soft" ]
+              },
+              "reset": {
+                "description": "Reset method used to start the image loaded into flash memory",
+                "$comment": "(SDK: do not add this if not explicitly set in the manifest data)",
+                "enum": [ "system", "core", "soft" ]
+              },
+              "preattach-script": {
+                "description": "Pre-attach script",
+                "$comment": "(SDK: not available in the manifest data) (launcher: to be added for the parts that require this)",
+                "type": "string"
+              },
+              "preconnect-script": {
+                "description": "Pre-connect script",
+                "$comment": "(SDK: not available in the manifest data) (launcher adds this in the process script)",
+                "type": "string"
+              },
+              "connect-script": {
+                "description": "Connect script",
+                "$comment": "(SDK: devices->device->debug_configurations->params: internal.connect.script)",
+                "type": "string"
+              },
+              "reset-script": {
+                "description": "Reset script",
+                "$comment": "(SDK: devices->device->debug_configurations->params: internal.reset.script)",
+                "type": "string"
+              },
+              "masserase-script": {
+                "description": "Mass erase script",
+                "$comment": "(SDK: not available in the manifest data) (launcher: to be added for the parts that require this)",
+                "type": "string"
+              },
+              "bootromstall": {
+                "description": "BootROM stall address (format: hex)",
+                "$comment": "(SDK: devices->device->debug_configurations->params: misc.options...--bootromstall <addr>)",
+                "type": "string",
+                "pattern": "^0x([a-fA-F0-9])+$"
+              },
+              "romstalldelay": {
+                "description": "BootROM stall delay in milliseconds",
+                "$comment": "(SDK: devices->device->debug_configurations->params: misc.options...--romstalldelay <ms>)",
+                "type": "integer",
+                "minimum": 0,
+                "examples": [200]
+              },
+              "no-flash-hashing": {
+                "description": "Disable flash hashing (enabled by default)",
+                "$comment": "(SDK: not available in the manifest data) (launcher: to be added for the parts that require this)",
+                "type": "boolean",
+                "default": false
+              },
+              "no-packed": {
+                "description": "Debug Access Port (DAP) does not support packed transfers",
+                "$comment": "(SDK: devices->device->debug_configurations->params: misc.options...--no-packed)",
+                "type": "boolean",
+                "default": false
+              },
+              "dapstride": {
+                "description": "DAP stride",
+                "$comment": "(SDK: devices->device->debug_configurations->params: misc.options...--dapstride <value>)",
+                "enum": [ "auto", "standard", "long", "short" ]
+              },
+              "apindex-limit": {
+                "description": "DAP AP index limit",
+                "$comment": "(SDK: devices->device->metadataSet->metadata->key=server.APLimit)",
+                "type": "integer",
+                "minimum": 0
+              },
+              "apindexes-allowed": {
+                "description": "TODO: A list of DAP AP indexes allowed (not yet supported in stub)",
+                "type": "array",
+                "items": {
+                  "description": "DAP AP index",
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "protocol": {
+                "description": "Debug protocol",
+                "$comment": "(SDK: devices->device->debug_configurations->params...internal.wiretype)",
+                "enum": [ "swd", "jtag" ],
+                "default": "swd"
+              },
+              "swo": {
+                "description": "Has SWO",
+                "$comment": "(SDK: devices->device->debug_configurations->params...internal.has_swo)",
+                "type": "boolean"
+              },
+              "wirespeed": {
+                "description": "Wire speed in Hz",
+                "$comment": "(SDK: not available in the manifest data) (launcher: to be added for the parts that require this)",
+                "type": "integer",
+                "minimum": 0
+              },
+              "bootconfigs": {
+                "description": "Boot configurations (name:<data> pairs) aimed to be used with MCU-Link on-board probes. <data> is a string of 4 characters ('x', '1' or '0') describing how each ISP_CTRL[3..0] pin should be handled.",
+                "$comment": "(SDK: not yet available in the manifest data)",
+                "type": "object",
+                "patternProperties": {
+                  "^[A-Za-z0-9_-]*$": {
+                    "description": "<data> for this boot configuration name",
+                    "type": "string",
+                    "pattern": "^[x01]{4}$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

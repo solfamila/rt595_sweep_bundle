@@ -1,0 +1,4 @@
+        ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+        /* Skip check due to potential use of a memory range which is seen at different addresses by the Master and Slave cores 
+        ASSERT( (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}), "${slave.name} execute address differs from address provided in source image");
+        */

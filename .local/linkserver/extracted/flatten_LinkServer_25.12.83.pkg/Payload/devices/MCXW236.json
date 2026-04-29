@@ -1,0 +1,62 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXW236",
+        "name": "MCXW236",
+        "family": "MCXW23X",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x000fe000",
+            "type": "Flash",
+            "flash-driver": "MCXW23x.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x000fe000",
+            "type": "Flash",
+            "flash-driver": "MCXW23x_S.cfx"
+          },
+          {
+            "location": "0x20004000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30004000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "preconnect-script": "LS_preconnect_MCXW23X.scp"
+      }
+    }
+  ]
+}

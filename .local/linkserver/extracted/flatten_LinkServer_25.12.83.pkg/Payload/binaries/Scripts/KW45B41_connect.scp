@@ -1,0 +1,79 @@
+1 REM ======================================
+2 REM Copyright 2022-2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+140  REM ================================================================
+150  print "KW45B41 connect script"
+160  rem probelist
+170  rem a% = probefirstfound
+180  if a% == 0 then goto 2990
+190  print "Connecting to Probe Index = ";a%
+200  wireswdconnect a%
+210  selectprobecore a% 0
+220  cminitapdp this
+230  rem cmhalt this
+240  rem cmregs this
+250  REM ================================================================
+260  REM Comment out the goto line below to enable ECC RAM initialization
+270  goto 3000
+280  print "ECC RAM initialization enabled"
+300  REM ================================================================
+310  s% = 0x04000000
+320  v% = 0xFFFFFFFF
+330  print "RAM Initialization - write "; ~v% ; " at "; ~s%
+340  poke32 this s% v%
+350  rem v% = peek32 this s%
+360  rem print "debug: v = "; ~v%
+370  print "Enable the DMA clock in MRCC"
+380  poke32 this 0x4001C410 0xC0000001
+400  REM ================================================================
+410  d% = 0x04000004
+420  c% = 0x3FFC
+430  goto 1000
+440  REM ================================================================
+450  d% = 0x20000000
+460  c% = 0x1C000
+470  goto 1000
+1000  REM ================================================================
+1010  print "RAM Initialization using DMA - region "; ~d%; " to "; ~(d% + c%)
+1040  print "The memory source address "; ~s%
+1050  poke32 this 0x40003020 s%
+1060  poke32 this 0x40003024 0x0
+1070  poke16 this 0x40003026 0x202
+1080  print "The bytes transfer count ";~c%
+1090  poke32 this 0x40003028 c%
+1100  poke32 this 0x4000302C 0x0
+1110  print "The memory destination address "; ~d%
+1120  poke32 this 0x40003030 d%
+1130  print "Destination address signed offset"
+1140  poke32 this 0x40003034 0x4
+1150  poke16 this 0x40003036 0x1
+1160  poke32 this 0x40003038 0x0
+1170  poke16 this 0x4000303e 0x1
+1180  print "Enable ERQ for channel 0"
+1190  poke32 this 0x40003000 0x1
+1200  print "Clear previous errors"
+1210  poke32 this 0x40003004 0x80000000
+1220  print "Start DMA transfer"
+1230  poke32 this 0x4000303C 0x1
+1240  i% = 0
+1250  repeat
+1260     i% = i% + 1
+1270     v% = peek32 this 0x40003000
+1280     rem print "debug: v = "; ~v%
+1290     if i% >= 100 then goto 1350
+1300  until v% & 0x80000000 == 0x00000000
+1310  print "DMA transfer finished "; i%
+1320  if d% == 0x04000004 then goto 440
+1340  if d% == 0x20000000 then goto 2000
+1350  print "DMA transfer not finished i="; i%
+1360  goto 2000
+2000  REM ================================================================
+2010  print "Disable the DMA clock in MRCC"
+2020  poke32 this 0x4001C410 0x0
+2030  REM ================================================================
+2980  goto 3000
+2990  print "Probe Not Found"
+3000  end

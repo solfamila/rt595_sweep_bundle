@@ -1,0 +1,44 @@
+  <#list slaves as slave>
+    <#if (slave.linkSection == memory.name) || (slave.linkSection == memory.alias)>
+    
+    /* ${slave.textSectionNormalized} text section */
+    .text${slave.textSection}_text : SUBALIGN(${text_align})
+    {
+       FILL(0xff)
+       _${slave.textSectionNormalized}_START__ = .; /* start of slave image */
+       KEEP(*(${slave.textSection}))
+    }> ${memory.name}
+
+    /* ${slave.textSectionNormalized} extab and exidx sections */
+    .text${slave.textSection}_ARM_extab . : SUBALIGN(${text_align})
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.ARM.extab))
+    } 
+
+    .text${slave.textSection}_ARM_exidx . : SUBALIGN(${text_align})
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.ARM.exidx))
+    } 
+
+    /* ${slave.textSectionNormalized} data section */
+    .text${slave.textSection}_data . : SUBALIGN(${text_align})
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.data_*)) KEEP(*(${slave.textSection}.data))
+        _${slave.textSectionNormalized}_END__ = .; /* end of slave image */
+
+        <#assign TEXT_MC_CHECKS_FILE = "text_section_multicore_checks_${chipFamily}.ldt">
+        <#assign optTemp = .get_optional_template(TEXT_MC_CHECKS_FILE)>
+        <#if optTemp.exists>
+            <#-- file found -->
+            <@optTemp.include />
+        <#else>
+            <#-- file not found -->
+            ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+            ASSERT( (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}), "${slave.name} execute address differs from address provided in source image");
+        </#if>
+    }
+    </#if>
+  </#list>

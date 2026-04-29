@@ -1,0 +1,91 @@
+1 REM ======================================
+2 REM Copyright 2014, 2019-2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM ================================================================
+120 REM LPC5410xMassErase.scp
+160 REM ================================================================
+170 REM
+180 REM This script is used to mass erase LPC5410x flash through the
+190 REM Debug Mailbox. Its' recommended use is through a redlinkserv
+200 REM console session (vs. Connect script) using the '--commandline'
+210 REM option.
+220 REM 
+230 REM >redlinkserv --commandline
+240 REM
+250 REM redlink> load "<path>/LPC5410xMassErase.scp"
+260 REM redlink> run
+270 REM
+280 REM ================================================================
+290 probelist
+300 p% = probefirstfound
+310 print "Open probe by index: "; p%
+320 probeopenbyindex p%
+330 wireswdconnect p%
+340 REM ================================================================
+350 REM Select M4 core initially
+360 REM ================================================================
+370 selectprobecore p% 0
+380 REM ================================================================
+390 REM Power it up
+400 REM ================================================================
+410 print "Debug Power Up"
+420 cmwritedp this 4 0x50000F00
+430 coreconfig p%
+440 cminitapdp this
+450 REM ================================================================
+460 REM Select Debug Mailbox AP ID
+470 REM ================================================================
+480 cmwritedp this 2 0x020000F0
+490 print "Debug Mailbox AP ID";
+500 i% = cmreadap this 3
+510 print "AP_ID: "; ~i%
+520 REM ================================================================
+530 REM Select Debug Mailbox AP as core
+540 REM
+550 REM CoreIndex is the Debug Mailbox AP << 4,
+560 REM an (internal convention)
+570 REM ================================================================
+580 selectprobecore p% 0x20
+590 REM ================================================================
+600 REM AP 2 Bank 0
+610 print "Setup AP 2 Bank 0"
+620 cmwritedp this 2 0x02000000
+630 REM ================================================================
+640 REM SOFT_RESET
+650 REM print "Soft Reset"
+660 REM cmwriteap this 0 0x10
+670 REM ================================================================
+680 REM CHIP_RESET_REQ|RESYNCH_REQ
+690 print "Debug Mailbox Resync and Reset"
+700 cmwriteap this 0 0x21
+710 REM s% = cmreadap this 2
+720 REM print"Result: "; ~s%
+730 REM ================================================================
+740 print "Enter Debugger Mailbox"
+750 cmwriteap this 1 1
+760 s% = cmreadap this 2
+770 print"Result: "; ~s%
+780 REM ================================================================
+790 cmwriteap this 1 2
+800 print "Return CRP Level"
+810 s% = cmreadap this 2
+820 print "CRP: "; ~s%
+830 REM ================================================================
+840 print "Erase Flash"
+850 cmwriteap this 1 3
+860 REM ================================================================
+870 print "Delay.."
+880 FOR i% = 0 to 100000
+890 REM PRINT i%
+900 NEXT i%
+910 s% = cmreadap this 2
+920 print "Erase Flash Result: "; ~s%
+930 REM ================================================================
+940 REM Exit Debugger Mailbox
+950 cmwriteap this 1 4
+960 REM ================================================================
+970 print "Close Probe by index: "; p%
+980 probeclosebyindex p%

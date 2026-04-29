@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "TWR-KV46F150M",
+      "device": {
+        "id": "MKV46F256xxx16",
+        "name": "MKV46F16",
+        "family": "KV4x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00040000",
+            "type": "Flash",
+            "flash-driver": "FTFA_4K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1fffc000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

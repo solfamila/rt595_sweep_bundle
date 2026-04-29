@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2021-2025 NXP -->
+<targets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="coresightComponents.xsd">
+	<target id="MIMXRT116.*">
+		<component type="ATBFunnel" address="E0045000"></component>
+		<component type="SWO" address="E0048000"></component>
+		<core id="cortex-m7" traceClock="0"></core>
+	</target>
+	<target id="MIMXRT117.*">
+		<component type="ATBFunnel" address="E0045000"></component>
+		<component type="SWO" address="E0048000"></component>
+		<core id="cortex-m7" traceClock="0"></core>
+	</target>
+	<target id="MIMXRT118.*">
+		<component type="SWO" address="41020000"></component>
+		<component type="ETF" address="41030000"></component>
+		<core id="cortex-m7" traceClock="0"></core>
+		<core id="cortex-m33" traceClock="0" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="MIMXRT10.*">
+		<core id="cortex-m7" traceClock="0"></core>
+	</target>
+	<target id="MIMXRT7.*">
+		<component type="TPIU" address="402C4000"></component>
+		<component type="FUNNEL" address="402D4000"></component>
+		<component type="ETF" address="402CC000"></component>
+		<component type="SWO" address="402C8000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="NXH200.*">
+		<core id="cortex-m0plus" index="0" romBaseAddr="F0000000"></core>
+		<core id="cortex-m0plus" index="1" romBaseAddr="F0004000"></core>
+	</target>
+	<target id="LPC804">
+		<core id="cortex-m0plus" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="LPC824">
+		<core id="cortex-m0plus" romBaseAddr="F0000000"></core>
+	</target>
+	<target id="KW4x">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+	</target>
+	<target id="K32W14X">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+	</target>
+	<target id="KW45B41.*">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="K32W1480.*">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="RW61.*">
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="MCXW3XX">
+		<component type="TPIU" address="E0040000"></component>
+	</target>
+	<target id="MCXW34.*">
+		<component type="TPIU" address="E0040000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="MCXN.*">
+		<core id="cortex-m33" traceClock="0" traceFunnelPorts="1"></core>
+	</target>
+	<target id="MCXA.*">
+		<core id="cortex-m33" traceClock="0"></core>
+	</target>
+	<target id="MCXW7XX">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+	</target>
+	<target id="MCXW71.*">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="MCXW72.*">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="KW47B42.*">
+		<component type="TPIU" address="E0040000"></component>
+		<component type="FUNNEL" address="E0044000"></component>
+		<core id="cortex-m33" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="MCXE31.*">
+		<component type="ETM"    address="E0041000"></component>
+		<component type="SWO"    address="4024B000"></component>
+		<!-- Known limitation
+		- only the last ETF component from the list below is configured by MCUX IDE
+		- the other ETF components must be configured in the app -->
+		<component type="ETF"    address="40247000"></component>
+		<component type="ETF"    address="40246000"></component>
+		<component type="ETF"    address="40245000"></component>
+		<component type="ETF"    address="40244000"></component>
+		<component type="FUNNEL" address="40243000"></component>
+		<component type="FUNNEL" address="40242000"></component>
+		<component type="FUNNEL" address="40241000"></component>
+		<core id="cortex-m7" traceClock="0" romBaseAddr="E00FF000"></core>
+	</target>
+	<target id="generic"> <!-- List of generic rom base addresses for all supported cortex -->
+		<core id="cortex-m0plus" romBaseAddr="F0002000"></core>
+		<core id="cortex-m33" romBaseAddr="E00FE000"></core>
+		<core id="cortex-m33-nodsp" romBaseAddr="E00FE000"></core>
+		<core id="cortex-m4" romBaseAddr="E00FF000"></core>
+		<core id="cortex-m3" romBaseAddr="E00FF000"></core> <!-- to be tested -->
+		<core id="cortex-m7" romBaseAddr="E00FD000"></core>
+	</target>
+</targets>

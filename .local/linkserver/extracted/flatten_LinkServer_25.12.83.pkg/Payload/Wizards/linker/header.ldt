@@ -1,0 +1,12 @@
+/*
+ * GENERATED FILE - DO NOT EDIT
+ * Copyright 2008-2013 Code Red Technologies Ltd,
+ * Copyright 2013-${year} NXP
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Generated linker script file for ${chipName}
+ * Created from ${.main_template_name} by ${basename}
+ * Using Freemarker v${.version}
+ * ${version} on ${.now}
+ <#-- assign listvars=true -->
+ <#include "listvars.ldt" >
+ */

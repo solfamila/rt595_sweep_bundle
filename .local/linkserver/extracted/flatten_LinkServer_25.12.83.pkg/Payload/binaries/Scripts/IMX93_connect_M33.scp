@@ -1,0 +1,89 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM 
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  print "IMX93 M33 Connect Script"
+110  rem ======================================
+120  rem "Supported mode: 0011, 1011"
+130  rem ======================================
+140  rem "SW1301[1:4]"
+141  rem "                  |  A55 |  M33 |"
+142  rem "eMMC/SDHC1        | 0000 | 1000 |"
+143  rem "microSD/SDHC2     | 0010 | 1010 |"
+144  rem "FLEXSPI NOR       | 0101 | 1101 |"
+145  rem "Serial Downloader | 0011 | 1011 |"
+150  rem ======================================
+
+200  rem probelist
+210  p% = probefirstfound
+220  rem probeopenbyindex p%
+230  wiretimedreset p% 500
+240  wait 500
+
+300  wireswdconnect p%
+310  aplist p%
+320  corelist p%
+330  gosub 1000
+
+400  rem ======================================
+410  print "M33 kicked off"
+420  selectprobecore p% 3
+430  cminitapdp this
+440  cmhalt this
+450  cmregs this
+500  end
+
+1000 rem ========== SUB: Enable M33 ==========
+1010 rem "M33 kick off: M33_CFG[WAIT]=1, SCR[BT_RELEASE_M33]=1, prepare ..., M33_CFG[WAIT]=0 + ...send a request to EdgeLock secure enclave to release the Cortex-M33 TROUT"
+1020 cminitapdp p% 0
+1030 m% = peek32 p% 0 0x44460004
+1040 n% = peek32 p% 0 0x444f0060
+1050 print "m = "; ~m%
+1060 print "n = "; ~n%
+
+1100 rem => set M33_CFG[WAIT] bit in blk_ctrl_s_aonmix block
+1110 poke32 p% 0 0x544f0060 (n% | 0x00000004)
+
+1120 print "... reconnect to see M33"
+1130 wiredisconnect p%
+1140 wait 200
+1150 wireswdconnect p%
+1160 cminitapdp p% 0
+
+1200 rem => reset M33_CFG[WAIT]
+1210 poke32 p% 0 0x54460010 (m% | 0x00000001)
+1220 print "... disables the ECC logic for Cortex-M33 TCM"
+1230 poke32 p% 0 0x54420004 (n% | 0x00000003)
+1240 print "... disables the ECC logic for Cortex-M33 CACHE"
+1250 poke32 p% 0 0x54401000 (n% | 0x00000003)
+
+1500 rem => prepare branch to self entry point
+1510 poke32 p% 0 (0x201E0000 + 0x00) (0x1ffe0000 + 0x2000)
+1520 poke32 p% 0 (0x201E0000 + 0x04) (0x1ffe0000 + 0x09)
+1530 poke32 p% 0 (0x201E0000 + 0x08) 0xe7fee7fe
+1540 poke32 p% 0 (0x201E0000 + 0x0c) 0xe7fee7fe
+
+2100 print "... send a request to EdgeLock secure enclave to release the Cortex-M33 TROUT"
+2110 rem => AHAB_RELEASE_M33_CMD => AHAB_CMD = AHAB_CMD_TAG(0x17) << 24 | AHAB_RELEASE_M33_CID(0xD3) << 16 | size(1) << 8 | AHAB_VERSION (0x6)
+2120 poke32 p% 0 0x57520200 0x17d30106
+2130 wait 200
+
+2230 print "... check"
+2240 r% = Peek32 p% 0 0x57520280
+2250 print "Resp1 : "; ~r%
+2560 r% = Peek32 p% 0 0x57520284
+2570 print "Resp2 : "; ~r%
+2580 wait 200
+
+2600 rem => reset M33_CFG[WAIT]
+2610 poke32 p% 0 0x544f0060 (n% & 0xfffffffb)
+
+2810 m% = peek32 p% 0 0x44460010
+2820 n% = peek32 p% 0 0x444f0060
+2830 print "SCR = "; ~m%
+2840 print "M33_CFG = "; ~n%
+
+2900 corelist p%
+2990 return

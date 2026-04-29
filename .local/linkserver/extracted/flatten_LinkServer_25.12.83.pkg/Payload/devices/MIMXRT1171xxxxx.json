@@ -1,0 +1,77 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MIMXRT1171xxxxx",
+        "name": "MIMXRT1171",
+        "family": "MIMXRT1170",
+        "memory": [
+          {
+            "location": "0x20240000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x202c0000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20340000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20350000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20360000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20380000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20200000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00080000",
+            "type": "RAM",
+            "core-name": "cm7"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "RAM",
+            "core-name": "cm7"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "RT1170_connect_M7.scp",
+        "reset-script": "RT1170_reset_M7.scp"
+      }
+    }
+  ]
+}

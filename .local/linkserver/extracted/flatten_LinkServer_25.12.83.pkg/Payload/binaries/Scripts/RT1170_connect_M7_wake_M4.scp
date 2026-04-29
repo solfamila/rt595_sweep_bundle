@@ -1,0 +1,111 @@
+1 REM ======================================
+2 REM Copyright 2020-2024 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM RT1170_connect_M7_wake_M4.scp
+150  REM =======================================================================
+160  PRINT "RT1170 Connect M7 and Wake M4 Script"
+170  REM =======================================================================
+180  REM Uncomment ProbeList for standalone script use (outside the stub)
+190  REM =======================================================================
+200  REM ProbeList
+210  p% = ProbeFirstFound
+220  REM ProbeOpenByIndex p%
+230  WireSwdConnect p%
+240  SelectProbeCore p% 0
+250  CMInitApDp this
+252  REM =======================================================================
+254  REM Disable ECC
+256  GOSUB 1500
+260  REM =======================================================================
+270  REM The M4 AP is not visible while the core is held in reset
+280  REM Prepare a spin code in RAM and wake up / reset the M4 to it
+290  REM This serves two purposes:
+300  REM   - enables the M4 AP, required for debug visibility
+310  REM   - prevents M4 code from interfering with flash programming on M7
+320  REM =======================================================================
+330  REM Prepare spin code
+340  GOSUB 1000
+350  REM =======================================================================
+360  PRINT "Setting M4 clock"
+370  REM Set m4_clk_root to OSC_RC_400M / 2: CLOCK_ROOT1 = mux(2), div(1)
+380  Poke32 this 0x40CC0080 0x201
+390  PRINT "Resetting M4 core"
+400  REM Save current reset SRMR and prevent M4 SW reset affecting the system
+410  s% = Peek32 this 0x40C04004
+420  Poke32 this 0x40C04004 0x00000C00
+430  Poke32 this 0x40C04284 0x1
+440  Poke32 this 0x40C04004 s%
+450  REM =======================================================================
+460  REM Release M4 if needed
+500  s% = Peek32 this 0x40c04000
+510  IF s% & 1 == 1 THEN GOTO 560
+520  PRINT "Releasing M4"
+530  s% = s% | 1
+540  Poke32 this 0x40c04000 s%
+550  REM =======================================================================
+560  PRINT "View cores on the DAP AP"
+570  WireSwdConnect p%
+580  CoreList p%
+590  SelectProbeCore p% 0
+600  REM =======================================================================
+610  REM Potentially FlexRAM might need to be set to ensure TCMs are available
+620  REM Uncomment next line if needed
+630  REM GOSUB 800
+640  REM =======================================================================
+650  REM Finished - 0 to select the M7, 1 to select M4
+660  d% = 0
+670  REM =======================================================================
+680  REM Setup VTOR in preparation for VECTRESET
+690  GOSUB 1300
+700  REM =======================================================================
+710  END
+800  REM ====================== SUB: Configure FlexRAM ========================
+810  PRINT "Configuring FlexRAM for 256KB I-TCM, 256KB D-TCM, 0KB OCRAM"
+820  REM FlexRAM TCM_CTRL - force RAM clocking ON and set fast mode = b100
+830  Poke32 this 0x40028000 0x4
+840  REM IOMUXC_GPR17/18 FlexRAM 32KB banks allocation - I(b11), D(b10), OC(b01)
+850  Poke32 this 0x400E4044 0x0000AAFF
+860  Poke32 this 0x400E4048 0x0000AAFF
+870  REM IOMUXC_GPR16 Enable FLEXRAM_BANK_CFG in GPR16/17
+880  s% = Peek32 this 0x400E4040
+890  s% = s% | 4
+900  Poke32 this 0x400E4040 s%
+910  RETURN
+1000 REM ==================== SUB: Set up M4 spin code ========================
+1010 REM Setup some spin code into an area of D-TCM (0x2021FF00)
+1020 REM Condensed vector table format taking up 2 words of memory:
+1030 REM   - x00: SP (dummy), two back-to-back branch-to-self opcodes (b 0)
+1040 REM   - x04: PC - points to address x00 (+1 Thumb)
+1050 PRINT "Setting M4 spin code"
+1060 Poke32 this 0x2021FF00 0xE7FEE7FE
+1070 Poke32 this 0x2021FF04 0x2021FF01
+1080 REM Set top/bottom 16 bits of RAM address into CM4 VTOR iomuxc_lpsr_GPR0/1
+1090 Poke32 this 0x40C0C000 0xFF00
+1100 Poke32 this 0x40C0C004 0x2021
+1110 RETURN
+1300 REM ==================== SUB: Setup CM7 VTOR =============================
+1310 REM Upon VECTRESET, VTOR is loaded with the value from this register.
+1320 REM If the address is invalid, a hard fault occurs after VECTRESET.
+1330 REM These registers are set in preparation for a pre-flash driver VECTRESET
+1340 REM requested by the stub.
+1350 REM BootROM VTOR
+1360 s% = 0x210000
+1370 REM Set addr >> 7 into CM7 VTOR iomuxc_lpsr_GPR26 (RevB) or 0x400e404c (Rev A)
+1380 v% = Peek32 this 0x40C84800
+1390 IF v% & 0x00FFFFF0 == 0x1170A0 Then GOTO 1420
+1400 Poke32 this 0x40C0C068 s% >> 7
+1410 GOTO 1430
+1420 Poke32 this 0x400E404C s% >> 7
+1430 RETURN
+1440 REM =======================================================================
+1500 REM ====================== SUB: Disable M7 TCM ECC and OCRAM ECC ==========
+1510 REM FlexRAM_CTRL - disable TCM ECC and OCRAM ECC
+1520 Poke32 this 0x40028108 0x00000000
+1530 REM MECC1/2 PIPE_ECC_EN - disable ECC
+1540 Poke32 this 0x40014100 0x00000000
+1550 Poke32 this 0x40018100 0x00000000
+1560 RETURN

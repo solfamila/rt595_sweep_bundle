@@ -1,0 +1,81 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "LPCXpresso55S36",
+      "device": {
+        "id": "LPC55S36",
+        "name": "LPC55S36",
+        "family": "LPC553x_S3x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x0003d800",
+            "type": "Flash",
+            "flash-driver": "LPC553x.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x0003d800",
+            "type": "Flash",
+            "flash-driver": "LPC553x_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x08000000",
+            "size": "0x04000000",
+            "type": "ExtFlash",
+            "flash-driver": "LPC553x_FlexSPI_A_MXIC_OPI.cfx"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x04000000",
+            "type": "ExtFlash",
+            "flash-driver": "LPC553x_FlexSPI_A_MXIC_OPI_S.cfx"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "reset-script": "LPC553x_reset.scp",
+        "preconnect-script": "LS_preconnect_LPC553x_S3x.scp",
+        "bootconfigs": {
+          "internal": "xx00",
+          "isp": "xx01",
+          "flexspi": "xx10",
+          "auto": "xx11"
+        }
+      }
+    }
+  ]
+}

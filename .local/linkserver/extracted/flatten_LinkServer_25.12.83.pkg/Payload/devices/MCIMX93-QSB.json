@@ -1,0 +1,64 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "MCIMX93-QSB",
+      "device": {
+        "id": "MIMX9322xxxxM",
+        "name": "MIMX9322",
+        "family": "MIMX93xx",
+        "memory": [
+          {
+            "location": "0x20000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x0ffe0000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20020000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20480000",
+            "size": "0x000A0000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x28000000",
+            "size": "0x08000000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x80000000",
+            "size": "0x10000000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33",
+            "index": "3"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "IMX93_connect_M33.scp",
+        "reset-script": "IMX93_reset_M33.scp",
+        "no-packed": true,
+        "dapstride": "short",
+        "apindex-limit": 4
+      }
+    }
+  ]
+}

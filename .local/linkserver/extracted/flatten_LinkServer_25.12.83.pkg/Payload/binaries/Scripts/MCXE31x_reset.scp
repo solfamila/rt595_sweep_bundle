@@ -1,0 +1,231 @@
+1 REM ======================================
+2 REM Copyright 2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100   REM ================================================================
+110   REM MCXE31x_reset.scp
+150   REM ================================================================
+160   Print "MCXE31x Reset Script"
+
+170   REM Find the probe index
+180   p% = ProbeFirstFound
+185   REM Core index is expected to be already selected
+190   This
+192   REM PRINT "a="; ~a%; " b="; ~b%; " c="; ~c%; " d="; ~d%
+
+200  REM If VTOR is in flash (0x00400000/0x10000000/0x68000000) ranges do a system reset
+210  if ((d% & 0xFFFF0000) == 0x00400000) || ((d% & 0xFFFF0000) == 0x10000000) || ((d% & 0xFFFF0000) == 0x68000000) Then Goto 400
+
+220  REM If info (pc, sp) from VTOR is invalid do a system reset
+230  v% = Peek32 This d%
+235  if v% == 0xffffffff Then Goto 260
+240  v% = Peek32 This (d% + 4)
+245  if v% == 0xffffffff Then Goto 260
+250  Goto 300
+260  PRINT "Info from VTOR @ "; ~d%; " looks invalid (" ; ~v%; ") - perform a system reset"
+265  Goto 400
+
+300   REM RAM-based application - perform a SOFT reset
+315   PRINT "SOFT Reset (RAM)"
+310   b% = Peek32 This d%
+320   t% = d% + 4
+330   a% = Peek32 This t%
+340   c% = 0x01000000
+350   Print "PC=" ~a%
+360   Print "SP=" ~b%
+370   Print "XPSR=" ~c%
+380   Print "VTOR=" ~d%
+390   End
+
+400   REM ================================================================
+410   Print "Assert NRESET"
+420   WireHoldReset p% 0
+430   Wait 100
+440   WireSwdConnect p%
+450   APList p%
+500   REM ================================================================
+510   REM SDA-AP(7) APID
+520   REM ================================================================
+530   SelectProbeCore p% 7
+540   CMWriteDP this 2 0x070000F0
+545   CMWriteAP this 1 0x000000FC
+550   v% = CMReadAP this 3
+560   Print "SDA-AP(7) APID: "; ~v%
+570   v% = v% & 0x00FF00F0
+580   if v% != 0x001C0040 Then Goto 8500
+590   REM ================================================================
+600   REM SDA-AP(7) APID - clear RSTRELTLCM7x bits in SDAAPRSTCTRL
+610   r% = 0x90
+620   v% = 0x00000000
+630   GOSUB 8800
+650   REM ================================================================
+660   Print "Release NRESET"
+670   WireHoldReset p% 1
+680   Wait 100
+690   REM ================================================================
+
+700   REM ================================================================
+710   REM MDM-AP(6) APID
+720   REM ================================================================
+730   SelectProbeCore p% 6
+740   CMWriteDP this 2 0x060000F0
+745   CMWriteAP this 1 0x000000FC
+750   v% = CMReadAP this 3
+760   Print "MDM-AP APID: "; ~v%
+770   v% = v% & 0x00FF00F0
+780   if v% != 0x001C0030 Then Goto 8700
+
+800   REM ================================================================
+810   REM Unlock application debug
+820   GOSUB 9000
+830   REM ================================================================
+
+900   REM SDA-AP(7) APID - enable debug for M7 cores in DBGENCTRL
+910   r% = 0x80
+920   v% = 0x300000F0
+930   GOSUB 8800
+
+1000  REM M7 APs - keep M7 cores halted when out of reset
+1005  i% = 4
+1010  SelectProbeCore p% i%
+1015  Print " M7 AP("; i% ; ") - "; ~(i% << 24)
+1020  CMWriteDP this 2 (i% << 24)
+1030  CMWriteAP this 1 0xE000EDF0
+1040  CMWriteAP this 3 0xA05F0003
+1050  v% = CMReadAP this 3
+1055  Print " M7 AP("; i% ; ") wr reg @ 0xE000EDF0 = "; ~v%
+1060  CMWriteAP this 1 0xE000EDFC
+1070  CMWriteAP this 3 0x1
+1080  v% = CMReadAP this 3
+1085  Print " M7 AP("; i% ; ") wr reg @ 0xE000EDFC = "; ~v%
+1090  i% = i% + 1
+1095  if i% <= 4 Then Goto 1010
+
+1200  REM SDA-AP(7) APID - set RSTRELTLCM7x bits in SDAAPRSTCTRL (debug from first instruction)
+1205  SelectProbeCore p% 7
+1210  r% = 0x90
+1220  v% = 0x06000000
+1230  GOSUB 8800
+
+1400  REM ===  MDM-AP(6) MDMAPCTL - clear SWOOVRD bit (SWO generates the trace response) ===
+1405  SelectProbeCore p% 6
+1410  CMWriteDP this 2 0x06000000
+1420  v% = CMReadAP this 1
+1430  Print "MDP AP(6)  r reg 1 = "; ~v%
+1440  v% = v% & (!0x00400000)
+1450  CMWriteAP this 1 v%
+1460  v% = CMReadAP this 1
+1470  Print "MDP AP(6) wr reg 1 = "; ~v%
+
+1500  REM ================================================================
+1510  WireSwdConnect p%
+1520  APList p%
+1530  CoreList p%
+
+7000  REM ================================================================
+7010  SelectProbeCore p% 4
+7020  CMHalt this
+7030  a% = CMReadReg This 15
+7032  b% = CMReadReg This 13
+7034  c% = CMReadReg This 16
+
+7250  REM === Disable SWT0 ====
+7260  r% = 0x40270000
+7270  GOSUB 12000
+
+7300  REM ===  Enable trace and halting debug trap on faults ===
+7310  v% = Peek32 This 0xE000EDFC
+7320  v% = v% | 0x10007f1
+7330  Print "Set DEMCR = " ~v%
+7340  Poke32 This 0xE000EDFC v%
+
+7700  REM ================================================================
+7770  REM === Initialization DONE  ====
+7777  End
+
+
+8500  REM ================================================================
+8510  Print "SDA-AP Not Found"
+8520  End
+
+8700  REM ================================================================
+8710  Print "MDM-AP Not Found"
+8720  End
+
+8800  REM ================================================================
+8810  REM Write SDA-AP(7) register r with value v
+8820  REM ================================================================
+8830  REM SelectProbeCore p% 7
+8840  CMWriteDP this 2 (0x07000000 | r%)
+8850  CMWriteAP this 1 r%
+8860  CMWriteAP this 0 v%
+8870  v% = CMReadAP this 0
+8880  REM Print "SDA AP(7) wr reg @ "; ~r%; " = "; ~v%
+8890  Return
+
+9000  REM ================================================================
+9010  Print "Unlock application debug (authentication)..."
+9020  REM ================================================================
+9030  SelectProbeCore p% 7
+9040  CMWriteDP this 2 0x07000000
+9050  CMWriteAP this 1 0x00000000
+9060  v% = CMReadAP this 0
+9070  Print "SDA AP(7)  r reg @ 0x0 = "; ~v%
+9080  REM Check APPDBGEN bit in AUTHSTTS register
+9090  if (v% & 0x40000000) != 0x40000000 Then Goto 9200
+9100  Print "... application debug already enabled (authentication not required)"
+9110  Return
+9200  Print "... NOTE: Challenge/Response authentication is not supported!"
+9210  Print "... unlock the device using keys (edit the file to set the required values)"
+9300  r% = 0x40
+9301  v% = 0x00000000
+9302  Print "... KEY0 = "; ~v%
+9305  GOSUB 8800
+9310  r% = 0x44
+9311  v% = 0x00000000
+9312  Print "... KEY1 = "; ~v%
+9315  GOSUB 8800
+9320  r% = 0x48
+9321  v% = 0x00000000
+9322  Print "... KEY2 = "; ~v%
+9325  GOSUB 8800
+9330  r% = 0x4C
+9331  v% = 0x00000000
+9332  Print "... KEY3 = "; ~v%
+9335  GOSUB 8800
+9340  r% = 0x50
+9341  v% = 0x00000000
+9342  Print "... KEY4 = "; ~v%
+9345  GOSUB 8800
+9350  r% = 0x54
+9351  v% = 0x00000000
+9352  Print "... KEY5 = "; ~v%
+9355  GOSUB 8800
+9360  r% = 0x58
+9361  v% = 0x00000000
+9362  Print "... KEY6 = "; ~v%
+9365  GOSUB 8800
+9370  r% = 0x5C
+9371  v% = 0x00000000
+9372  Print "... KEY7 = "; ~v%
+9375  GOSUB 8800
+9390  Return
+
+
+12000 REM ================================================================
+12010 REM "Disable SWT"
+12020 REM ================================================================
+12030 REM arguments: r% - SWT address (SWT0: 0x40270000, SWT1: 0x4046C000)
+12040 REM ================================================================
+12050 Print "... if enabled, disable SWT @ "; ~r%
+12100 t% = Peek32 this r%
+12110 if (t% & (1 << 0)) == 0 Then Goto 12200
+12120 Poke32 this (r% + 0x10) 0x0000C520
+12130 Poke32 this (r% + 0x10) 0x0000D928
+12140 Poke32 this (r% + 0x00) 0xFF00010A
+12150 t% = Peek32 this r%
+12160 if (t% & (1 << 0)) == 0 Then Goto 12200
+12170 Print "... Warning: failed to disable SWT @ "; ~r%
+12200 Return

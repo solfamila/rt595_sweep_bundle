@@ -1,0 +1,49 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "LPC54605J512",
+        "name": "LPC54605J512",
+        "family": "LPC546xx",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "LPC5460x_512K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00028000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00008000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40100000",
+            "size": "0x00002000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true
+      }
+    }
+  ]
+}

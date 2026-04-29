@@ -1,0 +1,59 @@
+1 REM ======================================
+2 REM Copyright 2024-2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 print "RT700 Connect Script"
+
+110  a% = ProbeFirstFound
+120  REM ProbeOpenByIndex p%
+130  WireSwdConnect a%
+140  SelectProbeCore a% 0
+150  CMInitApDp this
+
+160 REM ====================================
+170 REM When debugging standalone projects for CPU1
+180 REM CPU1 needs to be woken up and left in a spin-loop
+190 REM ====================================
+200 if b% != 1 then end
+
+210 REM Configurations need to be done from CPU0
+
+300 REM By default, CPU1 expects its vector table to be at 0x00580000
+310 REM Set the entry address in the vector table
+320 poke32 this 0x00580004 0x00580201
+330 REM Set a branch to self at the entry address
+340 poke32 this 0x00580200 0xE7FEE7FE
+
+400 REM GlikeyWriteEnable(GLIKEY1, 9U)
+410 poke32 this 0x40220c00 0x00060000
+420 poke32 this 0x40220c00 0x00020009
+430 poke32 this 0x40220c00 0x00010009
+440 poke32 this 0x40220c04 0x00290000
+450 poke32 this 0x40220c00 0x00020009
+460 poke32 this 0x40220c04 0x00280000
+470 poke32 this 0x40220c00 0x00000009
+480 REM AHBSC3->SENSE_ARB1RAM_ACCESS_ENABLE = RAM_PARTITIONn_ACCESS_EN
+490 poke32 this 0x40220F84 0xFFF
+500 REM GlikeyClearConfig(GLIKEY1);
+510 poke32 this 0x40220c00 0x00040009
+
+610 REM SLEEPCON0->RUNCFG_CLR = SENSEP_MAINCLK_SHUTOFF
+620 poke32 this 0x40003030 2
+630 REM CLKCTL3->PSCCTL0_COMP_SET = CPU1
+640 poke32 this 0x40061040 1
+
+700 REM RSTCTL3->PRSTCTL0_CLR = CPU1
+710 poke32 this 0x40060070 0x80000000
+720 REM SYSCON3->CPU_STATUS = ~CPU_WAIT
+730 poke32 this 0x4006208C 0
+
+800 REM Reconnect to detect CPU1
+810 wireswdconnect a%
+820 SelectProbeCore a% 1
+830 corelist a%
+840 print "CPU1 registers:"
+850 cmregs this
+
+900 end

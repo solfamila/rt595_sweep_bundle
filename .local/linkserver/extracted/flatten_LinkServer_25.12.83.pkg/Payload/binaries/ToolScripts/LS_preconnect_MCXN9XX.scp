@@ -1,0 +1,62 @@
+1 REM ======================================
+2 REM Copyright 2022-2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM probelist
+110  REM a% = 1
+120  ProbeOpenByIndex a%
+130  WireTimedReset a% 50
+140  WireSWDConnect a%
+150  APList a%
+160  REM -----------------------------------
+170  REM Debug Mailbox AP Index is 2
+180  REM -----------------------------------
+190  SelectProbeCore a% 2
+200  REM -----------------------------------
+210  REM DEBUG_SESSION_REQ: 7
+220  REM -----------------------------------
+230  r% = 7
+240  REM -----------------------------------
+250  PRINT "Issuing Debug Session Request... ";r%
+260  PRINT "";
+270  DebugMailboxReq this r%
+280  CoreList a%
+290  SelectProbeCore a% 0
+
+400  PRINT "Disable GDET..."
+410  REM /* Disable aGDET trigger the CHIP_RESET */
+420  REM ITRC0->OUT_SEL[4][0] = (ITRC0->OUT_SEL[4][0] & ~ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN9_SELn_MASK) | (ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN9_SELn(0x2));
+430  v% = Peek32 this 0x40026028
+440  Poke32 this 0x40026028 ((v% & (!0xc0000)) | 0x80000)
+450  REM ITRC0->OUT_SEL[4][1] = (ITRC0->OUT_SEL[4][1] & ~ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN9_SELn_MASK) | (ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN9_SELn(0x2));
+460  v% = Peek32 this 0x4002602c
+470  Poke32 this 0x4002602c ((v% & (!0xc0000)) | 0x80000)
+
+480  REM /* Disable aGDET interrupt and reset */
+490  REM SPC0->ACTIVE_CFG |= SPC_ACTIVE_CFG_GLITCH_DETECT_DISABLE_MASK;
+500  v% = Peek32 this 0x40045100
+510  Poke32 this 0x40045100 (v% | 0x1000)
+520  REM SPC0->GLITCH_DETECT_SC &= ~SPC_GLITCH_DETECT_SC_LOCK_MASK;
+530  v% = Peek32 this 0x40045144
+540  Poke32 this 0x40045144 (v% & (!0x10000))
+550  REM SPC0->GLITCH_DETECT_SC = 0x3C;
+560  Poke32 this 0x40045144 0x3C
+570  REM SPC0->GLITCH_DETECT_SC |= SPC_GLITCH_DETECT_SC_LOCK_MASK;
+580  v% = Peek32 this 0x40045144
+590  Poke32 this 0x40045144 (v% | 0x10000)
+
+600  REM /* Disable dGDET trigger the CHIP_RESET */
+610  REM ITRC0->OUT_SEL[4][0] = (ITRC0->OUT_SEL[4][0] & ~ ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN0_SELn_MASK) | (ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN0_SELn(0x2));
+620  v% = Peek32 this 0x40026028
+630  Poke32 this 0x40026028 ((v% & (!0x3)) | 0x2)
+640  REM ITRC0->OUT_SEL[4][1] = (ITRC0->OUT_SEL[4][1] & ~ ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN0_SELn_MASK) | (ITRC_OUTX_SEL_OUTX_SELY_OUT_SEL_IN0_SELn(0x2));
+650  v% = Peek32 this 0x4002602c
+660  Poke32 this 0x4002602c ((v% & (!0x3)) | 0x2)
+670  REM GDET0->GDET_ENABLE1 = 0
+680  Poke32 this 0x40024008 0
+690  REM GDET1->GDET_ENABLE1 = 0
+700  Poke32 this 0x40025008 0
+
+800  REM ProbeCloseByIndex a%

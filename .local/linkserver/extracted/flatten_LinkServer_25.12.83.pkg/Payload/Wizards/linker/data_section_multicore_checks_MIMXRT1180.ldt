@@ -1,0 +1,25 @@
+        ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+        ASSERT(/* Memory ranges seen at same address by the Master and Slave cores */
+               (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}) ||
+               /* Memory ranges seen at different addresses by the Master and Slave cores */
+               /* M33 I-TCM <-> M7 alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x0FFC0000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x0FFFFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x201C0000 - 0x0FFC0000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] M33 I-TCM <-> M7 alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x1FFC0000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x1FFFFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x201C0000 - 0x1FFC0000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* M33 D-TCM <-> M7 alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x20000000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x203FFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x20200000 - 0x20000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] M33 D-TCM <-> M7 alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x30000000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x303FFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x20200000 - 0x30000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* M33 alias <-> M7 D-TCM */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x20400000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x2047FFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x20400000 - 0x20000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] M33 alias <-> M7 D-TCM */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x30400000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x3047FFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x30400000 - 0x20000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* M33 alias <-> M7 I-TCM */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x203C0000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x203FFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x203C0000 - 0x00000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] M33 alias <-> M7 I-TCM */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x303C0000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x303FFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x303C0000 - 0x00000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* M33 alias <-> M7 I-TCM opt */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x20380000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x203BFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x20380000 - 0x00040000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] M33 alias <-> M7 I-TCM opt */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0x30380000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) <= 0x303BFFFF) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) - (0x30380000 - 0x00040000) == __vectors_start__${slave.textSectionNormalized}))
+               , "${slave.name} execute address differs from address provided in source image");

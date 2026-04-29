@@ -1,0 +1,106 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MIMXRT1181xxxxx",
+        "name": "MIMXRT1181",
+        "family": "MIMXRT1180",
+        "memory": [
+          {
+            "location": "0x20480000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20500000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x0FFE0000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x203C0000",
+            "size": "0x00040000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x20400000",
+            "size": "0x00040000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x1FFE0000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x303C0000",
+            "size": "0x00040000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x30400000",
+            "size": "0x00040000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x30480000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30500000",
+            "size": "0x00040000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33",
+            "index": "3"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "RT1180_connect_M33.scp",
+        "apindex-limit": 4,
+        "core-options": {
+          "cm33": {
+            "cachelib": "libahb_xcache.so"
+          }
+        },
+        "no-packed": true,
+        "dapstride": "short"
+      }
+    }
+  ]
+}

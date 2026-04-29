@@ -1,0 +1,91 @@
+1 REM ======================================
+2 REM Copyright 2021-2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM IMXRT1160 Reset script - used for M7 single-core derivatives
+
+110  REM When RT1160 is reset via SYSRESET_REQ under debugger control, bootROM will
+120  REM not boot an existent flash application, instead it will enter a debug loop at a
+130  REM fixed PC address (0x00223104). The debugger then needs to initialise the execution
+140  REM context in order to jump to the user application.
+
+170  REM When a reset script is used, it overrides any other reset configuration in the IDE.
+180  REM Therefore, it needs to handle the most common scenarios:
+190  REM  - used post flash programming (in this case it performs a system reset)
+200  REM  - used for RAM-based application (in this case it performs a soft reset)
+
+210  REM The script is given some useful information like the current context SP (b%), PC (a%),
+220  REM PSR (c%) and VTOR or image address in case of RAM applications (d%) and it passes back
+230  REM updated reset context to the debugger
+240  REM The vector table address is assumed 0x30002000/0x60002000 for flash images
+
+250  REM Find the probe index
+260  p% = ProbeFirstFound
+265  REM Core index is expected to be already selected
+270  THIS
+
+280  REM If VTOR is in flash (0x30000000/0x60000000) or bootROM (0x00200000) ranges do a system reset
+290  IF (d% & 0xFFFF0000 == 0x30000000) || (d% & 0xFFFF0000 == 0x60000000) || (d% & 0xFFFF0000 == 0x00200000) Then GOTO 400
+
+300  REM RAM-based application - perform a SOFT reset
+310  PRINT "SOFT Reset (RAM)"
+320  b% = Peek32 This d%
+330  t% = d% + 4
+340  a% = Peek32 This t%
+350  c% = 0x01000000
+360  GOTO  1000
+
+400  REM Flash application - perform SYSTEM reset (via boot core)
+410  PRINT "SYSTEM Reset"
+415  SelectProbeCore p% 0
+420  CMResetVectorCatchSet This
+422  x% = WireGetSpeed p%
+424  WireSetSpeed p% 1000000
+430  CMSysResetReq This
+432  WireSetSpeed p% x%
+
+440  WireSWDConnect This
+450  APList This
+460  CMInitApDp This
+470  CMResetVectorCatchClear This
+475  PRINT "View cores on the DAP AP"
+480  CoreList p%
+485  SelectProbeCore p% 0
+
+500  a% = CMReadReg This 15
+520  v% = Peek32 This 0x40C84800
+
+540  REM Check PC in debug loop: no special handling otherwise
+550 IF (v% & 0x00FFF0F0 == 0x1160A0) && (a% != 0x00223104) || (v% & 0x00FFF0F0 >= 0x1160C0) && (a% != 0x002231FC) Then GOTO 700
+
+600  REM Initialise reset context from vector table @ +0x2000
+605  REM BOOT_CFG2[3] - FlexSPI instance (SBMR1[15:8])
+610  t% = Peek32 This 0x40C04008
+620  d% = 0x30000000 * (((t% & 0x00000800) >> 11) + 1) + 0x2000
+630  b% = Peek32 This d%
+640  a% = Peek32 This (d% + 4)
+650  c% = 0x01000000
+660  CMWriteReg This 13 b%
+670  CMWriteReg This 15 a%
+680  CMWriteReg This 16 c%
+690  GOTO 1000
+
+700  REM Use PC, SP, PSR, VTOR from target after reset
+710  b% = CMReadReg This 13
+720  c% = CmReadReg This 16
+730  d% = Peek32 This 0xe000ed08
+
+1000 PRINT "Vector table SP/PC is the reset context."
+1010 PRINT "PC = "; ~a%
+1020 PRINT "SP = "; ~b%
+1030 PRINT "XPSR = "; ~c%
+1040 PRINT "VTOR = "; ~d%
+
+1050 REM Enable trace and halting debug trap on faults"
+1060 z% = Peek32 this 0xE000EDFC
+1070 z% = z% | 0x10007f1
+1080 PRINT "Set DEMCR = " ~z%
+1090 Poke32 this 0xE000EDFC z%
+1100 END

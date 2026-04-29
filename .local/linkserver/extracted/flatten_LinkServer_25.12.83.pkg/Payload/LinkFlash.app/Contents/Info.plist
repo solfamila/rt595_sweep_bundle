@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>CFBundleDevelopmentRegion</key>
+        <string>English</string>
+        <key>NSPrincipalClass</key>
+        <string>ShellScript</string>
+        <key>CFBundleExecutable</key>
+        <string>LinkFlash.command</string>
+        <key>CFBundleGetInfoString</key>
+        <string>LinkFlash for macOS, Copyright NXP.</string>
+        <key>CFBundleIconFile</key>
+        <string>LinkFlash.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>LinkFlash</string>
+        <key>CFBundleName</key>
+        <string>LinkFlash</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleShortVersionString</key>
+		<string>25.12</string>
+		<key>CFBundleVersion</key>
+		<string>25.12.83</string>
+        <key>NSHighResolutionCapable</key>
+        <true/>
+</dict>
+</plist>

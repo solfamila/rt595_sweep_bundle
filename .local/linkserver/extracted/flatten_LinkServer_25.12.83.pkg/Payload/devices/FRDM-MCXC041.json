@@ -1,0 +1,41 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-MCXC041",
+      "device": {
+        "id": "MCXC041",
+        "name": "MCXC041",
+        "family": "MCXC041",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00008000",
+            "type": "Flash",
+            "flash-driver": "FTFA_1K_Tiny_MCXC.cfx"
+          },
+          {
+            "location": "0x1ffffe00",
+            "size": "0x00000800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "MCXC_connect.scp",
+        "masserase-script": "MCXC_masserase.scp"
+      }
+    }
+  ]
+}

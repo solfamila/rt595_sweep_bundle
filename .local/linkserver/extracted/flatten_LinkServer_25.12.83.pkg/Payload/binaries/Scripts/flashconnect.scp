@@ -1,0 +1,19 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 print "Simple flash connect script"
+20 REM Enumerate the probes on USB
+25 REM
+30 probelist
+40 REM Find the first one
+50 a% = probefirstfound
+55 print a%
+60 REM Open the first one
+70 probeopenbyindex a%
+80 wireswdconnect a%
+90 REM a% is passed back to the debugger as a boolean to indicate if we want a sysresetreq
+100 a% = 1
+110 end

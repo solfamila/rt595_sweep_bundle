@@ -1,0 +1,31 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM i.MXRT1050 Internal RAM (@ 0x20000000) reset script
+110 REM Connect script is passed PC/SP from the vector table in the image by the debugger
+120 REM For the simple use case we pass them back to the debugger with the location of the reset context.
+130 REM
+140 REM Syntax here is that '~' commands a hex output, all integer variables are a% to z%
+150 REM Find the probe index
+160 p% = probefirstfound
+170 REM Set the 'this' probe and core
+180 selectprobecore p% 0
+190 REM NOTE!! Vector table presumed RAM location is address 0x20000000
+200 REM The script passes the SP (%b) and PC (%a) back to the debugger as the reset context.
+210 cmresetvectorcatchset this
+220 cmsysresetreq this
+230 wireswdconnect this
+240 REM cmclearerrors this
+250 cminitapdp this 
+260 b% = peek32 this 0x20000000
+270 a% = peek32 this 0x20000004
+280 d% = 0x20000000
+290 print "Vector table SP/PC is the reset context."
+300 print "PC = "; ~a%
+310 print "SP = "; ~b%
+320 print "XPSR = "; ~c%
+330 print "VTOR = "; ~d%
+340 end 

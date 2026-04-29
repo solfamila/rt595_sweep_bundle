@@ -1,0 +1,21 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023-2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10  p% = probefirstfound
+
+100 REM Reset script to run the boot rom at Reset
+110 cmresetvectorcatchset this
+112 x% = wiregetspeed p%
+114 wiresetspeed p% 1000
+120 cmsysresetreq this
+122 wiresetspeed p% x%
+130 print "Halt on reset vector catch"
+140 cmresetvectorcatchclear this
+150 cmwatchset this 0 4
+160 cmrun this
+170 print "Halt on watchpoint read of vector table"
+180 cmwatchclear this 0
+190 end

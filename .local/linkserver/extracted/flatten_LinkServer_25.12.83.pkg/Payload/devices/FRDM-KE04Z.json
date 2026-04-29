@@ -1,0 +1,41 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KE04Z",
+      "device": {
+        "id": "MKE04Z8xxx4",
+        "name": "MKE04Z4",
+        "family": "KE0x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00002000",
+            "type": "Flash",
+            "flash-driver": "FTMRE_KE04_Tiny.cfx"
+          },
+          {
+            "location": "0x1fffff00",
+            "size": "0x00000400",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "ke0xconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

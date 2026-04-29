@@ -1,0 +1,214 @@
+1 REM ======================================
+2 REM Copyright 2022-2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM RT1180_reset.scp
+170  REM =======================================================================
+180  PRINT "RT1180 Reset Script"
+190  REM =======================================================================
+
+200  REM When a reset script is used, it overrides any other reset configuration in the IDE.
+210  REM Therefore, it needs to handle the most common scenarios:
+220  REM  - used post flash programming (in this case it performs a system reset)
+230  REM  - used for RAM-based application (in this case it performs a soft reset)
+
+240  REM The script is given some useful information like the current context SP (b%), PC (a%),
+250  REM PSR (c%) and VTOR or image address in case of RAM applications (d%) and it passes back
+260  REM updated reset context to the debugger
+270  REM The vector table address is assumed 0x30003000/0x60003000 for NOR flash images
+
+280  p% = ProbeFirstFound
+
+310  REM If VTOR is in flash (0x38000000/0x28000000) or bootROM (0x10000000) ranges do a system reset
+320  IF (d% & 0xEFFF0000 == 0x28000000) || (d% & 0xFFFF0000 == 0x10000000) Then GOTO 440
+
+370  REM RAM-based application - perform a SOFT reset
+380  PRINT "SOFT Reset (RAM)"
+390  b% = Peek32 This d%
+400  a% = Peek32 This (d% + 4)
+410  c% = 0x01000000
+420  PRINT "Vector table SP/PC is the current context"
+430  GOTO  1050
+
+435  REM Flash application - perform SYSTEM reset
+440  PRINT "SYSTEM Reset"
+
+445  SelectProbeCore p% 3
+450  CMInitApDp this
+
+460  REM Unmask CM33 reset and request reset with vector catch
+470  Poke32 this 0x54460018 0x00003ebf
+480  CMResetVectorCatchSet this
+490  CMSysResetReq this
+500  CMResetVectorCatchClear this
+
+510  PRINT "********** Initialize CM33 ************"
+
+520  REM PRINT "**** Invalidate and disable XCACHEs ****"
+530  Poke32 this 0x44400000 0x85000000
+540  Poke32 this 0x44400800 0x85000000
+
+550  REM PRINT "*********** Init CM33 TCMs *************"
+
+560  CMHalt this
+570  j% = CMReadReg this 15
+
+580  w% = 0x1ffe0000
+590  s% = w% + 0x8
+600  l% = 0x40000 - 0x8
+610  f% = 0
+620  GOSUB 3000
+
+630  REM PRINT "*********** Clear CM33 NVICs *************"
+640  l% = 0x40
+650  s% = 0xe000e180
+660  f% = 0xffffffff
+670  GOSUB 3000
+680  s% = 0xe000e280
+690  GOSUB 3000
+
+700  REM Clear scratch area
+710  Poke32 this (w% + 0x0) 0x00000000
+720  Poke32 this (w% + 0x4) 0x00000000
+730  CMwriteReg this 15 j%
+
+800  PRINT "************* Enable CM7  **************"
+810  GOSUB 2000
+
+820  PRINT "************ Init CM7 TCMs *************"
+
+830  CmHalt this
+840  j% = CmReadReg this 15
+
+850  REM Set workspace after the landing zone
+860  w% = 0x20000010
+870  s% = 0x00000000
+880  l% = 0x40000
+890  f% = 0
+900  GOSUB 3000
+
+910  s% = 0x20000020
+920  l% = 0x40000 - 0x20
+930  GOSUB 3000
+
+940  Poke32 this (w% + 0x0) 0x00000000
+950  Poke32 this (w% + 0x0) 0x00000000
+
+960  REM Disable CM7 caches
+970  Poke32 this 0xe000ed14 0x00000000
+
+980  SelectProbeCore p% 3
+
+1000 PRINT "Vector table SP/PC is the reset context"
+1010 a% = CMReadReg This 15
+1020 b% = CMReadReg This 13
+1030 c% = CmReadReg This 16
+1040 d% = Peek32 This 0xe000ed08
+
+1050 PRINT "PC = "; ~a%
+1060 PRINT "SP = "; ~b%
+1070 PRINT "XPSR = "; ~c%
+1080 PRINT "VTOR = "; ~d%
+
+1999 END
+
+
+2000 REM ==================== SUB: Enable CM7  ====================================
+2010 REM PRINT "************ Prepare Clock *************"
+2020 Poke32 this 0x54484310 0x007901F2
+2030 Poke32 this 0x54484320 0x40000014
+2040 Poke32 this 0x54450080 0x00000000
+2050 Wait 50
+2060 Poke32 this 0x54484680 0x00000105
+2070 Wait 50
+2080 Poke32 this 0x54484710 0x00000070
+2090 Poke32 this 0x54484000 0x400020a6
+2100 Wait 50
+2110 Poke32 this 0x54484000 0x000060a6
+
+2120 REM DCDC_SetVDD1P0BuckModeTargetVoltage(DCDC, kDCDC_1P0Target1P1V);
+2130 Poke32 this 0x5452000C 0x00980000
+2140 Poke32 this 0x54520024 0x00100C14
+
+2150 REM M7 Clk
+2160 Poke32 this 0x54450000 0x00000201
+
+2170 REM VTOR 0x00, WAIT
+2180 Poke32 this 0x544F0080 0x00000010
+
+2190 REM Release CM7
+2200 Poke32 this 0x54460010 0x00000001
+
+2210 REM PRINT "************ Init CM7 TCMs *************"
+
+2220 w% = 0x1ffe0000
+2230 f% = 0x00000000
+2240 l% = 0x80000
+2250 s% = 0x303c0000
+
+2260 REM Using M33 core to initialize M7's TCMs - try to preserve core state
+2270 g% = CMReadReg this 0
+2280 h% = CMReadReg this 1
+2290 i% = CMReadReg this 2
+2300 j% = CMReadReg this 15
+2310 m% = Peek32 this (w% + 0x0)
+2320 n% = Peek32 this (w% + 0x4)
+
+2330 GOSUB 3000
+
+2340 REM Restore registers and scratch area
+2350 Poke32 this (w% + 0x0) m%
+2360 Poke32 this (w% + 0x4) n%
+2370 CMwriteReg this 0 g%
+2380 CMwriteReg this 1 h%
+2390 CMwriteReg this 2 i%
+2400 CMwriteReg this 15 j%
+
+2410 REM PRINT "******** Creating Landing Zone *********"
+2420 Poke32 this 0x303c0000 0x20000000
+2430 Poke32 this 0x303c0004 0x00000009
+2440 Poke32 this 0x303c0008 0xe7fee7fe
+
+2450 REM PRINT "******** EdgeLock APC Request **********"
+2460 Poke32 this 0x57520200 0x17d20106
+2470 r% = Peek32 this 0x57520280
+2480 PRINT "Resp1 : "; ~r%
+2490 r% = Peek32 this 0x57520284
+2500 PRINT "Resp2 : "; ~r%
+2510 PRINT "************* Kickoff CM7 **************"
+2520 Poke32 this 0x544F0080 0x00000000
+
+2530 APList p%
+2540 SelectProbeCore p% 2
+2550 CMInitApDp this
+
+2560 RETURN
+
+
+3000 REM ==================== SUB: Fill memory area  ====================================
+3010 REM Fills a memory area by executing code on CM core using an 8 byte scratch area
+3020 REM Expects s% = start addres, l% = length, f% = fill value, w% = scratch area
+3030 REM (clobbers PC, R0-R3 and scratch area)
+3040 PRINT "New Filling "; ~s%; " + "; ~l%; " with "; ~f%
+3050 REM   0x00:  c00c    loop1: stmia r0!, {r2-r3}
+3060 REM   0x04:  4288           cmp r0, r1
+3070 REM   0x08:  d3fc           bcc.n   loop
+3080 REM   0x0c:  e7fe    loop2: b loop2
+3090 Poke32 this (w% + 0x0) 0x4288c00c
+3100 Poke32 this (w% + 0x4) 0xe7fed3fc
+3110 CMWriteReg this 0 (s%)
+3120 CMWriteReg this 1 (s% + l%)
+3130 CMWriteReg this 2 f%
+3140 CMWriteReg this 3 f%
+3150 CMWriteReg this 15 w%
+3160 CMRun this
+3170 Wait 100
+3180 CMHalt this
+3190 REM u% = CMReadReg this 0
+3200 REM v% = CMReadReg this 15
+3210 REM IF u% == (s% + l%) && v% == (w% + 0x06) THEN GOTO 3230
+3220 REM PRINT "Error: Initialization not finished!"
+3230 RETURN

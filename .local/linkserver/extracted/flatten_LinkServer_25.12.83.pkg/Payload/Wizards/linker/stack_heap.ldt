@@ -1,0 +1,4 @@
+<#if HEAP_STACK_STYLE?? && HEAP_STACK_STYLE == "lpc">
+    <#include "heap.ldt">
+    <#include "stack.ldt">
+</#if>

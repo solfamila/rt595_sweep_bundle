@@ -1,0 +1,2 @@
+
+    PROVIDE(${heap_symbol} = DEFINED(__user_heap_base) ? __user_heap_base : .);

@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "TWR-K60D100M",
+      "device": {
+        "id": "MK60DN512xxx10",
+        "name": "MK60D10",
+        "family": "K6x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "FTFL_2K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1fff0000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00001000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

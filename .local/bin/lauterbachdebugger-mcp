@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+BUNDLE_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
+VENV_DIR="$BUNDLE_ROOT/.local/lauterbach-mcp-venv"
+SITE_PACKAGES="$VENV_DIR/lib/python3.14/site-packages"
+CACHE_DIR="$BUNDLE_ROOT/.local/lauterbach-mcp-cache"
+
+detect_python() {
+  if [[ -x "$VENV_DIR/bin/python" ]]; then
+    printf '%s\n' "$VENV_DIR/bin/python"
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    command -v python3
+    return 0
+  fi
+
+  if command -v python >/dev/null 2>&1; then
+    command -v python
+    return 0
+  fi
+
+  echo "python interpreter not found for lauterbachdebugger-mcp" >&2
+  return 1
+}
+
+detect_t32sys() {
+  if [[ -n "${T32SYS:-}" ]]; then
+    printf '%s\n' "$T32SYS"
+    return 0
+  fi
+
+  if [[ -d "$HOME/t32/files" ]]; then
+    printf '%s\n' "$HOME/t32/files"
+    return 0
+  fi
+
+  if [[ -d "$HOME/t32" ]]; then
+    printf '%s\n' "$HOME/t32"
+    return 0
+  fi
+
+  if [[ -d "/Users/foxy/Downloads/t32/files" ]]; then
+    printf '%s\n' "/Users/foxy/Downloads/t32/files"
+    return 0
+  fi
+
+  return 1
+}
+
+PYTHON_BIN=$(detect_python)
+mkdir -p "$CACHE_DIR"
+
+export PYTHONPATH="$SITE_PACKAGES${PYTHONPATH:+:$PYTHONPATH}"
+export T32_HOST="${T32_HOST:-localhost}"
+export T32_PORT="${T32_PORT:-20000}"
+export T32_PROTOCOL="${T32_PROTOCOL:-TCP}"
+export T32_CACHE_DIR="${T32_CACHE_DIR:-$CACHE_DIR}"
+
+if detected_t32sys=$(detect_t32sys); then
+  export T32SYS="$detected_t32sys"
+fi
+
+exec "$PYTHON_BIN" -m lauterbachdebugger_mcp "$@"

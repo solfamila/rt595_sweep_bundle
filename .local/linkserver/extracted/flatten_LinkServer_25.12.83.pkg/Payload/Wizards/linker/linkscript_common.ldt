@@ -1,0 +1,36 @@
+<#include "header.ldt" >
+
+<#include "includes.ldt">
+
+ENTRY(${start_symbol})
+
+SECTIONS
+{
+<#include "section_top.ldt" >
+<#include "sgstubs_fixed.ldt" >
+<#include "text_section.ldt" >
+<#include "boot_hdr.ldt">
+<#include "main_text_section.ldt" >
+<#include "exdata.ldt" >
+<#include "sgstubs.ldt" >
+<#include "end_text.ldt" >
+<#include "usb_ram_section.ldt" >
+<#include "stack_heap_sdk_start.ldt" >
+<#include "data_section.ldt" >
+    /* MAIN DATA SECTION */
+<#include "mtb_default_section.ldt" >
+<#include "uninit_reserved_section.ldt" >
+<#include "main_data_section.ldt" >
+<#include "ecrp.ldt" >
+<#include "bss_section.ldt" >
+<#include "main_bss_section.ldt" >
+<#include "noinit_section.ldt" >
+<#include "noinit_noload_section.ldt" >
+<#include "stack_heap_sdk_postdata.ldt" >
+<#include "stack_heap_sdk_end.ldt" >
+<#include "stack_heap.ldt" >
+<#include "checksum.ldt" >
+<#include "image_size.ldt" >
+<#include "symbols.ldt" >
+<#include "section_tail.ldt" >
+}

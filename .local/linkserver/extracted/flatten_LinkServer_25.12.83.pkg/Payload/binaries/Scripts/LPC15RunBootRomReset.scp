@@ -1,0 +1,20 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM Reset script to run the boot rom at Reset
+110 cmresetvectorcatchset this
+120 cmsysresetreq this
+130 print "Halt on reset vector catch"
+140 cmresetvectorcatchclear this
+150 cmwatchset this 0 4
+160 cmrun this
+170 cmwatchset this 0 0x40074380
+180 cmrun this
+190 print "Halt on watchpoint write of ROMWSCTRL register"
+200 cmwatchclear this 0
+210 poke32 this 0x40074380 1
+220 end
+

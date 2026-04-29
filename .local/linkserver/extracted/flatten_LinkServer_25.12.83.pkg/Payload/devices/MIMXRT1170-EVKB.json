@@ -1,0 +1,113 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "MIMXRT1170-EVKB",
+      "device": {
+        "id": "MIMXRT1176xxxxx",
+        "name": "MIMXRT1176",
+        "family": "MIMXRT1170",
+        "memory": [
+          {
+            "location": "0x20240000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x202c0000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20340000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20350000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20360000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20380000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20200000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00080000",
+            "type": "RAM",
+            "core-name": "cm7"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "RAM",
+            "core-name": "cm7"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm4"
+          },
+          {
+            "location": "0x1ffe0000",
+            "size": "0x00020000",
+            "type": "RAM",
+            "core-name": "cm4"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x04000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT1170_SFDP_QSPI.cfx",
+            "core-name": "cm7"
+          },
+          {
+            "location": "0x08000000",
+            "size": "0x04000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT1170_SFDP_QSPI.cfx",
+            "core-name": "cm4"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7",
+            "primary": true
+          },
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "RT1170_connect_M7_wake_M4.scp",
+        "reset-script": "RT1170_reset.scp",
+        "core-options": {
+          "cm4": {
+            "cachelib": "libahb_lmem.so"
+          }
+        }
+      }
+    }
+  ]
+}

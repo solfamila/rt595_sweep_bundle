@@ -1,0 +1,43 @@
+1 REM ======================================
+2 REM Copyright 2020-2021, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+ 10  REM a% = 1
+ 20  ProbeOpenByIndex a%
+ 30  WireTimedReset a% 50
+ 40  WireSWDConnect a%
+ 50  APList a%
+100  REM -----------------------------------
+110  REM Prepare the session. This is useful for A1 silicon,
+115  REM to avoid debug session start-up issues in some special cases
+120  REM (such as a TrustZone app running at 150MHz).
+130  SelectProbeCore a% 0
+150  GOSUB 500
+160  REM -----------------------------------
+170  REM Debug Mailbox AP Index is 2
+180  REM -----------------------------------
+190  SelectProbeCore a% 2
+200  REM -----------------------------------
+210  REM DEBUG_SESSION_REQ: 7
+220  REM -----------------------------------
+230  r% = 7
+240  REM -----------------------------------
+250  PRINT "Issuing Debug Session Request... ";r%
+260  PRINT "";
+270  DebugMailboxReq this r%
+280  CoreList a%
+290  SelectProbeCore a% 0
+300  CMInitApDp this
+310  GOSUB 500
+400  REM ProbeCloseByIndex a%
+410  END
+
+500  REM -----------------------------------
+510  PRINT "Reset PMC LDO (PMC.LDOPMU,DCDC0,LDOCORE0)"
+520  poke32 this 0x5002001c 0x0109CF18
+530  poke32 this 0x50020010 0x010A767E
+540  poke32 this 0x50020024 0x2801006B
+550  RETURN
+560  REM -----------------------------------

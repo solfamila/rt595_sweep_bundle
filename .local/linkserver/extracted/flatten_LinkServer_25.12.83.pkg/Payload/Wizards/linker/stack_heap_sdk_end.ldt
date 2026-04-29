@@ -1,0 +1,34 @@
+<#if HEAP_STACK_STYLE?? && HEAP_STACK_STYLE == "sdk">
+    <#if HEAP_LOCATION == "End">
+
+    _HeapSize = ${HEAP_SIZE};
+    /* Reserve space in memory for Heap */
+    .heapfill (NOLOAD) :
+    {
+        . += _HeapSize;
+    } > ${HEAP_REGION}
+    /* Locate actual Heap in memory map */
+    .heap ORIGIN(${HEAP_REGION}) + LENGTH(${HEAP_REGION}) - _HeapSize (NOLOAD) :  ALIGN(${bss_align})
+    {
+        ${heap_symbol} = .;
+        . = ALIGN(${bss_align});
+        _pvHeapLimit = . + _HeapSize;
+    } > ${HEAP_REGION}
+    </#if>
+    <#if STACK_LOCATION == "End">
+
+     _StackSize = ${STACK_SIZE};
+     /* Reserve space in memory for Stack */
+    .heap2stackfill (NOLOAD) :
+    {
+        . += _StackSize;
+    } > ${STACK_REGION}
+    /* Locate actual Stack in memory map */
+    .stack ORIGIN(${STACK_REGION}) + LENGTH(${STACK_REGION}) - _StackSize - ${STACK_OFFSET} (NOLOAD) :  ALIGN(${bss_align})
+    {
+        _vStackBase = .;
+        . = ALIGN(${bss_align});
+        _vStackTop = . + _StackSize;
+    } > ${STACK_REGION}
+    </#if>
+</#if>

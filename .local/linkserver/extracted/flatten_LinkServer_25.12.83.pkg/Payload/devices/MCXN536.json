@@ -1,0 +1,90 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXN536",
+        "name": "MCXN536",
+        "family": "MCXN5XX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx_S.cfx"
+          },
+          {
+            "location": "0x00080000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx.cfx"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x400ba000",
+            "size": "0x00001000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x500BA000",
+            "size": "0x00001000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33_core0",
+            "primary": true
+          },
+          {
+            "type": "cm33_nodsp",
+            "name": "cm33_core1"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "romstalldelay": 600,
+        "preconnect-script": "LS_preconnect_MCXN5XX.scp"
+      }
+    }
+  ]
+}

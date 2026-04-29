@@ -1,0 +1,74 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KV11Z",
+      "device": {
+        "id": "MKV11Z128xxx7",
+        "name": "MKV11Z128",
+        "family": "KV1x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "FTFA_2K.cfx"
+          },
+          {
+            "location": "0x1ffff000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    },
+    {
+      "board": "FRDM-KV11Z",
+      "device": {
+        "id": "MKV11Z64xxx7",
+        "name": "MKV11Z64",
+        "family": "KV1x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00010000",
+            "type": "Flash",
+            "flash-driver": "FTFA_2K.cfx"
+          },
+          {
+            "location": "0x1ffff000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

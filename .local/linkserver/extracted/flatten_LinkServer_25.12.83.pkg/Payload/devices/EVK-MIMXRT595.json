@@ -1,0 +1,94 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "EVK-MIMXRT595",
+      "device": {
+        "id": "MIMXRT595S",
+        "name": "MIMXRT595S",
+        "family": "MIMXRT500",
+        "memory": [
+          {
+            "location": "0x00280000",
+            "size": "0x00280000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00020000",
+            "size": "0x00060000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00080000",
+            "size": "0x00200000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40140000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x08000000",
+            "size": "0x00800000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT500_SFDP_MXIC_OSPI.cfx"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x00800000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT500_SFDP_MXIC_OSPI_S.cfx"
+          },
+          {
+            "location": "0x10280000",
+            "size": "0x00280000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10020000",
+            "size": "0x00060000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x00200000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x50140000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33",
+            "primary": true
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50002034",
+        "connect-script": "RT500_connect.scp",
+        "preconnect-script": "LS_preconnect_MIMXRT500.scp"
+      }
+    }
+  ]
+}

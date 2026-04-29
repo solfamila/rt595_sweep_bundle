@@ -1,0 +1,64 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXW716AxxxA",
+        "name": "MCXW716A",
+        "family": "MCXW7XX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXW71X.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXW71X_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "MCXW71X_connect.scp",
+        "bootromstall": "0xE000ED08",
+        "apindex-limit": 2,
+        "preconnect-script": "LS_preconnect_MCXW7XX.scp"
+      }
+    }
+  ]
+}

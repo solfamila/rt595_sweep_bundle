@@ -1,0 +1,31 @@
+<#-- List the variables. Designed to be used *inside* a comment block -->
+<#-- typically this is included by the header when the "listvars" variable is defined and set to true -->
+<#if listvars?has_content && listvars==true>
+ *
+ * List of predefined variables and values:
+ <#list .data_model?keys?sort as key>
+ 	<#if .vars[key]??>
+      <#if .vars[key]?is_hash_ex>
+ *   ${key} (hash)
+      <#elseif .vars[key]?is_sequence>
+ *   ${key}[]
+        <#list .vars[key] as valueValue>
+ *       ${key}[${valueValue_index}] = ${valueValue}
+        </#list>
+      <#elseif .vars[key]?is_boolean>
+ *   ${key} = ${.vars[key]?c}
+      <#else>
+ *   ${key} = ${.vars[key]}
+      </#if>
+	</#if>
+</#list>
+</#if>
+<#if listvarsext?has_content && listvarsext==true>
+ * Extended variables:
+  <#list environment?keys as key>
+ *   environment.${key} = ${environment[key]}
+  </#list>
+  <#list systemProperties?keys as key>
+ *   systemProperties.${key} = ${systemProperties[key]}
+  </#list>
+</#if>

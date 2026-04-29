@@ -1,0 +1,72 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.1",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXE315",
+        "name": "MCXE315",
+        "family": "MCXE31x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00008000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00400000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXE31x.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00010000",
+            "type": "Flash",
+            "flash-driver": "MCXE31x_D.cfx"
+          },
+          {
+            "location": "0x11000000",
+            "size": "0x00008000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20400000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x21000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7",
+            "index": "4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "apindex-limit": 5,
+        "no-packed": true,
+        "dapstride": "short",
+        "preattach-script": "LS_preattach_MCXE31x.scp",
+        "connect-script": "MCXE31x_connect.scp",
+        "reset-script": "MCXE31x_reset.scp"
+      }
+    }
+  ]
+}

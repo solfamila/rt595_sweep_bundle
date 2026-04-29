@@ -1,0 +1,14 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 print "QN9090 flash connect script"
+11 cminitapdp this
+12 REM cmbreakset this 0x0300071C
+13 REM cmsysresetreq this
+14 REM cmbreakclear this 0x0300071C
+100 poke32 this 0x40000000 0x0
+400 print "Done"
+440 end 

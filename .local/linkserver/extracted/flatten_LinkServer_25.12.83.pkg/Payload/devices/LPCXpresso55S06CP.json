@@ -1,0 +1,71 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "LPCXpresso55S06CP",
+      "device": {
+        "id": "LPC5506CPXXXX",
+        "name": "LPC5506CPXXXX",
+        "family": "LPC550xCPXXXX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x0003d800",
+            "type": "Flash",
+            "flash-driver": "LPC550x.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x0003d800",
+            "type": "Flash",
+            "flash-driver": "LPC550x_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20010000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30010000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040"
+      }
+    }
+  ]
+}

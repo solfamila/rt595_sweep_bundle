@@ -1,0 +1,18 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 REM Connect script to run the boot rom at start of debug
+20 p% = probefirstfound
+30 wireswdconnect p%
+40 selectprobecore p% 0
+50 cminitapdp this
+60 REM Clear reset vector catch
+70 cmresetvectorcatchclear this
+80 REM Select reset type
+90 REM cmsysresetreq this
+100 cmvectresetreq this
+110 end
+

@@ -1,0 +1,56 @@
+<!--
+Scripts that appear in the RedlinkServer Console "Scripts" pulldown.
+To define a single line script, create a script simple entry:
+<script name="name"
+        params="CommaSeparatedCamelCase"
+	value="script"
+/>
+
+For multi-line scripts, use following syntax:
+<script name="name"
+	params="CommaSeparatedCamelCase">
+  <value>line 1</value>
+  <value>line 2</value>
+  <value>line with parameter ${CommaSeparatedCamelCase}</value>
+</script>
+
+If parameters are required, they are displayed in a simple dialog with a text
+field for each parameter. The parameter is referenced in the script as
+${ParamName}
+
+Within the dialog (only) CamelCase parameter names are split into separate 
+words for readability. So "CamelCaseWord" will be displayed as "Camel Case Word"
+
+Separators can be defined by providing an empty script
+<script />
+-->
+<RedlinkScripts>
+	<script name="List probes" value="ProbeList" />
+	<script name="List cores" params="ProbeIndex">
+		<value>CoreList ${ProbeIndex}</value>
+	</script>
+	<script />
+	<script name="Set wire speed" params="ProbeIndex, SpeedInHz">
+		<value>WireSetSpeed ${ProbeIndex} ${SpeedInHz}</value>
+	</script>
+	<script name="Get wire speed" params="ProbeIndex">
+		<value>WireGetSpeed ${ProbeIndex}</value>
+	</script>
+	<script />
+	<script name="Set idle cycles" params="ProbeIndex, IdleCyclesBetweenDebugTransactions">
+		<value>WireSetIdleCycles ${ProbeIndex} ${IdleCyclesBetweenDebugTransactions}</value>
+	</script>
+	<script name="Get idle cycles" params="ProbeIndex">
+		<value>WireGetIdleCycles ${ProbeIndex}</value>
+	</script>
+	<script />
+	<script name="Pull reset (timed)" params="ProbeIndex, TimeInMiliseconds">
+		<value>WireTimedReset ${ProbeIndex} ${TimeInMiliseconds}</value>
+	</script>
+	<script name="Hold reset" params="ProbeIndex, StateOfReset">
+		<value>WireHoldReset ${ProbeIndex} ${StateOfReset}</value>
+	</script>
+	<script />
+	<script name="Start the server" builtin="start" />
+	<script name="Stop the server" builtin="stop" />
+</RedlinkScripts>

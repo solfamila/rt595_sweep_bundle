@@ -1,0 +1,70 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MIMXRT633S",
+        "name": "MIMXRT633S",
+        "family": "MIMXRT600",
+        "memory": [
+          {
+            "location": "0x00080000",
+            "size": "0x00180000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00020000",
+            "size": "0x00060000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40140000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10080000",
+            "size": "0x00180000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10020000",
+            "size": "0x00060000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x50140000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50002034",
+        "preconnect-script": "LS_preconnect_MIMXRT600.scp"
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "LPCXpresso54102",
+      "device": {
+        "id": "LPC54102J512",
+        "name": "LPC54102",
+        "family": "LPC5410x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "LPC5410x_512K.cfx"
+          },
+          {
+            "location": "0x02000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x02010000",
+            "size": "0x00008000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x03400000",
+            "size": "0x00002000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4",
+            "primary": true
+          },
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true
+      }
+    }
+  ]
+}

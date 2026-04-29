@@ -1,0 +1,86 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "MIMXRT700-EVK",
+      "device": {
+        "id": "MIMXRT798S",
+        "name": "MIMXRT798S",
+        "family": "MIMXRT700",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00780000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00780000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00780000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00780000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x28000000",
+            "size": "0x4000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT700_XSPI0_Octal.cfx"
+          },
+          {
+            "location": "0x38000000",
+            "size": "0x4000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT700_XSPI0_Octal_S.cfx"
+          },
+          {
+            "location": "0x08000000",
+            "size": "0x4000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT700_XSPI1_Octal.cfx"
+          },
+          {
+            "location": "0x18000000",
+            "size": "0x4000000",
+            "type": "ExtFlash",
+            "flash-driver": "MIMXRT700_XSPI1_Octal_S.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33_core0",
+            "primary": true
+          },
+          {
+            "type": "cm33",
+            "name": "cm33_core1"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50002094",
+        "preconnect-script": "LS_preconnect_MIMXRT700.scp",
+        "connect-script": "RT700_connect.scp",
+        "reset-script": "RT700_reset.scp",
+        "core-options": {
+          "cm33_core0": {
+            "cachelib": "libahb_xcache.so"
+          }
+        }
+      }
+    }
+  ]
+}

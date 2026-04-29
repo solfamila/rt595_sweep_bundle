@@ -1,0 +1,12 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM Connect script to Reset/Boot to ISP.
+110 print "Reset to ISP"
+120 p% = probefirstfound
+130 selectprobecore p% 0
+140 wireispreset this
+150 end

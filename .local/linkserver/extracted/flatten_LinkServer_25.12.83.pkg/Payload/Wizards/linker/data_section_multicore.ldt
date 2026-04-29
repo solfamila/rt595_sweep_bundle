@@ -1,0 +1,45 @@
+<#list slaves as slave>
+<#if ((slave.linkSection == memory.name) || (slave.linkSection == memory.alias))>
+    .data_${memory.alias}${slave.textSectionNormalized}_text : 
+    {
+       FILL(0xff)
+       PROVIDE(__start_data_${memory.alias} = .) ;
+<#assign provide_required=false>
+       _${slave.textSectionNormalized}_START__ = .; /* start of slave image */
+       KEEP(*(${slave.textSection}))
+    } > ${memory.name} AT>${CODE}
+
+    /* ${slave.name} extab and exidx sections */
+    .data_${memory.alias}${slave.textSectionNormalized}_ARM_extab :
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.ARM.extab))
+    } > ${memory.name} AT>${CODE} 
+
+    .data_${memory.alias}${slave.textSectionNormalized}_ARM_exidx :
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.ARM.exidx))
+    } > ${memory.name} AT>${CODE} 
+
+    /* ${slave.name} data section */
+    .data_${memory.alias}${slave.textSectionNormalized}_data :
+    {
+        FILL(0xff)
+        KEEP(*(${slave.textSection}.data_*)) KEEP(*(${slave.textSection}.data))
+        _${slave.textSectionNormalized}_END__ = .; /* end of slave image */
+
+        /* perform some simple sanity checks */
+<#assign DATA_MC_CHECKS_FILE = "data_section_multicore_checks_${chipFamily}.ldt">
+<#assign optTemp = .get_optional_template(DATA_MC_CHECKS_FILE)>
+<#if optTemp.exists>
+        <#-- file found -->
+        <@optTemp.include />
+<#else>
+        <#-- file not found -->
+        ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+        ASSERT( (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}), "${slave.name} execute address differs from address provided in source image");
+</#if>
+    } > ${memory.name} AT>${CODE} 
+</#if>
+</#list>

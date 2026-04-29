@@ -1,0 +1,6 @@
+<#-- Allow placement of optional header before main code section -->
+<#-- Generally used to add an XIP header for parts with external flash -->
+<#if (MemUtils.isFlash(CODE) == true) >
+<#assign BOOT_HDR_FILE = "boot_hdr_${chipFamily}.ldt">
+<#include BOOT_HDR_FILE ignore_missing=true>
+</#if>

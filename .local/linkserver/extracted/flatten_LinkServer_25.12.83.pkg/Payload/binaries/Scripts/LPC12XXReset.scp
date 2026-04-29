@@ -1,0 +1,32 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 rem ---------------------------------
+20 print "LPC12XX Reset Script"
+30 rem ---------------------------------
+40 rem probelist
+50 p% = probefirstfound
+60 rem probeopenbyindex p%
+70 rem wireswdconnect p%
+80 selectprobecore p% 0
+90 cminitapdp this
+100 cmhalt this
+110 cmwatchset this 0 0x40048000 W
+120 cmresetvectorcatchclear this
+130 cmsysresetreq this
+140 qpoke32 this 0x40004000 0x00
+150 qpoke32 this 0x40004008 0xAA
+160 qpoke32 this 0x40004008 0x55
+170 qstarttransfers this 0
+180 rem ---------------------------------
+190 rem Watchdog MOD Register
+200 rem ---------------------------------
+210 rem m% = peek32 this 0x40004000
+220 rem print "MOD = "; ~m%
+230 cmwatchclear this 0
+240 cmresetvectorcatchset this
+250 rem ---------------------------------
+260 end

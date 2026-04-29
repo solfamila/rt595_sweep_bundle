@@ -1,0 +1,67 @@
+1 REM ======================================
+2 REM Copyright 2020-2021, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM a% = 1
+110  ProbeOpenByIndex a%
+120  WireTimedReset a% 50
+130  WireSWDConnect a%
+140  APList a%
+150  REM ----------------------------------------------------------------------
+160  REM Debug Mailbox AP Index is 2
+170  REM ----------------------------------------------------------------------
+180  SelectProbeCore a% 2
+190  REM ----------------------------------------------------------------------
+200  REM DEBUG_SESSION_REQ: 7
+210  REM ----------------------------------------------------------------------
+220  r% = 7
+230  REM ----------------------------------------------------------------------
+240  PRINT "Issuing Debug Session Request #1 ... ";r%
+250  PRINT "";
+260  DebugMailboxReq this r%
+270  REM ----------------------------------------------------------------------
+280  REM Issue second request in case first failed
+290  REM ----------------------------------------------------------------------
+300  REM PRINT "Issuing Debug Session Request #2 ... ";r%
+310  REM PRINT "";
+320  REM DebugMailboxReq this r%
+330  REM ----------------------------------------------------------------------
+340  CoreList a%
+350  SelectProbeCore a% 0
+360  REM ----------------------------------------------------------------------
+370  REM Setup FlexSPI Flash reset info for BootROM 
+380  REM WARNING: GPIO PORT and PIN must match the actual board configuration!!
+390  REM ----------------------------------------------------------------------
+400  REM EVK boards have different pins assigned depending on revision
+410  REM  - PIO0_24 for Rev C and earlier
+420  REM  - PIO4_5 for Rev C1
+430  REM Read chip version from SILICONREV_ID to infer board revision:
+440  REM    - chip revisions < B are fitted on boards based using PIO0_24
+450  REM    - chip revisions > B are fitted on boards based using PIO4_5
+460  REM    - chip revision B is a special case as it can be fitted on both
+470  REM      Rev C (PIO0_24) and Rev C1 (PIO4_5) boards. Assume the newer board
+480  REM      design unless specified otherwise in line 510
+490  REM ----------------------------------------------------------------------
+500  REM Uncomment next line to force using PIO0_24 (board Rev C or earlier)
+510  REM GOTO 590
+520  REM Uncomment next line to force using PIO4_5 (board Rev C1 or newer)
+530  REM GOTO 630
+540  REM Otherwise auto-detect
+550  i% = Peek32 this 0x40002064
+560  i% = i% & 0x000F000F
+570  IF i% >= 0x000B0000 THEN GOTO 630
+580  REM ----------------------------------------------------------------------
+590  PRINT "Using PIO0_24 pin for FlexSPI flash reset (board Rev C or earlier)"
+600  v% = 0x00604000
+610  REM ----------------------------------------------------------------------
+620  GOTO 670
+630  REM ----------------------------------------------------------------------
+640  PRINT "Using PIO4_5 pin for FlexSPI flash reset (board Rev C1 or newer)"
+650  v% = 0x00164000
+660  REM ----------------------------------------------------------------------
+670  REM SHADOW_OTP BOOT_CFG[1] = (1 << 14) | (PORT << 15) | (PIN << 18) 
+680  Poke32 this 0x40130184 v%
+690  REM ----------------------------------------------------------------------
+700  REM ProbeCloseByIndex a%

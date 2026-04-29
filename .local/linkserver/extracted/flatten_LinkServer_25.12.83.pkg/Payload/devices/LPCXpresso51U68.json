@@ -1,0 +1,45 @@
+{
+  "copyright": "Copyright 2023-2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "LPCXpresso51U68",
+      "device": {
+        "id": "LPC51U68",
+        "name": "LPC51U68",
+        "family": "LPC51U68",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00040000",
+            "type": "Flash",
+            "flash-driver": "LPC51U6x_256K.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00008000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus",
+            "index": "1"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false
+      }
+    }
+  ]
+}

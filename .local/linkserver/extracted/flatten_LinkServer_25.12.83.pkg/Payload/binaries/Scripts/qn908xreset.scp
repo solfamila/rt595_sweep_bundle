@@ -1,0 +1,44 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM -----------------------------------------------------------------
+110 REM QN908X Reset Script (1 second delay loop)
+120 REM -----------------------------------------------------------------
+130 REM Find probe index and select probe+core
+140 REM -----------------------------------------------------------------
+150 p% = ProbeFirstFound
+160 SelectProbeCore p% 0
+170 REM WireSetSpeed 1 1000000
+180 REM -----------------------------------------------------------------
+190 REM Ensure reset vector catch is set
+200 REM -----------------------------------------------------------------
+210 CMResetVectorCatchSet this
+220 CMHalt this
+230 REM -----------------------------------------------------------------
+240 REM Issue VECTRESET
+250 REM -----------------------------------------------------------------
+260 CMVectResetReq this
+270 WireSWDConnect p%
+280 REM -----------------------------------------------------------------
+290 REM Set initial timer value (10 ms increment)
+300 REM -----------------------------------------------------------------
+310 REM t% = TIME
+320 REM PRINT "Time:    "; t%
+330 REM -----------------------------------------------------------------
+340 REM Current timer value is v%
+350 REM -----------------------------------------------------------------
+360 REM REPEAT
+370 REM   v% = TIME
+380 REM   e% = v% - t%
+390 REM UNTIL e% >= 100
+400 REM -----------------------------------------------------------------
+410 REM Display elapsed time in 10 ms ticks as milliseconds
+420 REM -----------------------------------------------------------------
+430 REM e% = e% * 10
+440 REM PRINT "Elapsed (ms): "; e%
+450 REM -----------------------------------------------------------------
+460 REM CMResetVectorCatchClear this
+470 END

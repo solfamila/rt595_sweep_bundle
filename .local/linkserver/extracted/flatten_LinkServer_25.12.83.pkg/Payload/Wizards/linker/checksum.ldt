@@ -1,0 +1,25 @@
+<#if chipName?upper_case?starts_with("LPC") && procFamily=="Cortex-M">
+  <#if !isSlave>
+
+    /* ## Create checksum value (used in startup) ## */
+    <#if procName?starts_with("Cortex-M0")>
+    PROVIDE(__valid_user_code_checksum = 0 - 
+                                         (_vStackTop 
+                                         + (ResetISR + 1) 
+                                         + (( DEFINED(NMI_Handler) ? NMI_Handler : M0_NMI_Handler ) + 1) 
+                                         + (( DEFINED(HardFault_Handler) ? HardFault_Handler : M0_HardFault_Handler ) + 1) 
+                                         )
+           );
+    <#else>
+    PROVIDE(__valid_user_code_checksum = 0 - 
+                                         (_vStackTop 
+                                         + (ResetISR + 1) 
+                                         + (NMI_Handler + 1) 
+                                         + (HardFault_Handler + 1) 
+                                         + (( DEFINED(MemManage_Handler) ? MemManage_Handler : 0 ) + 1)   /* MemManage_Handler may not be defined */
+                                         + (( DEFINED(BusFault_Handler) ? BusFault_Handler : 0 ) + 1)     /* BusFault_Handler may not be defined */
+                                         + (( DEFINED(UsageFault_Handler) ? UsageFault_Handler : 0 ) + 1) /* UsageFault_Handler may not be defined */
+                                         ) );
+    </#if>
+  </#if>
+</#if>

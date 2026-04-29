@@ -1,0 +1,15 @@
+    /* Provide symbols for MIMXRT1180 parts for boot header generation code
+     * to set image to be plain load image or XIP.
+<#if (PLAIN_LOAD_IMAGE) >
+     * Config : Plain load image = true
+     */
+    _image_loadaddr = ADDR(.text);
+    _boot_loadaddr = ORIGIN(${CODEX});
+    _boot_size = LENGTH(${CODEX});
+<#else>
+     * Config : Plain load image = false
+     */
+     _image_loadaddr = LOADADDR(.text);
+    _boot_loadaddr = ORIGIN(${CODE});
+    _boot_size = LENGTH(${CODE});
+</#if>

@@ -1,0 +1,107 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KE02Z40M",
+      "device": {
+        "id": "MKE02Z16xxx4",
+        "name": "MKE02Z16",
+        "family": "KE0x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00004000",
+            "type": "Flash",
+            "flash-driver": "FTMRH_KE02.cfx"
+          },
+          {
+            "location": "0x1ffffe00",
+            "size": "0x00000800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "ke0xconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    },
+    {
+      "board": "FRDM-KE02Z40M",
+      "device": {
+        "id": "MKE02Z32xxx4",
+        "name": "MKE02Z32",
+        "family": "KE0x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00008000",
+            "type": "Flash",
+            "flash-driver": "FTMRH_KE02.cfx"
+          },
+          {
+            "location": "0x1ffffc00",
+            "size": "0x00001000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "ke0xconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    },
+    {
+      "board": "FRDM-KE02Z40M",
+      "device": {
+        "id": "MKE02Z64xxx4",
+        "name": "MKE02Z64",
+        "family": "KE0x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00010000",
+            "type": "Flash",
+            "flash-driver": "FTMRH_KE02.cfx"
+          },
+          {
+            "location": "0x1ffffc00",
+            "size": "0x00001000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "ke0xconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

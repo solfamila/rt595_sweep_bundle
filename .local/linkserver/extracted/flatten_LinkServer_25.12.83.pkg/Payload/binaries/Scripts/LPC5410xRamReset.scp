@@ -1,0 +1,24 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10  REM LPC5410x Internal RAM (@ 0x02000000) reset script
+20  REM Connect script is passed PC/SP from the vector table in the image by the debugger
+30  REM For the simple use case we pass them back to the debugger with the location of the reset context.
+40  REM
+50  REM Syntax here is that '~' commands a hex output, all integer variables are a% to z%
+70  REM Find the probe index
+80  p% = probefirstfound
+90  REM Set the 'this' probe and core
+100 selectprobecore p% 0
+110 REM NOTE!! Vector table presumed RAM location is address 0x02000000
+120 REM The script passes the SP (%b) and PC (%a) back to the debugger as the reset context.
+130 b% = peek32 this 0x2000000
+140 a% = peek32 this 0x2000004
+150 print "Vector table SP/PC is the reset context."
+160 print "PC = "; ~a%
+170 print "SP = "; ~b%
+180 print "XPSR = "; ~c%
+190 end 

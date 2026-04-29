@@ -1,0 +1,3 @@
+<#-- Create additional, part family specific symbols that are required-->
+<#assign SYMBOLS_FILE = "symbols_${chipFamily}.ldt">
+<#include SYMBOLS_FILE ignore_missing=true>

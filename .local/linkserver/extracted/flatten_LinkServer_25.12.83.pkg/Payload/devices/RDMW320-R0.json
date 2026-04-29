@@ -1,0 +1,50 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "RDMW320-R0",
+      "device": {
+        "id": "device_88MW320_xx_xxxx",
+        "name": "88MW320",
+        "family": "88MW32X",
+        "memory": [
+          {
+            "location": "0x00100000",
+            "size": "0x0005efc0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00020000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x0015efc0",
+            "size": "0x00001040",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1f000000",
+            "size": "0x00090000",
+            "type": "ExtFlash",
+            "flash-driver": "88MW320.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "88mw320_connect.scp"
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+<#if USB_BDT_SIZE ??> <#-- Kinetis section -->
+    /* USB_RAM */
+    .m_usb_data (NOLOAD) :
+    {
+    <#if ((MemUtils.exists('USB_RAM') == true) && (Utils.strToInt(USB_BDT_SIZE) gt 0)) || ((MemUtils.exists('USB_RAM') == false) && (MemUtils.exists('USBROM_RAM') == false)) >
+        *(m_usb_bdt)
+        <#if (MemUtils.exists('USB_RAM') == true) && ((MemUtils.size('USB_RAM') gt Utils.strToInt(USB_BDT_SIZE))) >
+        *(m_usb_global)
+        </#if>
+    <#else>
+        *(m_usb_global)
+    </#if>
+    <#if (MemUtils.exists('USB_RAM') == true) >
+    } > USB_RAM AT> USB_RAM
+    <#elseif MemUtils.exists('USBROM_RAM') == false || MemUtils.exists('USB_RAM') >
+    } > ${DATA} AT> ${DATA}
+    </#if>
+<#elseif (MemUtils.exists('USB_RAM') == true)> <#-- LPC MCUs - no KHCI controller but USB_RAM defined -->
+    /* USB_RAM */
+    .m_usb_data (NOLOAD) :
+    {
+        *(m_usb_global)
+    } > USB_RAM AT> USB_RAM
+</#if>

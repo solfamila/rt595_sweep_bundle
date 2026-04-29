@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- source id = (adcMode << 1) | analogMuxSelect 
+	adcMode = 00 - IN1
+			  01 - IN2
+			  10 - IN1 and IN2
+-->
+<circuits>
+	<circuit name="LPCXpresso546x8/540xx/54S0xx">
+		<targetResistors>
+			<resistor>2.0</resistor>
+			<resistor>1.0</resistor>
+		</targetResistors>
+		<shieldResistor>10.0</shieldResistor>
+		<voltageGain>25</voltageGain>
+		<vRef>3.3</vRef>
+		<bitLevelADC>4096</bitLevelADC>
+		<sources>
+			<source>
+				<id>2</id>
+				<name>Target voltage</name>
+				<unit>V</unit>
+			</source>
+			<source>
+				<id>1</id>
+				<name>Target current</name>
+				<unit>A</unit>
+			</source>
+			<source>
+				<id>0</id>
+				<name>Shield current</name>
+				<unit>A</unit>
+			</source>
+		</sources>
+	</circuit>
+	<circuit name="LPCXpresso54102">
+		<targetResistors>
+			<resistor>8.2</resistor>
+		</targetResistors>
+		<shieldResistor>10.0</shieldResistor>
+		<voltageGain>25</voltageGain>
+		<vRef>3.3</vRef>
+		<bitLevelADC>4096</bitLevelADC>
+		<sources>
+			<source>
+				<id>2</id>
+				<name>Target voltage</name>
+				<unit>V</unit>
+			</source>
+			<source>
+				<id>1</id>
+				<name>Target current</name>
+				<unit>A</unit>
+			</source>
+			<source>
+				<id>0</id>
+				<name>Shield current</name>
+				<unit>A</unit>
+			</source>
+		</sources>
+	</circuit>
+	<circuit name="LPCXpresso51U68/54114">
+		<targetResistors>
+			<resistor>4.12</resistor>
+			<resistor>8.24</resistor>
+		</targetResistors>
+		<shieldResistor>10.0</shieldResistor>
+		<voltageGain>25</voltageGain>
+		<vRef>3.3</vRef>
+		<bitLevelADC>4096</bitLevelADC>
+		<sources>
+			<source>
+				<id>3</id>
+				<name>Target voltage</name>
+				<unit>V</unit>
+			</source>
+			<source>
+				<id>1</id>
+				<name>Target current</name>
+				<unit>A</unit>
+			</source>
+			<source>
+				<id>2</id>
+				<name>Shield current</name>
+				<unit>A</unit>
+			</source>
+		</sources>
+	</circuit>
+	<circuit name="QN9090-DK006/JN5189-DK006/IOTZTB-DK006">
+		<targetResistors>
+			<resistor>3.3</resistor>
+		</targetResistors>
+		<shieldResistor>10.0</shieldResistor>
+		<voltageGain>25</voltageGain>
+		<vRef>3.3</vRef>
+		<bitLevelADC>4096</bitLevelADC>
+		<sources>
+			<source>
+				<id>3</id>
+				<name>Target voltage</name>
+				<unit>V</unit>
+			</source>
+			<source>
+				<id>1</id>
+				<name>Target current</name>
+				<unit>A</unit>
+			</source>
+			<source>
+				<id>2</id>
+				<name>Shield current</name>
+				<unit>A</unit>
+			</source>
+		</sources>
+	</circuit>
+	<circuit name="QN9080-DK">
+		<targetResistors>
+			<resistor>4.12</resistor>
+			<resistor>8.24</resistor>
+		</targetResistors>
+		<shieldResistor>10.0</shieldResistor>
+		<voltageGain>25</voltageGain>
+		<vRef>3.3</vRef>
+		<bitLevelADC>4096</bitLevelADC>
+		<sources>
+			<source>
+				<id>3</id>
+				<name>Target voltage</name>
+				<unit>V</unit>
+			</source>
+			<source>
+				<id>1</id>
+				<name>Target current</name>
+				<unit>A</unit>
+			</source>
+			<source>
+				<id>2</id>
+				<name>Shield current</name>
+				<unit>A</unit>
+			</source>
+		</sources>
+	</circuit>
+</circuits>

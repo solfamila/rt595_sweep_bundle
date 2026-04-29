@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-KL82Z",
+      "device": {
+        "id": "MKL82Z128xxx7",
+        "name": "MKL82Z7",
+        "family": "KL8x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "FTFA_2K.cfx"
+          },
+          {
+            "location": "0x1fffa000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x40100000",
+            "size": "0x00000800",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

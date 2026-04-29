@@ -1,0 +1,17 @@
+ <#if (tzProjType?? & tzProjType == "secure") >
+ <#if (SG_LOCATION?? & SG_LOCATION == "append")>
+    /* Section for TrustZone Secure Gateway veneers */
+    .gnu.sgstubs : ALIGN (32)
+    {
+        . = ALIGN(32);
+        _start_sg = .;
+        *(.gnu.sgstubs*)
+        . = ALIGN(32);
+        _end_sg = .;
+<#if (PLAIN_LOAD_IMAGE) >
+    } > ${CODEX} AT> ${CODE}
+<#else>
+    } > ${CODE}
+</#if>
+</#if>
+</#if>

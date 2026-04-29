@@ -1,0 +1,9 @@
+<#if (freertos_project??) >
+<#if freertos_project || (force_freertos?? && force_freertos) >
+       KEEP(*freertos*/tasks.o(.rodata*)) /* FreeRTOS Debug Config */
+</#if>
+<#else>
+<#if project?lower_case?contains("freertos") || (force_freertos?? && force_freertos)>
+       KEEP(*/tasks.o(.rodata*))  /* FreeRTOS Debug Config */
+</#if>
+</#if>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2021, 2023 NXP -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	vc:minVersion="1.2">
+	<xs:element name="targets">
+		<xs:annotation>
+			<xs:documentation>Comment describing your root element
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="target" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="target">
+								<xs:attribute name="name" type="xs:string"/>
+								<xs:attribute name="id" type="xs:string" use="required" />
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="target">
+		<xs:sequence>
+			<xs:element name="component" type="component" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:element name="core" type="core" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="component">
+		<xs:attribute name="type" type="xs:string" />
+		<xs:attribute name="address" type="xs:hexBinary"/>
+	</xs:complexType>
+	<xs:complexType name="core">
+		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attribute name="romBaseAddr" type="xs:hexBinary" use="optional"/>
+		<xs:attribute name="index" type="xs:int" use="optional"/>
+		<xs:attribute name="traceClock" type="xs:double" use="optional"/>
+		<xs:attribute name="traceFunnelPorts" use="optional">
+			<xs:simpleType>
+			<!-- traceFunnelPorts: all used ports listed with comma separator (e.g. 0,1,2) -->
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[0-7](,[0-7])*" />
+				</xs:restriction>
+			</xs:simpleType>
+	  	</xs:attribute>
+	</xs:complexType>
+</xs:schema>

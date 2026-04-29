@@ -1,0 +1,17 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 REM Reset script to run the boot rom at Reset
+20 REM Clear reset vector catch (may be already cleared by connect script)
+30 b% = peek32 this 0x00203000
+40 a% = peek32 this 0x00203004
+50 cmbreakset this a%
+60 cmresetvectorcatchclear this
+70 REM Select reset type
+80 cmsysresetreq this
+90 REM cmvectresetreq this
+100 cmbreakclear this a%
+110 end

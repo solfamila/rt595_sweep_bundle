@@ -1,0 +1,9 @@
+<#if mtb_supported?? && mtb_supported >
+    /* Default MTB section */
+    .mtb_buffer_default (NOLOAD) :
+    {
+        KEEP(*(.mtb*))
+    } > ${DATA} AT > ${DATA}
+<#elseif mtbError??>
+    ${mtbError}
+</#if>

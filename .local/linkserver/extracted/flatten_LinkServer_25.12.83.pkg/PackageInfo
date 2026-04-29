@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pkg-info overwrite-permissions="true" relocatable="false" identifier="com.crt.LinkServer_25.12.83.pkg" postinstall-action="none" version="25.12" format-version="2" generator-version="InstallCmds-830.1 (22F66)" install-location="/Applications/LinkServer_25.12.83" auth="root">
+    <payload numberOfFiles="1253" installKBytes="53567"/>
+    <bundle path="./dist/_internal/Python.framework" id="org.python.python" CFBundleShortVersionString="3.13.3, (c) 2001-2024 Python Software Foundation." CFBundleVersion="3.13.3"/>
+    <bundle path="./LinkFlash.app" id="LinkFlash" CFBundleShortVersionString="25.12" CFBundleVersion="25.12.83"/>
+    <bundle-version>
+        <bundle id="org.python.python"/>
+        <bundle id="LinkFlash"/>
+    </bundle-version>
+    <upgrade-bundle>
+        <bundle id="org.python.python"/>
+        <bundle id="LinkFlash"/>
+    </upgrade-bundle>
+    <update-bundle/>
+    <atomic-update-bundle/>
+    <strict-identifier>
+        <bundle id="LinkFlash"/>
+    </strict-identifier>
+    <relocate/>
+    <scripts>
+        <postinstall file="./postinstall"/>
+    </scripts>
+</pkg-info>

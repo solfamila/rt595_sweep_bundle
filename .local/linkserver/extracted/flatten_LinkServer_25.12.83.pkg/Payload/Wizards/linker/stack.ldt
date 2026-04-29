@@ -1,0 +1,2 @@
+
+    PROVIDE(_vStackTop = DEFINED(__user_stack_top) ? __user_stack_top : __top_${DATA} - ${STACK_OFFSET});

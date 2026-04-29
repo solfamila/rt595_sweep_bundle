@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXA255",
+        "name": "MCXA255",
+        "family": "MCXA2XX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "MCXA2xx.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0001e000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04002000",
+            "size": "0x00002000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00002000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x4009123C",
+        "preconnect-script": "LS_preconnect_MCXA2XX.scp"
+      }
+    }
+  ]
+}

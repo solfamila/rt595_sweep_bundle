@@ -1,0 +1,35 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM 
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  print "IMX95 M33 connect script"
+110  rem ======================================
+120  rem "Supported mode: 1001"
+130  rem ======================================
+140  rem "SW6(evk)/SW7(fval) [1:4]"
+141  rem "                  |  A55 |  M33 |"
+142  rem "eMMC/SDHC1        | 0010 | 1010 |"
+143  rem "microSD/SDHC2     | 0011 | 1011 |"
+144  rem "FLEXSPI NOR       | 0100 | 1100 |"
+145  rem "Serial Downloader | 0001 | 1001 |"
+150  rem ======================================
+
+199  rem ========================
+200  rem probelist
+210  p% = probefirstfound
+220  rem probeopenbyindex p%
+230  wiretimedreset p% 100
+240  wait 500
+
+300  wireswdconnect p%
+310  corelist p%
+
+420  print "M33 is expected to be kicked off (see boot mode)... halt M33"
+430  selectprobecore p% 3
+440  cminitapdp this
+450  cmhalt this
+460  cmregs this
+
+999  end

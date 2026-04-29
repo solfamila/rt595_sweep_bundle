@@ -1,0 +1,83 @@
+1 REM ======================================
+2 REM Copyright 2021, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM RT1160_connect_M7_wake_M4.scp
+150  REM =======================================================================
+160  PRINT "RT1160 Connect M7 and Wake M4 Script"
+170  REM =======================================================================
+180  REM Uncomment ProbeList for standalone script use (outside the stub)
+190  REM =======================================================================
+200  REM ProbeList
+210  p% = ProbeFirstFound
+220  REM ProbeOpenByIndex p%
+230  WireSwdConnect p%
+240  SelectProbeCore p% 0
+250  CMInitApDp this
+260  REM =======================================================================
+270  REM The M4 AP is not visible while the core is held in reset
+280  REM Prepare a spin code in RAM and wake up / reset the M4 to it
+290  REM This serves two purposes:
+300  REM   - enables the M4 AP, required for debug visibility
+310  REM   - prevents M4 code from interfering with flash programming on M7
+320  REM =======================================================================
+330  REM Prepare spin code
+340  GOSUB 900
+350  REM =======================================================================
+360  PRINT "Setting M4 clock"
+370  REM Set m4_clk_root to OSC_RC_400M / 2: CLOCK_ROOT1 = mux(2), div(1)
+380  Poke32 this 0x40CC0080 0x201
+390  PRINT "Resetting M4 core"
+400  REM Save current reset SRMR and prevent M4 SW reset affecting the system
+410  s% = Peek32 this 0x40C04004
+420  Poke32 this 0x40C04004 0x00000C00
+430  Poke32 this 0x40C04284 0x1
+440  Poke32 this 0x40C04004 s%
+450  REM =======================================================================
+460  REM Release M4 if needed
+500  s% = Peek32 this 0x40c04000
+510  IF s% & 1 == 1 THEN GOTO 560
+520  PRINT "Releasing M4"
+530  s% = s% | 1
+540  Poke32 this 0x40c04000 s%
+550  REM =======================================================================
+560  PRINT "View cores on the DAP AP"
+570  WireSwdConnect p%
+580  CoreList p%
+590  SelectProbeCore p% 0
+600  REM =======================================================================
+610  REM Potentially FlexRAM might need to be set to ensure TCMs are available
+620  REM Uncomment next line if needed
+630  REM GOSUB 700
+640  REM =======================================================================
+650  REM Finished - 0 to select the M7, 1 to select M4
+660  d% = 0
+670  END
+700  REM ====================== SUB: Configure FlexRAM ========================
+710  PRINT "Configuring FlexRAM for 256KB I-TCM, 256KB D-TCM, 0KB OCRAM"
+720  REM FlexRAM TCM_CTRL - force RAM clocking ON and set fast mode = b100
+730  Poke32 this 0x40028000 0x4
+740  REM IOMUXC_GPR17/18 FlexRAM 32KB banks allocation - I(b11), D(b10), OC(b01)
+750  Poke32 this 0x400E4044 0x0000AAFF
+760  Poke32 this 0x400E4048 0x0000AAFF
+770  REM IOMUXC_GPR16 Enable FLEXRAM_BANK_CFG in GPR16/17
+780  s% = Peek32 this 0x400E4040
+790  s% = s% | 4
+800  Poke32 this 0x400E4040 s%
+810  RETURN
+900  REM ==================== SUB: Set up M4 spin code ========================
+910  REM Setup some spin code into an area of D-TCM (0x2021FF00)
+920  REM Condensed vector table format taking up 2 words of memory:
+930  REM   - x00: SP (dummy), two back-to-back branch-to-self opcodes (b 0)
+940  REM   - x04: PC - points to address x00 (+1 Thumb)
+950  PRINT "Setting M4 spin code"
+960  Poke32 this 0x2021FF00 0xE7FEE7FE
+970  Poke32 this 0x2021FF04 0x2021FF01
+980  REM Set top/bottom 16 bits of RAM address into CM4 VTOR iomuxc_lpsr_GPR0/1
+990  Poke32 this 0x40C0C000 0xFF00
+1000 Poke32 this 0x40C0C004 0x2021
+1010 RETURN
+1020 REM =======================================================================

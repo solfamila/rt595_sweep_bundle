@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "MIMXRT1024-EVK",
+      "device": {
+        "id": "MIMXRT1024xxxxx",
+        "name": "MIMXRT1024",
+        "family": "MIMXRT1020",
+        "memory": [
+          {
+            "location": "0x60000000",
+            "size": "0x00400000",
+            "type": "Flash",
+            "flash-driver": "MIMXRT1024.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00010000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20200000",
+            "size": "0x00020000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm7",
+            "name": "cm7"
+          }
+        ]
+      },
+      "debug": {
+        "no-packed": true,
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "RT1024_connect.scp"
+      }
+    }
+  ]
+}

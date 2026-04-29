@@ -1,0 +1,35 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 print "RT700 Reset Script"
+110 p% = probefirstfound
+120 selectprobecore p% 0
+
+200 REM Don't SYSRESET if the image doesn't start with "FCFB" flash tag
+210 if b% == 0x42464346 then goto 300
+220 print "%a (PC) = " ~a%
+230 print "%b (SP) = " ~b%
+240 print "%c (XPSR) = " ~c%
+250 print "%d (VTOR) = " ~d%
+260 goto 400
+
+300 REM FLASH case: Set bootROM stall and send SYSRESET
+310 cmhalt this
+320 cmwatchset this 0 0x50002094 rw
+330 cmsysresetreq this
+340 REM Small delay is needed after SYSRESET
+350 wait 200
+360 cmwatchclear this 0
+
+400 REM Enable CPU1 clock so that the core is visible
+410 REM SLEEPCON0->RUNCFG_CLR = 2
+420 poke32 this 0x40003030 2
+430 REM CLKCTL3->PSCCTL0_COMP_SET = 1
+440 poke32 this 0x40061040 1
+450 wireswdconnect p%
+460 corelist p%
+
+900 end

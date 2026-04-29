@@ -1,0 +1,26 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM ---------------------------------
+110  REM LPC8N04 Connect Script
+120  REM ---------------------------------
+130  REM Connect sequence presumes core 0
+140  REM ---------------------------------
+150  p% = probefirstfound
+160  selectprobecore p% 0
+170  wireswdconnect this
+180  REM ---------------------------------
+190  REM Pulses RESET for 50 ms
+200  REM ---------------------------------
+210  wiretimedreset p% 50
+220  wireswdconnect this
+230  REM ---------------------------------
+240  cminitapdp this
+250  cmhalt this
+260  REM ---------------------------------
+270  cmresetvectorcatchset this
+280  cmsysresetreq this
+290  end

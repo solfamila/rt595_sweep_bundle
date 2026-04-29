@@ -1,0 +1,16 @@
+<#-- Only insert header if Flash region starts at true base address -->
+<#if (MemUtils.location(CODE) == Utils.strToInt("0x08000000")) || (MemUtils.location(CODE) == Utils.strToInt("0x18000000"))  >
+    /* Image Vector Table and Boot Data for booting from external flash */
+    .boot_hdr : ALIGN(${text_align})
+    {
+        FILL(0x00)
+        __boot_hdr_start__ = ABSOLUTE(.) ;
+        . = 0x400 ;
+        __flash_conf_hdr_start__ = ABSOLUTE(.) ;
+        KEEP(*(.flash_conf))
+        __flash_conf_hdr_end__ = ABSOLUTE(.) ;
+        . = 0x1000 ;
+         __boot_hdr_end__ = ABSOLUTE(.) ;
+    } >${CODE}
+
+ </#if>

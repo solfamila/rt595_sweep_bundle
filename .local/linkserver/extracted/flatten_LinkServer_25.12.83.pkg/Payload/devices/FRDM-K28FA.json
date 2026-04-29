@@ -1,0 +1,51 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-K28FA",
+      "device": {
+        "id": "MK28FN2M0Axxx15",
+        "name": "MK28FA15",
+        "family": "K2x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00200000",
+            "type": "Flash",
+            "flash-driver": "FTFE_4K.cfx"
+          },
+          {
+            "location": "0x34000000",
+            "size": "0x00080000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00040000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x1ffc0000",
+            "size": "0x00040000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "kinetisconnect.scp",
+        "masserase-script": "kinetismasserase.scp"
+      }
+    }
+  ]
+}

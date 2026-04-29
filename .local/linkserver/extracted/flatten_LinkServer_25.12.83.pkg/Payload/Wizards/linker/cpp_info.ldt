@@ -1,0 +1,32 @@
+<#if isCppProject>
+            /* C++ constructors etc */
+            . = ALIGN(${text_align});
+            KEEP(*(.init))
+            
+            . = ALIGN(${text_align});
+            __preinit_array_start = .;
+            KEEP (*(.preinit_array))
+            __preinit_array_end = .;
+            
+            . = ALIGN(${text_align});
+            __init_array_start = .;
+            KEEP (*(SORT(.init_array.*)))
+            KEEP (*(.init_array))
+            __init_array_end = .;
+            
+            KEEP(*(.fini));
+            
+            . = ALIGN(${text_align});
+            KEEP (*crtbegin.o(.ctors))
+            KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+            KEEP (*(SORT(.ctors.*)))
+            KEEP (*crtend.o(.ctors))
+            
+            . = ALIGN(${text_align});
+            KEEP (*crtbegin.o(.dtors))
+            KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+            KEEP (*(SORT(.dtors.*)))
+            KEEP (*crtend.o(.dtors))
+            . = ALIGN(${text_align});
+            /* End C++ */
+</#if>

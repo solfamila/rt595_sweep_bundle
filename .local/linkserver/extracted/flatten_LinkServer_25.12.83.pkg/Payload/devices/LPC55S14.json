@@ -1,0 +1,72 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "LPC55S14",
+        "name": "LPC55S14",
+        "family": "LPC551x_S1x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "LPC551x.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "LPC551x_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0000c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x20010000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x0000c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30010000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "preconnect-script": "LS_preconnect_LPC551x_S1x.scp"
+      }
+    }
+  ]
+}

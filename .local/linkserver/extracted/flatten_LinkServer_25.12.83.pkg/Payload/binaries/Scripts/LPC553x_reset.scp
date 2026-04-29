@@ -1,0 +1,63 @@
+1 REM ======================================
+2 REM Copyright 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM =======================================================================
+110  REM LPC553x_reset.scp
+170  REM =======================================================================
+180  PRINT "LPC553x Reset Script"
+190  REM =======================================================================
+
+200  REM When a reset script is used, it overrides any other reset configuration in the IDE.
+210  REM Therefore, it needs to handle the most common scenarios:
+220  REM  - used post flash programming (in this case it performs a system reset)
+230  REM  - used for RAM-based application (in this case it performs a soft reset)
+240  REM The script is given some useful information like the current context SP (b%), PC (a%),
+250  REM PSR (c%) and VTOR or image address in case of RAM applications (d%) and it passes back
+260  REM updated reset context to the debugger
+
+300  REM =======================================================================
+310  Cmhalt this
+320  PRINT "Reset PMC LDO (PMC.LDOPMU,DCDC0,LDOCORE0)"
+330  poke32 this 0x5002001c 0x0109CF18
+340  poke32 this 0x50020010 0x010A767E
+350  poke32 this 0x50020024 0x2801006B
+
+400  REM =======================================================================
+405  REM Print "VTOR=" ~d%
+410  REM If VTOR is not in RAM, do a SYSRESET
+420  IF (d% & 0xEFFF0000 != 0x04000000) && (d% & 0xEFFF0000 != 0x20000000) Then GOTO 600
+430  REM =======================================================================
+440  REM Also do a SYSRESET if VTOR is found in RAM at 0x20005800.
+450  REM This VTOR address is seen for A1 silicon, when the internal flash is blank.
+460  IF (d% & 0xEFFFFFFF == 0x20005800) Then GOTO 600
+
+500  REM =======================================================================
+505  REM RAM-based application - perform a SOFT reset
+510  PRINT "SOFT Reset (RAM)"
+520  b% = Peek32 This d%
+530  t% = d% + 4
+540  a% = Peek32 This t%
+550  c% = 0x01000000
+560  Print "PC=" ~a%
+570  Print "SP=" ~b%
+580  Print "VTOR=" ~d%
+590  End
+
+600  REM =======================================================================
+610  REM SYSRESET with bootromstall
+620  Cmwatchset this 0 0x50000040 R
+630  REM Print "Whatchpoints before CMSYSRESETREQ"
+640  REM cmwatchlist this
+650  Print "Sending CMSYSRESETREQ"
+660  Cmsysresetreq this
+665  Wait 200
+670  WireSwdConnect this
+680  REM Print "Whatchpoints after CMSYSRESETREQ"
+690  REM Cmwatchlist this
+700  REM Print "Registers after CMSYSRESETREQ"
+710  REM Cmregs this
+720  Cmwatchclear this 0
+730  End

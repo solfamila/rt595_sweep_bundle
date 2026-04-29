@@ -1,0 +1,263 @@
+1 REM ======================================
+2 REM Copyright 2016, 2019-2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM ================================================================
+110 REM K32L3connect.scp
+150 REM ================================================================
+160 Print "K32L3A M4 Connect Script"
+170 REM ================================================================
+180 REM Uncomment ProbeList for standalone script use
+190 REM ================================================================
+200 REM ProbeList
+210 REM a% = ProbeFirstFound
+220 if a% == 0 Then Goto 2060
+225 print "Connecting to Probe Index = ";a%
+226 this
+230 REM ================================================================
+240 REM Uncomment ProbeOpenByIndex for standalone script use
+250 REM ================================================================
+260 REM ProbeOpenByIndex a%
+270 i% = WireSwdConnect a%
+280 SelectProbeCore a% 0
+290 Print "Assert NRESET"
+300 WireHoldReset a% 0
+310 REM ================================================================
+320 REM Select MEM-AP
+330 REM ================================================================
+340 CMWriteDP this 2 0x00000000
+350 REM ================================================================
+360 REM Power up Debug and System - All byte lanes
+370 REM ================================================================
+380 Print "Power up Debug"
+390 CMWriteDP this 1 0x50000F00
+400 REM ================================================================
+410 REM Check Power up Acknowledge
+420 REM ================================================================
+430 s% = CMReadDP this 1
+440 if s% & 0xFFFF0000 != 0xF0000000 Then Goto 2090
+450 REM ================================================================
+460 REM MDM-AP ID is at 0x010000FC
+470 REM ================================================================
+480 CMWriteDP this 2 0x010000FC
+490 j% = CMReadAP this 3
+500 Print "MDM-AP APID: ";~j%
+510 j% = j% & 0x00FF0000
+520 if j% != 0x001C0000 Then Goto 2120
+530 REM ================================================================
+540 REM Kinetis L MDM-AP         : 0x001C0020
+550 REM Kinetis M MDM-AP         : 0x001C0000
+560 REM =====================================
+570 REM MDM_CTRL_DEBUG_REQUEST   : 0x04
+580 REM MDM_CTRL_RESET           : 0x08
+590 REM MDM_CTRL_CORE_HOLD_RESET : 0x10
+600 REM ================================================================
+610 REM MDM-AP System Reset/Hold Reset/Debug Request
+620 REM ================================================================
+630 Print "MDM-AP System Reset/Hold Reset/Debug Request"
+640 CMWriteDP this 2 0x01000000
+650 c% = 0x1C
+660 CMWriteAP this 1 c%
+670 c% = CMReadAP this 1
+680 Print "MDM-AP Control: ";~c%
+690 REM ================================================================
+700 REM Wait for Flash Ready
+710 REM ================================================================
+720 i% = 0
+730 Repeat
+740   s% = CMReadAP this 0
+750   i% = i% + 1
+760   if i% >= 50 Then Goto 2160
+770 Until s% & 0x00000002 == 0x00000002
+780 Print "MDM-AP Status (Flash Ready) : ";~s%
+790 if s% & 0x00000004 Then Goto 860
+800 REM ================================================================
+810 Print "Part is not secured"
+820 Goto 1070
+830 REM ================================================================
+840 REM Check if Mass Erase Enabled
+850 REM ================================================================
+860 s% = s% & 0x00000020
+870 if s% == 0x00000000 Then Goto 2200
+880 REM ================================================================
+890 Print "Part is secured"
+900 REM ================================================================
+910 Goto 2240
+920 REM c% = 0x15
+930 REM i% = 0
+940 REM CMWriteAP this 1 c%
+950 REM ================================================================
+960 REM KE15Z - Hit it again
+970 REM ================================================================
+980 REM CMWriteAP this 1 c%
+990 REM Repeat
+1000 REM s% = CMReadAP this 1
+1010 REM Print "MDM-AP Control: ";~s%
+1020 REM i% = i% + 1
+1030 REM if i% >= 50 Then Goto 2280
+1040 REM Until s% & 0x00000001 == 0x00000001
+1050 Print "Mass Erase Complete"
+1060 REM ================================================================
+1070 c% = 0x14
+1080 Repeat
+1090   CMWriteDP this 2 0x01000000
+1100   CMWriteAP this 1 c%
+1110   s% = CMReadAP this 1
+1120 Until s% & 0x14 == 0x14
+1130 Print "MDM-AP Control: ";~s%
+1140 REM ================================================================
+1150 REM Select MEM-AP
+1160 REM ================================================================
+1170 CMWriteDP this 2 0x00000000
+1180 CMWriteDP this 1 0x50000F00
+1190 CMWriteAP this 0 0x63000002
+1200 s% = CMReadDP this 1
+1210 if s% & 0xFFFF0000 != 0xF0000000 Then Goto 2090
+1220 REM ================================================================
+1230 REM DHSCR Debug Enable/Halt
+1240 REM ================================================================
+1250 Poke32 this 0xE000EDF0 0xA05F0003
+1260 REM ================================================================
+1270 REM ================================================================
+1280 REM Wait for Debug Halt
+1290 REM ================================================================
+1300 Print "Release NRESET"
+1310 WireHoldReset a% 1
+1320 k% = 0
+1330 CMWriteDP this 2 0x01000000
+1340 i% = 0x00
+1350 c% = 0x04
+1360 Print "MDM-AP Control (Debug Request): ";~c%
+1370 Repeat
+1380   CMWriteAP this 1 c%
+1390   s% = CMReadAP this 0
+1400   i% = i% + 1
+1410   if i% >= 50 Then Goto 1430
+1420 Until s% & 0x0080 == 0x0080
+1430 Print "MDM-AP Status: ";~s%
+1440 REM if s% & 0x10000 == 0x00000 Then Goto 1510
+1450 if s% & 0x0080 == 0x0000 Then Goto 1510
+1460 Print "MDM-AP Core Halted"
+1470 Goto 1680
+1480 REM ================================================================
+1490 REM Retry
+1500 REM ================================================================
+1510 CMWriteDP this 2 0x01000000
+1520 CMWriteAP this 1 0x1C
+1530 k% = k% + 1
+1540 if k% <= 2 Then Goto 1330
+1550 Print "MDM-AP No M4 Halt Indication"
+1560 REM ================================================================
+1570 REM Check the DHSCR for Halt
+1580 REM ================================================================
+1590 REM CMWriteDP this 2 0x00000000
+1600 REM CMWriteDP this 1 0x50000F00
+1610 REM CMWriteAP this 0 0x63000002
+1620 REM Poke32 this 0xE000EDF0 0xA05F0003
+1630 REM s% = Peek32 this 0xE000EDF0
+1640 REM Print "DHCSR: ";~s%
+1650 REM if s% & 0x000000001 Then Goto 1460
+1660 REM Print "MDM-AP Core Halt Failed"
+1670 REM ================================================================
+1680 c% = 0x00000000
+1690 CMWriteAP this 1 c%
+1700 REM ================================================================
+1710 REM Select MEM-AP
+1720 REM ================================================================
+1730 CMWriteDP this 2 0x00000000
+1740 REM ================================================================
+1750 REM Read System Device ID (SIM_SDID)
+1760 REM ================================================================
+1770 REM KV10, KL26, KL27, K64F +others SIM_SDID
+1780 REM i% = Peek32 this 0x40048024
+1790 REM ================================================================
+1800 REM KL28 +others SIM_SDID
+1810 REM i% = Peek32 this 0x40075024
+1820 REM ================================================================
+1830 REM i% = i% & 0x00F00000
+1840 REM if i% & 0x00100000 Then Goto 2020
+1850 REM ================================================================
+1860 REM Disable Watchdog K, KV Series
+1870 REM ================================================================
+1880 REM Poke32 this 0x4005200E 0xC520
+1890 REM Poke32 this 0x4005200E 0xD928
+1900 REM Poke32 this 0x40052000 0x01D2
+1910 REM ================================================================
+1920 REM Ensure RAMS are awake via SRAM LPR and DSR for K32L3
+1930 REM ================================================================
+1940 Print "Ensure RAMs are awake"
+1950 Poke32 this 0x40020060 0
+1960 Poke32 this 0x40020064 0
+1965 REM Goto 5000 to erase Flash, IFR and set M0 as boot core
+1970 REM ProbeCloseByIndex a%
+1980 End
+1990 REM ================================================================
+2000 REM Disable Watchdog KL Series
+2010 REM ================================================================
+2020 REM Poke32 this 0x40048100 0x0000
+2030 REM ProbeCloseByIndex a%
+2040 End
+2050 REM ================================================================
+2060 Print "Probe Not Found"
+2070 End
+2080 REM ================================================================
+2090 Print "No Debug Power"
+2100 End
+2110 REM ================================================================
+2120 Print "MDP-AP Not Found"
+2130 REM ProbeCloseByIndex a%
+2140 End
+2150 REM ================================================================
+2160 Print "Flash Not Ready"
+2170 REM ProbeCloseByIndex a%
+2180 End
+2190 REM ================================================================
+2200 Print "MDM-AP Mass Erase Not Enabled"
+2210 REM ProbeCloseByIndex a%
+2220 End
+2230 REM ================================================================
+2240 Print "Mass Erase Required"
+2250 REM ProbeCloseByIndex a%
+2260 End
+2270 REM ================================================================
+2280 Print "Mass Erase Failed"
+2290 REM ProbeCloseByIndex a%
+2300 End
+5000 REM ================== Mass Erase over FTFE ========================
+5010 REM Ensure Any Command has Finished
+5020 s% = Peek8 this 0x40023000
+5030 if s% & 0x80 != 0 Then goto 5020
+5040 REM Clear Possible Error Condition
+5050 Poke8 this 0x40023000 0x30
+5060 REM Setup Mass Erase and Call
+5070 Poke32 this 0x40023004 0x49000000
+5080 Poke8  this 0x40023000 0x80
+5090 REM Spin until Command Finishes
+5100 s% = Peek8 this 0x40023000
+5110 if s% & 0x80 != 0 Then goto 5100
+5120 Print "Mass Erase Error Condition ";~s%
+5130 wait 1000
+5500 REM ================== Set Boot M0 in IFR ===========================
+5510 REM Program Index 0x84 IFR OPT to boot from M0+
+5520 REM Clear Possible Error Condition
+5530 Poke8  this 0x40023000 0x30
+5540 Poke32 this 0x40023004 0x43840000
+5550 Poke32 this 0x40023008 0xFFFFFFBF
+5560 Poke8  this 0x40023000 0x80
+5570 REM Spin until Command Finishes
+5580 s% = Peek8 this 0x40023000
+5590 if s% & 0x80 != 0 Then goto 5580
+5600 Print "Set M0 Error Condition ";~s%
+5610 REM Read back programmed value
+5700 Poke8  this 0x40023000 0x30
+5710 Poke32 this 0x40023004 0x41840000
+5720 s% = Peek8 this 0x40023000
+5730 if s% & 0x80 != 0 Then goto 5720
+5740 Print "Read Index Error Condition ";~s%
+5750 s% = peek32 this 0x40023008
+5760 Print "OPT Word0";~s%
+5770 s% = peek32 this 0x4002300C
+5780 Print "OPT Word1";~s%
+6000 End

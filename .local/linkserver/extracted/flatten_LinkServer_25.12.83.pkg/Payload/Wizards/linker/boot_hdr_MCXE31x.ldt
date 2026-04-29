@@ -1,0 +1,13 @@
+<#-- Only insert header if Flash region starts at true base address -->
+<#if (MemUtils.location(CODE) == Utils.strToInt("0x00400000")) >
+    /* Boot header (image vector table) */
+    .boot_hdr : ALIGN(${text_align})
+    {
+        FILL(0xFF)
+        __boot_hdr_start__ = ABSOLUTE(.) ;
+        KEEP(*(.boot_header))
+        . = 0x100;
+        __boot_hdr_end__ = ABSOLUTE(.) ;
+        . = 0x1000;
+    } > ${CODE}
+ </#if>

@@ -1,0 +1,14 @@
+
+    /* Provide symbols for MIMXRT500 parts for startup code to use
+     * to set image to be plain load image or XIP.
+<#if (PLAIN_LOAD_IMAGE) >
+     * Config : Plain load image = true
+     */
+    __imghdr_loadaddress = ADDR(.text);
+    __imghdr_imagetype = 0;
+<#else>
+     * Config : Plain load image = false
+     */
+    __imghdr_loadaddress = LOADADDR(.text);
+    __imghdr_imagetype = 0;
+</#if>

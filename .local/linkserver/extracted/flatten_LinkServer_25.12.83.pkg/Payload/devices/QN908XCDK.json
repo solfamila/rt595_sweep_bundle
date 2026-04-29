@@ -1,0 +1,41 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "QN908XCDK",
+      "device": {
+        "id": "QN908XC",
+        "name": "QN908XC",
+        "family": "QN908XC",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "QN908XC_512K.cfx"
+          },
+          {
+            "location": "0x04000400",
+            "size": "0x0001FC00",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "reset-script": "qn908xreset.scp",
+        "connect-script": "RunBootRomConnect.scp"
+      }
+    }
+  ]
+}

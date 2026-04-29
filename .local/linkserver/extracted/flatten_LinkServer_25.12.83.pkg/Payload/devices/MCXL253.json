@@ -1,0 +1,82 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXL253xxx",
+        "name": "MCXL253",
+        "family": "MCXL2XX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "MCXL25x.cfx",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00020000",
+            "type": "Flash",
+            "flash-driver": "MCXL25x_S.cfx",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x28000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0xa1000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x38000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0xb1000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm33"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00008000",
+            "type": "RAM",
+            "core-name": "cm0plus"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33",
+            "index": "0",
+            "primary": true
+          },
+          {
+            "type": "cm0plus",
+            "name": "cm0plus",
+            "index": "2"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x5009123C",
+        "connect-script": "MCXL25x_connect.scp",
+        "preconnect-script": "LS_preconnect_MCXL2XX.scp"
+      }
+    }
+  ]
+}

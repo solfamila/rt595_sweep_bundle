@@ -1,0 +1,25 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM Connect script to run the boot rom at start of debug
+110 p% = probefirstfound
+120 wireswdconnect p%
+130 selectprobecore p% 0
+140 cminitapdp this
+150 cmhalt this
+160 cmresetvectorcatchset this
+170 cmsysresetreq this
+180 print "Halt on reset vector catch"
+190 cmresetvectorcatchclear this
+200 cmwatchset this 0 4
+210 cmrun this
+220 cmwatchclear this 0
+230 cmwatchset this 0 0x40074380
+240 print "Halt on watchpoint write of ROMWSCTRL register"
+250 cmwatchclear this 0
+260 poke32 this 0x40074380 1
+270 end
+

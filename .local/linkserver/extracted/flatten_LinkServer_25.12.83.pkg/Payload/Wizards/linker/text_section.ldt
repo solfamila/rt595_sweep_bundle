@@ -1,0 +1,20 @@
+<#if configMemory?has_content>
+<#list configMemory as memory>
+<#if memory.flash && !memory.defaultFlash>
+<#if slaves?has_content>
+  <#include "text_section_multicore.ldt" >
+<#elseif slavesError??>
+    ${slavesError}
+</#if>
+    .text_${memory.alias} : ALIGN(${text_align})
+    {
+       FILL(0xff)
+<#include "extrasections_text.ldt">
+<#include "text.ldt" >
+<#include "extrasections_rodata.ldt">
+<#include "rodata.ldt" >
+    } > ${memory.name}
+
+</#if>
+</#list>
+</#if>

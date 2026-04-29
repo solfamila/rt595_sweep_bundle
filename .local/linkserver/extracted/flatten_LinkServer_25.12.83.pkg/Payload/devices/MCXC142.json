@@ -1,0 +1,46 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXC142",
+        "name": "MCXC142",
+        "family": "MCXC142",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00010000",
+            "type": "Flash",
+            "flash-driver": "FTFA_1K_MCXC.cfx"
+          },
+          {
+            "location": "0x1ffff000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x400FE000",
+            "size": "0x00000200",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm0plus",
+            "name": "cm0plus"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": false,
+        "connect-script": "MCXC_connect.scp",
+        "masserase-script": "MCXC_masserase.scp"
+      }
+    }
+  ]
+}

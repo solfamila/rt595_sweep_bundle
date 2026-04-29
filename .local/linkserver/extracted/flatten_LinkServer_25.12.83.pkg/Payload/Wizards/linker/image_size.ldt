@@ -1,0 +1,9 @@
+
+    /* Provide basic symbols giving location and size of main text
+     * block, including initial values of RW data sections. Note that
+     * these will need extending to give a complete picture with
+     * complex images (e.g multiple Flash banks).
+     */
+    _image_start = LOADADDR(.text);
+    _image_end = LOADADDR(.data) + SIZEOF(.data);
+    _image_size = _image_end - _image_start;

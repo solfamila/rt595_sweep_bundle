@@ -1,0 +1,9 @@
+        ASSERT(!(_${slave.textSectionNormalized}_START__ == _${slave.textSectionNormalized}_END__), "No slave code for ${slave.textSectionNormalized}");
+        ASSERT(/* Memory ranges seen at same address by the primary and secondary cores */
+               (ABSOLUTE(_${slave.textSectionNormalized}_START__) == __vectors_start__${slave.textSectionNormalized}) ||
+               /* Memory ranges seen at different addresses by the main core and secondary cores */
+               /* AON SRAM region (primary core <-> secondary core) alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0xa1000000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) < 0xa1008000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x00000000 - 0xa1000000) == __vectors_start__${slave.textSectionNormalized})) ||
+               /* [SEC addr] AON SRAM region (primary core <-> secondary core) alias */
+               ((ABSOLUTE(_${slave.textSectionNormalized}_START__) >= 0xb1000000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) < 0xb1008000) && (ABSOLUTE(_${slave.textSectionNormalized}_START__) + (0x00000000 - 0xb1000000) == __vectors_start__${slave.textSectionNormalized}))
+               , "${slave.name} execute address differs from address provided in source image");

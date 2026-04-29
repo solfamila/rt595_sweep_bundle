@@ -1,0 +1,64 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "KW45B41Z52xxxA",
+        "name": "KW45B41Z52",
+        "family": "KW4x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "KW45B41.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00080000",
+            "type": "Flash",
+            "flash-driver": "KW45B41_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x0001c000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00004000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "KW45B41_connect.scp",
+        "bootromstall": "0xE000ED08",
+        "apindex-limit": 2,
+        "preconnect-script": "LS_preconnect_KW4x.scp"
+      }
+    }
+  ]
+}

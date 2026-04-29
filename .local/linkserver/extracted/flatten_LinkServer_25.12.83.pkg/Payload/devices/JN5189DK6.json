@@ -1,0 +1,45 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "JN5189DK6",
+      "device": {
+        "id": "JN5189",
+        "name": "JN5189",
+        "family": "JN518x",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x000a0000",
+            "type": "Flash",
+            "flash-driver": "JN5189_640K.cfx"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00015fe0",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04020000",
+            "size": "0x00010000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm4",
+            "name": "cm4"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "connect-script": "QN9090Connect.scp"
+      }
+    }
+  ]
+}

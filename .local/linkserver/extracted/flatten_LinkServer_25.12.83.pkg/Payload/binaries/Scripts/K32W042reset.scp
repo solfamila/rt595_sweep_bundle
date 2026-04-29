@@ -1,0 +1,27 @@
+1 REM ======================================
+2 REM Copyright 2016, 2019-2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  REM ================================================================
+110  REM K32W042reset.scp
+150  REM ================================================================
+160  REM Print "K32W042 Reset Script"
+170  REM Connect script is passed PC/SP from the vector table in the FLASH image from the debugger
+180  REM For the simple use case we pass them back to the debugger as the where we want to reset from.
+190  REM
+200  REM Syntax here is that '~' commands a hex output, all integer variables are a% to z%
+210  REM For ResetScripts:
+220  REM  - The debugger passes PC/SP read from the downloaded FLASH image in a%/b%
+230  REM  - The debugger also passes the current XPSR value and the contents of the VTOR
+240  REM  - The script then passes a%/b%/c% back to the debugger to set the execution reset point for debug
+250  REM
+260  Print "Boot from FLASH image pc/sp reset script"
+270  Print "PC = "; ~a%
+280  Print "SP = "; ~b%
+290  Print "XPSR = "; ~c%
+300  Print "VTOR = "; ~d%
+310  REM cmresetvectorcatchset this
+320  REM cmvectresetreq this
+330  End

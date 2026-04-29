@@ -1,0 +1,62 @@
+{
+  "copyright": "Copyright 2023-2024 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "FRDM-MCXN236",
+      "device": {
+        "id": "MCXN236",
+        "name": "MCXN236",
+        "family": "MCXN2XX",
+        "memory": [
+          {
+            "location": "0x20000000",
+            "size": "0x00038000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00038000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x00000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx_S.cfx"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "preconnect-script": "LS_preconnect_MCXN2XX.scp"
+      }
+    }
+  ]
+}

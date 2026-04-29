@@ -1,0 +1,42 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100 REM ===============================
+110 REM RT1024_connect.scp
+150 REM ===============================
+160 print "RT1024 Connect Script"
+170 REM probelist
+180 p% = probefirstfound
+190 rem probeopenbyindex p%
+200 wireswdconnect p%
+210 selectprobecore p% 0
+220 cminitapdp this
+230 cmhalt this
+235 goto 320
+240 rem trap in bootrom
+250 cmwatchset this 0 0x400F8004 RW
+260 cmresetvectorcatchclear this
+270 print "Resetting and trapping"
+280 cmsysresetreq this
+290 print "Back from reset"
+300 cmresetvectorcatchset this
+310 cmwatchclear this 0
+320 print "Disabling MPU"
+330 s% = Peek32 this 0xE000ED94
+340 s% = s% & 0xFFFFFFFE
+350 Poke32 this 0xE000ED94 s%
+360 REM ====== Configure FlexRAM ======
+370 print "Configure FlexRAM for 128KB OC RAM, 64KB I-TCM, 64KB D-TCM"
+380 REM TCM CTRL Poke 0x400B0000 - to force RAM clocking and set wait states = b100
+390 Poke32 this 0x400B0000 0x4
+400 REM IOMUXC_GPR17 0x400AC044 - this sets bitfield allocation of FlexRAM 32KB banks to OC 128KB b01, I 64KB b11, D 64KB b10
+405 REM Default FlexRAM RAM bank partioning: O,O,D,D,I,I,O,O
+410 Poke32 this 0x400AC044 0x5FA5
+420 REM IOMUXC_GPR16 0x400AC040 - this sets enables for I and DTCM and the source of the TCM config = 0x200007
+430 Poke32 this 0x400AC040 0x200007
+440 print "Finished"
+450 REM ===============================
+460 end

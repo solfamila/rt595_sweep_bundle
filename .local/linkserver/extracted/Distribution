@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<installer-gui-script minSpecVersion="1">
+    <title>LinkServer</title>
+    <background file="background.png" alignment="bottomleft" scaling="tofit"/>
+    <background-darkAqua file="background_dark.png" alignment="bottomleft" scaling="tofit"/>
+    <welcome file="Welcome.rtf"/>
+    <license file="License"/>
+    <conclusion file="Conclusion.html"/>
+    <pkg-ref id="com.crt.LinkServer_25.12.83.pkg">
+        <bundle-version>
+            <bundle CFBundleShortVersionString="25.12" CFBundleVersion="25.12.83" id="LinkFlash" path="LinkFlash.app"/>
+            <bundle CFBundleShortVersionString="3.13.3, (c) 2001-2024 Python Software Foundation." CFBundleVersion="3.13.3" id="org.python.python" path="dist/_internal/Python.framework"/>
+        </bundle-version>
+    </pkg-ref>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.crt.LinkServer_25.12.83.pkg"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.crt.LinkServer_25.12.83.pkg" visible="false">
+        <pkg-ref id="com.crt.LinkServer_25.12.83.pkg"/>
+    </choice>
+    <pkg-ref id="com.crt.LinkServer_25.12.83.pkg" version="25.12" onConclusion="none" installKBytes="53567">#flatten_LinkServer_25.12.83.pkg</pkg-ref>
+</installer-gui-script>

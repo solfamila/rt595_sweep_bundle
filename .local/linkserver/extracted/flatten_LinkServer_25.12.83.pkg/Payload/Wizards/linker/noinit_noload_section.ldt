@@ -1,0 +1,20 @@
+<#if configMemory?has_content>
+<#list configMemory as memory>
+<#if memory.RAM && memory.defaultRAM>
+
+    /* DEFAULT NOINIT SECTION */
+    .noinit (NOLOAD): ALIGN(${bss_align})
+    {
+        _noinit = .;
+        PROVIDE(__start_noinit_${memory.alias} = .) ;
+        PROVIDE(__start_noinit_${memory.name} = .) ;
+<#include "extrasections_noinit.ldt">
+        *(.noinit*)
+         . = ALIGN(${bss_align}) ;
+        _end_noinit = .;
+       PROVIDE(__end_noinit_${memory.alias} = .) ;
+       PROVIDE(__end_noinit_${memory.name} = .) ;        
+    } > ${DATA} AT> ${DATA}
+</#if>
+</#list>
+</#if>

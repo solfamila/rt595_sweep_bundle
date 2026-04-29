@@ -1,0 +1,74 @@
+{
+  "copyright": "Copyright 2025 NXP",
+  "license": "SPDX-License-Identifier: BSD-3-Clause",
+  "version": "1.1.0",
+  "vendor": "NXP",
+  "devices": [
+    {
+      "board": "",
+      "device": {
+        "id": "MCXN247",
+        "name": "MCXN247",
+        "family": "MCXN2XX",
+        "memory": [
+          {
+            "location": "0x00000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx.cfx"
+          },
+          {
+            "location": "0x10000000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx_S.cfx"
+          },
+          {
+            "location": "0x00100000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx.cfx"
+          },
+          {
+            "location": "0x10100000",
+            "size": "0x00100000",
+            "type": "Flash",
+            "flash-driver": "MCXNxxx_S.cfx"
+          },
+          {
+            "location": "0x20000000",
+            "size": "0x00038000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x04000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x30000000",
+            "size": "0x00038000",
+            "type": "RAM"
+          },
+          {
+            "location": "0x14000000",
+            "size": "0x00018000",
+            "type": "RAM"
+          }
+        ],
+        "cores": [
+          {
+            "type": "cm33",
+            "name": "cm33"
+          }
+        ]
+      },
+      "debug": {
+        "protocol": "swd",
+        "swo": true,
+        "bootromstall": "0x50000040",
+        "preconnect-script": "LS_preconnect_MCXN2XX.scp"
+      }
+    }
+  ]
+}

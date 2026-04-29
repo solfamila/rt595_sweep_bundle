@@ -1,0 +1,23 @@
+1 REM ======================================
+2 REM Copyright 2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+10 rem ---------------------------------
+20 print "LPC11AXX Connect Script"
+30 rem ---------------------------------
+40 rem probelist
+50 p% = probefirstfound
+60 rem probeopenbyindex p%
+70 wireswdconnect p%
+80 selectprobecore p% 0
+90 cminitapdp this
+100 cmhalt this
+110 cmwatchset this 0 0x40048000 W
+120 cmresetvectorcatchclear this
+130 cmvectresetreq this
+140 cmwatchclear this 0
+150 cmresetvectorcatchset this
+160 rem ---------------------------------
+170 end

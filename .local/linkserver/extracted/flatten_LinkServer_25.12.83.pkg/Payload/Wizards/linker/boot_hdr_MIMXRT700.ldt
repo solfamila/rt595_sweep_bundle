@@ -1,0 +1,12 @@
+<#-- Only insert header if Flash region starts at base address XSPI0/XSPI1 -->
+<#if (MemUtils.location(CODE) == Utils.strToInt("0x28000000")) || (MemUtils.location(CODE) == Utils.strToInt("0x38000000")) ||
+     (MemUtils.location(CODE) == Utils.strToInt("0x08000000")) || (MemUtils.location(CODE) == Utils.strToInt("0x18000000"))>
+    .boot_hdr : ALIGN(${text_align})
+    {
+        FILL(0xFF)
+        __FLASH_BASE = .;
+        KEEP(*(.flash_conf))
+        . = 0x4000 ;
+    } >${CODE}
+
+ </#if>

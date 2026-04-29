@@ -1,0 +1,125 @@
+1 REM ======================================
+2 REM Copyright 2016, 2019-2020, 2023 NXP
+3 REM All rights reserved.
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100   REM ================================================================
+110   REM kinetisunlock.scp
+150   REM ================================================================
+160   Print "Kinetis Unlock Script"
+170   REM ================================================================
+180   REM Uncomment ProbeList for standalone script use
+190   REM ================================================================
+200   REM ProbeList
+210   p% = ProbeFirstFound
+220   if p% == 0 Then Goto 1140
+230   REM ================================================================
+240   REM Uncomment ProbeOpenByIndex for standalone script use
+250   REM ================================================================
+260   REM ProbeOpenByIndex p%
+270   i% = WireSwdConnect p%
+280   SelectProbeCore p% 0
+290   Print "Assert NRESET"
+300   WireHoldReset p% 0
+310   REM ================================================================
+320   REM Power up Debug and System - All byte lanes
+330   REM ================================================================
+340   Print "Power up Debug"
+350   CMWriteDP this 1 0x50000F00
+360   REM ================================================================
+370   REM Check Power up Acknowledge
+380   REM ================================================================
+390   s% = CMReadDP this 1
+400   if s% & 0xFFFF0000 != 0xF0000000 Then Goto 1110
+410   REM ================================================================
+420   REM MDM-AP ID is at 0x010000FC
+430   REM ================================================================
+440   CMWriteDP this 2 0x010000FC
+450   j% = CMReadAP this 3
+460   Print "MDM-AP APID: ";~j%
+470   j% = j% & 0x00FF0000 
+480   if j% != 0x001C0000 Then Goto 1170
+490   REM ================================================================
+500   REM Kinetis L MDM-AP         : 0x001C0020
+510   REM Kinetis M MDM-AP         : 0x001C0000
+520   REM =====================================
+530   REM MDM_CTRL_DEBUG_REQUEST   : 0x04
+540   REM MDM_CTRL_RESET           : 0x08
+550   REM MDM_CTRL_CORE_HOLD_RESET : 0x10
+560   REM ================================================================
+570   REM MDM-AP System Reset/Hold Reset/Debug Request
+580   REM ================================================================
+590   Print "MDM-AP System Reset/Hold Reset/Debug Request"
+600   CMWriteDP this 2 0x01000000
+610   c% = 0x1C
+620   CMWriteAP this 1 c%
+630   c% = CMReadAP this 1
+640   Print "MDM-AP Control: ";~c%
+650   REM ================================================================
+660   REM Wait for Flash Ready
+670   REM ================================================================
+680   i% = 0
+690   Repeat
+700     s% = CMReadAP this 0
+710     i% = i% + 1
+720     if i% >= 50 Then Goto 1210
+730   Until s% & 0x00000002 == 0x00000002
+740   Print "MDM-AP Status (Flash Ready) : ";~s%
+750   if s% & 0x00000004 Then Goto 820
+760   REM ================================================================
+770   Print "Part is not secured"
+780   Goto 1020
+790   REM ================================================================
+800   REM Check if Mass Erase Enabled
+810   REM ================================================================
+820   s% = s% & 0x00000020
+830   if s% == 0x00000000 Then Goto 1250
+840   REM ================================================================
+850   REM Part is secured
+860   REM ================================================================
+870   c% = 0x15
+880   i% = 0
+890   CMWriteAP this 1 c%
+900   REM ================================================================
+910   REM KE15Z - Hit it again
+920   REM ================================================================
+930   CMWriteAP this 1 c%
+940   Repeat
+950     s% = CMReadAP this 1
+960     Print "MDM-AP Control: ";~s%
+970     i% = i% + 1
+980     if i% >= 50 Then Goto 1290
+990   Until s% & 0x00000001 == 0x00000001 
+1000  Print "Finished unlock"
+1010  REM ================================================================
+1020  c% = 0x14
+1030  Repeat
+1040    CMWriteDP this 2 0x01000000
+1050    CMWriteAP this 1 c%
+1060    s% = CMReadAP this 1
+1070  Until s% & 0x14 == 0x14
+1080  Print "MDM-AP Control: ";~s%
+1090  End
+1100  REM ================================================================
+1110  Print "No Debug Power"
+1120  End
+1130  REM ================================================================
+1140  Print "Probe Not Found"
+1150  End
+1160  REM ================================================================
+1170  Print "MDP-AP Not Found"
+1180  REM ProbeCloseByIndex p%
+1190  End
+1200  REM ================================================================
+1210  Print "Flash Not Ready"
+1220  REM ProbeCloseByIndex p%
+1230  End
+1240  REM ================================================================
+1250  Print "MDM-AP Mass Erase Not Enabled"
+1260  REM ProbeCloseByIndex p%
+1270  End 
+1280  REM ================================================================
+1290  Print "Mass Erase Failed"
+1300  REM ProbeCloseByIndex p%
+1310  End

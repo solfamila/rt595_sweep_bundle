@@ -1,0 +1,13 @@
+<#include "user.ldt" >
+<#include "user_library.ldt" ignore_missing=true>
+<#include "header.ldt" >
+
+<#if libraries?has_content>
+GROUP (
+<#list libraries as library>
+  "${library}"
+</#list>
+)
+<#else>
+  /* No libraries */
+</#if>

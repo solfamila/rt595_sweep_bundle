@@ -1,0 +1,18 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM 
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  print "IMX93 M33 reset script"
+110  rem ======================================
+
+200  print "SOFT Reset (RAM)"
+210  b% = peek32 This d%
+220  t% = d% + 4
+230  a% = peek32 This t%
+240  c% = 0x01000000
+250  print "PC=" ~a%
+260  print "SP=" ~b%
+270  print "VTOR=" ~d%
+280  end

@@ -1,0 +1,338 @@
+1 REM ======================================
+2 REM Copyright 2025 NXP
+3 REM
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100   REM ================================================================
+110   REM MCXE31x_connect.scp
+150   REM ================================================================
+160   Print "MCXE31x Connect Script"
+170   REM ================================================================
+180   REM Uncomment ProbeList for standalone script use (outside the stub)
+190   REM ================================================================
+200 rem ProbeList
+210 a% = ProbeFirstFound
+220   if a% == 0 Then Goto 8000
+235   Print "Connecting to Probe Index = "; a%
+236   this
+230   REM ================================================================
+240   REM Uncomment ProbeOpenByIndex for standalone script use
+250   REM ================================================================
+260 rem ProbeOpenByIndex a%
+270   p% = a%
+275   APLimit p% 5
+
+400   REM ================================================================
+410   Print "Assert NRESET"
+420   WireHoldReset p% 0
+430   Wait 100
+440   WireSwdConnect p%
+450   APList p%
+500   REM ================================================================
+510   REM SDA-AP(7) APID
+520   REM ================================================================
+530   SelectProbeCore p% 7
+540   CMWriteDP this 2 0x070000F0
+545   CMWriteAP this 1 0x000000FC
+550   v% = CMReadAP this 3
+560   Print "SDA-AP(7) APID: "; ~v%
+570   v% = v% & 0x00FF00F0
+580   if v% != 0x001C0040 Then Goto 8500
+590   REM ================================================================
+600   REM SDA-AP(7) APID - clear RSTRELTLCM7x bits in SDAAPRSTCTRL
+610   r% = 0x90
+620   v% = 0x00000000
+630   GOSUB 8800
+650   REM ================================================================
+660   Print "Release NRESET"
+670   WireHoldReset p% 1
+680   Wait 100
+690   REM ================================================================
+
+700   REM ================================================================
+710   REM MDM-AP(6) APID
+720   REM ================================================================
+730   SelectProbeCore p% 6
+740   CMWriteDP this 2 0x060000F0
+745   CMWriteAP this 1 0x000000FC
+750   v% = CMReadAP this 3
+760   Print "MDM-AP APID: "; ~v%
+770   v% = v% & 0x00FF00F0
+780   if v% != 0x001C0030 Then Goto 8700
+
+800   REM ================================================================
+810   REM Unlock application debug
+820   GOSUB 9000
+830   REM ================================================================
+
+900   REM SDA-AP(7) APID - enable debug for M7 cores in DBGENCTRL
+910   r% = 0x80
+920   v% = 0x300000F0
+930   GOSUB 8800
+
+1000  REM M7 APs - keep M7 cores halted when out of reset
+1005  i% = 4
+1010  SelectProbeCore p% i%
+1015  Print " M7 AP("; i% ; ") - "; ~(i% << 24)
+1020  CMWriteDP this 2 (i% << 24)
+1030  CMWriteAP this 1 0xE000EDF0
+1040  CMWriteAP this 3 0xA05F0003
+1050  v% = CMReadAP this 3
+1055  Print " M7 AP("; i% ; ") wr reg @ 0xE000EDF0 = "; ~v%
+1060  CMWriteAP this 1 0xE000EDFC
+1070  CMWriteAP this 3 0x1
+1080  v% = CMReadAP this 3
+1085  Print " M7 AP("; i% ; ") wr reg @ 0xE000EDFC = "; ~v%
+1090  i% = i% + 1
+1095  if i% <= 4 Then Goto 1010
+
+1200  REM SDA-AP(7) APID - set RSTRELTLCM7x bits in SDAAPRSTCTRL (debug from first instruction)
+1205  SelectProbeCore p% 7
+1210  r% = 0x90
+1220  v% = 0x06000000
+1230  GOSUB 8800
+
+1500  REM ================================================================
+1510  WireSwdConnect p%
+1520  APList p%
+1530  CoreList p%
+
+7000  REM ================================================================
+7010  SelectProbeCore p% 4
+7020  CMHalt this
+
+7050  REM ================================================================
+7052  x% = Peek32 this 0x40290004
+7054  Print "SIUL2:MIDR1 @ 0x40290004 = "; ~x%
+7056  x% = ((x% >> 16 ) & 0x3FF)
+7058  Print "MCU Part Number is "; ~x%
+
+7110  REM === RAM init via eDMA - SRAM0 160KB (default MCXE31B) ===
+7112  q% = 160
+7114  if (x% == 0x138) Then q% = 96
+7116  if (x% == 0x137) Then q% = 32
+7118  if (x% == 0x136) Then q% = 16
+7120  r% = 0x20400000
+7130  s% = 0x400 * q%
+7140  GOSUB 10000
+
+7160  REM === RAM init via CPU - ITCM0 - addr=0x00000000 size=0x8000 ===
+7170  r% = 0x00000000
+7180  s% = 0x8000
+7190  GOSUB 11000
+
+7210  REM === RAM init via CPU - DTCM0 - addr=0x20000000 size=0x10000 ===
+7220  r% = 0x20000000
+7230  s% = 0x10000
+7240  GOSUB 11000
+
+7250  REM === Disable SWT0 ====
+7260  r% = 0x40270000
+7270  GOSUB 12000
+
+7700  REM ================================================================
+7770  REM === Initialization DONE  ====
+7777  End
+
+
+8000  REM ================================================================
+8010  Print "Probe Not Found"
+8020  End
+
+8500  REM ================================================================
+8510  Print "SDA-AP Not Found"
+8520  End
+
+8700  REM ================================================================
+8710  Print "MDM-AP Not Found"
+8720  End
+
+8800  REM ================================================================
+8810  REM Write SDA-AP(7) register r with value v
+8820  REM ================================================================
+8830  REM SelectProbeCore p% 7
+8840  CMWriteDP this 2 (0x07000000 | r%)
+8850  CMWriteAP this 1 r%
+8860  CMWriteAP this 0 v%
+8870  v% = CMReadAP this 0
+8880  REM Print "SDA AP(7) wr reg @ "; ~r%; " = "; ~v%
+8890  Return
+
+9000  REM ================================================================
+9010  Print "Unlock application debug (authentication)..."
+9020  REM ================================================================
+9030  SelectProbeCore p% 7
+9040  CMWriteDP this 2 0x07000000
+9050  CMWriteAP this 1 0x00000000
+9060  v% = CMReadAP this 0
+9070  Print "SDA AP(7)  r reg @ 0x0 = "; ~v%
+9080  REM Check APPDBGEN bit in AUTHSTTS register
+9090  if (v% & 0x40000000) != 0x40000000 Then Goto 9200
+9100  Print "... application debug already enabled (authentication not required)"
+9110  Return
+9200  Print "... NOTE: Challenge/Response authentication is not supported!"
+9210  Print "... unlock the device using keys (edit the file to set the required values)"
+9300  r% = 0x40
+9301  v% = 0x00000000
+9302  Print "... KEY0 = "; ~v%
+9305  GOSUB 8800
+9310  r% = 0x44
+9311  v% = 0x00000000
+9312  Print "... KEY1 = "; ~v%
+9315  GOSUB 8800
+9320  r% = 0x48
+9321  v% = 0x00000000
+9322  Print "... KEY2 = "; ~v%
+9325  GOSUB 8800
+9330  r% = 0x4C
+9331  v% = 0x00000000
+9332  Print "... KEY3 = "; ~v%
+9335  GOSUB 8800
+9340  r% = 0x50
+9341  v% = 0x00000000
+9342  Print "... KEY4 = "; ~v%
+9345  GOSUB 8800
+9350  r% = 0x54
+9351  v% = 0x00000000
+9352  Print "... KEY5 = "; ~v%
+9355  GOSUB 8800
+9360  r% = 0x58
+9361  v% = 0x00000000
+9362  Print "... KEY6 = "; ~v%
+9365  GOSUB 8800
+9370  r% = 0x5C
+9371  v% = 0x00000000
+9372  Print "... KEY7 = "; ~v%
+9375  GOSUB 8800
+9390  Return
+
+10000 REM ================================================================
+10010 REM "RAM initialization (64-bits access) via eDMA"
+10020 REM ================================================================
+10030 REM arguments: r% - address, s% - size
+10040 REM ================================================================
+10050 Print "... RAM init via eDMA: address="; ~r%; " size="; ~s%
+10060 REM ... Enable DMAMUX, EDMA and TCD Clocks
+10070 t% = peek32 this 0x402DC330
+10080 Poke32 this 0x402DC330 (t% | (1<<3) | (1<<4))
+10090 t% = peek32 this 0x402DC334
+10100 Poke32 this 0x402DC334 (t% | (1<<0))
+10110 Poke32 this 0x402DC300 (1<<0)
+10120 Poke32 this 0x402DC304 (1<<0)
+
+10130 t% = peek32 this 0x402DC000
+10140 Poke32 this 0x402DC000 t%
+10150 t% = peek32 this 0x402DC000
+10160 Poke32 this 0x402DC000 t%
+
+10170 Wait 5
+
+10180 REM ... Enable EDMA in DMAMUX
+10190 REM ... DMAMUX0_CHCFG0 = 0x80
+10195 Poke8 this 0x40280003 0x80
+10200 REM ... configure eDMA
+10210 REM ... EDMA_CSR = 0x00000000
+10215 Poke32 this 0x4020C000 0x00000000
+10220 REM ... EDMA_CH0_GRPRI = 0x00000000
+10225 Poke32 this 0x4020C100 0x00000000
+10230 REM ... configure TCD Channel 0
+10240 REM ... TCD_CH0_CSR = 0x40000000 (Clear the flag DONE)
+10245 Poke32 this 0x40210000 0x40000000
+10250 REM ... TCD_CH0_SBR = 0x00000000
+10255 Poke32 this 0x40210008 0x00000000
+10260 REM ... TCD0_SADDR = 0x00000000 (Read from flash. We do not have other place to read from!)
+10265 Poke32 this 0x40210020 0x00400000
+10270 REM ... TCD0_SOFF = 0x0000 (Do not increment the source address)
+10275 Poke16 this 0x40210024 0x0000
+10280 REM ... TCD0_ATTR = 0x0303 (Modulo feature disabled. SSIZE - 64bit, DSIZE - 64bit)
+10285 Poke16 this 0x40210026 0x0303
+10290 REM ... TCD0_NBYTES = size
+10295 Poke32 this 0x40210028 s%
+10300 REM ... TCD0_SLAST = 0x00000000 (Do not adjust the source address)
+10315 Poke32 this 0x4021002C 0x00000000
+10320 REM ... TCD0_DADDR = addr
+10325 Poke32 this 0x40210030 r%
+10330 REM ... TCD0_DOFF = 0x0008 (Increment Dest Address with 8(64-bits))
+10335 Poke16 this 0x40210034 0x0008
+10340 REM ... TCD0_CITER_ELINK = 0x0001 (Single request)
+10345 Poke16 this 0x40210036 0x0001
+10350 REM ... TCD0_DLAST = 0x00000000 (Do not adjust the dest address)
+10355 Poke32 this 0x40210038 0x00000000
+10360 REM ... TCD0_CSR = 0x0000
+10365 Poke16 this 0x4021003C 0x0000
+10370 REM ... TCD0_BITER_ELINK = 0x0001 (Single request)
+10375 Poke16 this 0x4021003E 0x0001
+10380 REM ... TCD0_CSR = 0x0001 Start
+10385 Poke16 this 0x4021003C 0x0001
+10390 i% = 0
+10400 Wait 100
+10410 i% = i% + 1
+10420 t% = peek32 this 0x40210000
+10430 if i% >= 20 Then Goto 10460
+10440 if (t% & (1<<30)) == 0 Then Goto 10400
+10450 Return
+10460 Print "Error: RAM initialization failed (timeout)!"
+10470 End
+
+
+11000 REM ================================================================
+11010 REM "RAM initialization (64-bits) via CPU"
+11020 REM ================================================================
+11030 REM arguments: r% - address, s% - size
+11040 REM ================================================================
+11050 Print "... RAM init via CPU: address="; ~r%; " size="; ~s%
+11100 m% = CMReadReg this 15
+11110 n% = CMReadReg this 0
+11120 o% = CMReadReg this 1
+11130 p% = CMReadReg this 2
+11140 q% = CMReadReg this 3
+
+11200 REM ... load the initializing code in SRAM0 (assuming it was already initialized)
+11210 REM 0x2300E9C1 STRD R2, R3, [R1]
+11220 REM 0x3108     ADDS R1, R1, #8
+11230 REM 0x3808     SUBS R0, R0, #8
+11240 REM 0xD1FA     BNE.N 0x20400000
+11250 REM 0xE7FE     B .
+11260 Poke32 this 0x20400000 0x2300E9C1
+11270 Poke16 this 0x20400004 0x3108
+11275 Poke16 this 0x20400006 0x3808
+11280 Poke16 this 0x20400008 0xD1FA
+11285 Poke16 this 0x2040000A 0xE7FE
+
+11300 REM ... init registers
+11310 CMWriteReg this 0 s%
+11320 CMWriteReg this 1 r%
+11330 CMWriteReg this 2 0x0
+11340 CMWriteReg this 3 0x0
+
+11350 REM ... init start address (PC)
+11355 CMWriteReg this 15 0x20400000
+11360 CMBreakSet this 0x2040000A
+11370 CMStep this
+11375 CMRun this
+11380 CMBreakClear this 0x2040000A
+
+11390 REM ... restore registers
+11400 CMWriteReg this 15 m%
+11410 CMWriteReg this 0 n%
+11420 CMWriteReg this 1 o%
+11430 CMWriteReg this 2 p%
+11440 CMWriteReg this 3 q%
+11450 Return
+
+12000 REM ================================================================
+12010 REM "Disable SWT"
+12020 REM ================================================================
+12030 REM arguments: r% - SWT address (SWT0: 0x40270000, SWT1: 0x4046C000)
+12040 REM ================================================================
+12050 Print "... if enabled, disable SWT @ "; ~r%
+12100 t% = Peek32 this r%
+12110 if (t% & (1 << 0)) == 0 Then Goto 12200
+12120 Poke32 this (r% + 0x10) 0x0000C520
+12130 Poke32 this (r% + 0x10) 0x0000D928
+12140 Poke32 this (r% + 0x00) 0xFF00010A
+12150 t% = Peek32 this r%
+12160 if (t% & (1 << 0)) == 0 Then Goto 12200
+12170 Print "... Warning: failed to disable SWT @ "; ~r%
+12200 Return

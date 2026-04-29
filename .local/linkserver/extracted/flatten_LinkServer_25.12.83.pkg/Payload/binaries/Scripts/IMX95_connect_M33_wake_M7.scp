@@ -1,0 +1,185 @@
+1 REM ======================================
+2 REM Copyright 2024 NXP
+3 REM 
+4 REM SPDX-License-Identifier: BSD-3-Clause
+5 REM ======================================
+
+100  print "IMX95 M33 wake M7 connect script"
+110  rem ======================================
+120  rem "Supported mode: 1001"
+130  rem ======================================
+140  rem "SW6(evk)/SW7(fval) [1:4]"
+141  rem "                  |  A55 |  M33 |"
+142  rem "eMMC/SDHC1        | 0010 | 1010 |"
+143  rem "microSD/SDHC2     | 0011 | 1011 |"
+144  rem "FLEXSPI NOR       | 0100 | 1100 |"
+145  rem "Serial Downloader | 0001 | 1001 |"
+150  rem ======================================
+
+199  rem ========================
+200  rem probelist
+210  p% = probefirstfound
+220  rem probeopenbyindex p%
+230  wiretimedreset p% 100
+240  wait 500
+
+300  wireswdconnect p%
+310  corelist p%
+
+420  print "M33 is expected to be kicked off (see boot mode)... halt M33"
+430  selectprobecore p% 3
+440  cminitapdp this
+450  print "Wait for boot image to be executed (M33 DDR/TCM OEI, M33 SM start, M7 image start)"
+460  gosub 2000
+470  cmhalt this
+480  cmregs this
+
+510  rem print "*** Invalidate and disable M33 XCACHEs ***"
+515  rem XCACHE_PC->CCR
+520  rem poke32 this 0x54400000 0x85000000
+525  rem XCACHE_PS->CCR
+530  rem poke32 this 0x54400800 0x85000000
+
+800  print "*** Enable M7 (might not work for boot images without M33 DDR/TCM OEI) ***"
+810  gosub 3000
+820  print "M7 kicked off"
+830  selectprobecore p% 2
+840  cminitapdp this
+850  cmhalt this
+860  cmregs this
+
+900  print "*** Resume M33 ***"
+910  cmrun p% 3
+
+999  end
+
+2000 rem ========== SUB: Wait for boot image to be executed and M7 core to be released ==========
+2010 t% = time
+2020 rem print "... wait for M7 - start time: "; t%
+2030 repeat
+2040   v% = time
+2050   e% = v% - t%
+2055   wait 100
+2060   rem => check M7_CFG[WAIT]
+2070   m% = peek32 this 0x544f0124
+2071   rem print "... M7_CFG[WAIT] m = "; ~m%
+2080   if (m% & 0x10) == 0 then goto 2100
+2090 until e% >= 700
+2100 e% = e% * 10
+2110 print "... wait for M7 - elapsed (ms): "; e%
+2190 return
+
+3000 rem ========== SUB: Enable M7 ==========
+3001 print "... enabling CM7"
+3002 rem "CM7 kick off: M7_CFG[WAIT]=1, SRC.m7mix.func_stat[RST_STAT]=1 and [MTR_STAT]=1, prepare ... , M7_CFG[WAIT]=0, send a request to EdgeLock secure enclave to release M7 TROUT"
+3003 rem "AON.BLK_CTRL_S_AONMIX2 base address: 444F_0000h + 0124h M7_CFG"
+3004 rem "AON.BLK_CTRL_S_AONMIX2 base address: 444F_0000h + 0108h INITVTOR_M7"
+3005 rem "CCMSRCGPC.SRC.xspr_m7mix base address: 4446_4800h + 20h SLICE_SW_CTRL"
+3006 rem "CCMSRCGPC.SRC.xspr_m7mix base address: 4446_4800h + b4h FUNC_STAT"
+3010 cminitapdp p% 0
+3020 selectprobecore p% 0
+
+3100 print "... get M7_CFG in blk_ctrl_s_aonmix block"
+3110 m% = peek32 this 0x544f0124
+3120 print "... initial M7_CFG m = "; ~m%
+3130 rem => check M7_CFG[WAIT]
+3140 if (m% & 0x10) == 0 then goto 4900
+
+3150 x% = 0x0
+3154 rem => next line sets M7 entry in OCRAM, if enabled (useful to be able to acces M7 without a bootable image)
+3155 rem x% = 0x20480000
+3160 print "... prepare M7 entry address: "; ~x%
+
+3200 print "... setup M7 entry address (INITVTOR_M7 in AON.BLK_CTRL_S_AONMIX2)"
+3210 poke32 this  0x544f0108 x%
+3220 m% = peek32 this  0x544f0108
+3230 print "... M7 entry address m = "; ~m%
+
+3300 print "... power up M7MIX (SLICE_SW_CTRL in CCMSRCGPC.SRC.xspr_m7mix)"
+3310 m% = peek32 this 0x54464820
+3320 print "... old M7MIX SLICE_SW_CTRL m = "; ~m%
+3330 poke32 this 0x54464820 0x0
+3340 m% = peek32 this 0x54464820
+3350 print "... new M7MIX SLICE_SW_CTRL m = "; ~m%
+3360 wait 100
+
+3400 print "... initialize M7 TCM - TBD - curently we rely on oei-m33-tcm for M7 TCM initialization"
+3401 rem => M7 TCM initialization requires 64-bit writes (via DMA transfers)
+3402 rem => fill memory by regular 32-bit writes is not feasible (added here just reference)
+3410 rem gosub 5000
+
+3430 u% = 0x203c0000
+3435 if (x% != 0) then u% = x%
+3440 print "... initialize M7 entry code: "; ~u%; " "; ~x%
+3450 poke32 this (u% + 0x00) (x% + 0x10)
+3460 poke32 this (u% + 0x04) (x% + 0x09)
+3470 poke32 this (u% + 0x08) 0xe7fee7fe
+
+3490 wait 100
+
+3500 print "... WaitM7Release"
+3510 rem "SRC_M7MIX_FUNC_STAT's value should be set to 0b 0000 0000 0100 0100 = 0x0044"
+3520 m% = peek32 this 0x444648b4
+3530 wait 10
+3540 print "m = "; ~m%
+3550 if (m% != 0x44) then goto 3520
+
+3600 print "... KickOffM7"
+3610 rem "A. Send message to edgelock enclave(s500) to release M7 trout cpu wait, command 0xD4"
+3620 rem "B. Set block control M7_CFG register(0x444F0124) to release M7 CPU WAIT"
+
+4100 rem "... AhabReleaseM7Trout start"
+4110 rem => send a request to EdgeLock secure enclave to release M7 TROUT
+4120 rem => ELE.MU0.MUA.TR0: CMD_TAG(0x17) << 24 | ENABLE_AUX_CID(0xD4) << 16 | SIZE(2) << 8 | VERSION (0x6)
+4130 rem => ELE.MU0.MUA.TR1: CMD_DATA (aux id) (0xb)
+4210 poke32 this 0x57520200 0x17d40206
+4220 poke32 this 0x57520204 0x0000000b
+4230 wait 200
+4240 r% = peek32 this 0x57520280
+4250 print "RR0: "; ~r%
+4260 r% = peek32 this 0x57520284
+4270 print "RR1: "; ~r%
+4280 wait 200
+4300 if (r% == 0xd6) then goto 4330
+4310 print "Fail to release M7 trout cpu wait"
+4320 goto 4400
+4330 print "... success to release M7 trout cpu wait"
+4400 rem "... AhabReleaseM7Trout finish"
+
+4410 corelist p%
+4430 cminitapdp p% 2
+4440 cmhalt p% 2
+
+4500 rem "... ReleaseM7CpuWait start"
+4510 m% = peek32 this 0x544f0124
+4520 print "... old M7_CFG m = "; ~m%
+4530 poke32 this 0x544f0124 0x0
+4540 m% = peek32 this 0x544f0124
+4550 print "... new M7_CFG m = "; ~m%
+4560 wait 200
+4570 rem "... ReleaseM7Cpuwait finish"
+
+4900 corelist p%
+4990 return
+
+
+5000 rem ========== SUB: Call Fill memory area for 0x201c0000 ==========
+5010 s% = 0x201c0000
+5020 l% = 0x4000
+5030 f% = 0x0
+5040 gosub 6000
+5050 rem v% = peek32 this s%
+5060 rem print "... data at address "; ~s%; " is "; ~v%
+5070 return
+
+
+6000 rem ========== SUB: Fill memory area ==========
+6010 rem Fills a memory area by regular 32-bit writes
+6020 rem Expects s% = start address, l% = length, f% = fill value
+6030 print "Filling "; ~s%; " + "; ~l%; " with "; ~f%
+6040 m% = s%
+6050 repeat
+6060    poke32 this m% f%
+6070    m% = m% + 4
+6080 until m% >= s% + l%
+6090 return
