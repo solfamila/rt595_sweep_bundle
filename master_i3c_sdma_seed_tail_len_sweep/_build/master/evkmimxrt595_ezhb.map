@@ -5025,77 +5025,79 @@ Discarded input sections
  .text.I3C_SlaveTransferAbort
                 0x00000000       0x58 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleGetStatusFlags
-                0x00000000       0xb8 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .text.I3C_SlaveTransferHandleBusStart
-                0x00000000       0xac /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.I3C_SlaveTransferHandleEventSent.str1.4
+                0x00000000      0x11c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .rodata.I3C_SlaveTransferHandleBusStart.str1.4
                 0x00000000       0x1e /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .text.I3C_SlaveTransferHandleBusStart
+                0x00000000      0x1c4 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleEventSent
                 0x00000000      0x110 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleReceivedCCC
                 0x00000000       0x46 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleBusStop
-                0x00000000      0x140 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                0x00000000      0x254 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.I3C_SlaveTransferHandleMatched.str1.4
                 0x00000000       0x46 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleMatched
-                0x00000000      0x1b4 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                0x00000000      0x1cc /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleTxReady
-                0x00000000      0x71c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                0x00000000      0x734 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleRxReady
                 0x00000000       0xf0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C_SlaveTransferHandleIRQ
                 0x00000000      0x13a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .text.I3C0_DriverIRQHandler
                 0x00000000       0x14 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .rodata.__func__.39
+                0x00000000       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.38
-                0x00000000       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.37
                 0x00000000       0x18 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.36
+ .rodata.__func__.37
                 0x00000000       0x15 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.35
+ .rodata.__func__.36
                 0x00000000        0x9 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.32
+ .rodata.__func__.33
                 0x00000000       0x13 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.29
+ .rodata.__func__.30
                 0x00000000       0x16 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.22
+ .rodata.__func__.23
                 0x00000000       0x1f /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.21
+ .rodata.__func__.22
                 0x00000000       0x24 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.20
+ .rodata.__func__.21
                 0x00000000       0x29 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.19
+ .rodata.__func__.20
                 0x00000000       0x37 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.18
+ .rodata.__func__.19
                 0x00000000       0x2a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .rodata.__func__.18
+                0x00000000       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.17
-                0x00000000       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                0x00000000       0x1e /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.16
-                0x00000000       0x1e /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.15
                 0x00000000       0x1b /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .rodata.__func__.15
+                0x00000000       0x1a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.14
-                0x00000000       0x1a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                0x00000000        0xe /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.13
-                0x00000000        0xe /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.12
                 0x00000000       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.11
+ .rodata.__func__.12
                 0x00000000        0xe /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.10
+ .rodata.__func__.11
                 0x00000000       0x11 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.9
+ .rodata.__func__.10
                 0x00000000       0x1e /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.8
+ .rodata.__func__.9
                 0x00000000       0x1d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.7
+ .rodata.__func__.8
                 0x00000000       0x1a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.6
+ .rodata.__func__.7
                 0x00000000       0x17 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.5
+ .rodata.__func__.6
                 0x00000000       0x26 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .rodata.__func__.5
+                0x00000000       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.4
                 0x00000000       0x21 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.__func__.3
@@ -8388,41 +8390,41 @@ LOAD /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchai
  .rodata.I3C_MasterTransferBlocking.str1.4
                 0x2028e6dc        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
                                 0x1bd (size before relaxing)
- .rodata.__func__.41
+ .rodata.__func__.42
                 0x2028e6dc       0x10 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.40
+ .rodata.__func__.41
                 0x2028e6ec       0x1d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e709        0x3 
- .rodata.__func__.39
+ .rodata.__func__.40
                 0x2028e70c       0x19 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e725        0x3 
- .rodata.__func__.34
+ .rodata.__func__.35
                 0x2028e728       0x12 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e73a        0x2 
- .rodata.__func__.33
+ .rodata.__func__.34
                 0x2028e73c        0xf /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e74b        0x1 
- .rodata.__func__.31
+ .rodata.__func__.32
                 0x2028e74c       0x16 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e762        0x2 
- .rodata.__func__.30
+ .rodata.__func__.31
                 0x2028e764       0x16 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e77a        0x2 
- .rodata.__func__.28
+ .rodata.__func__.29
                 0x2028e77c       0x12 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e78e        0x2 
- .rodata.__func__.27
+ .rodata.__func__.28
                 0x2028e790        0xf /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e79f        0x1 
- .rodata.__func__.26
+ .rodata.__func__.27
                 0x2028e7a0       0x26 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e7c6        0x2 
- .rodata.__func__.25
+ .rodata.__func__.26
                 0x2028e7c8       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .rodata.__func__.24
+ .rodata.__func__.25
                 0x2028e7e8       0x1a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  *fill*         0x2028e802        0x2 
- .rodata.__func__.23
+ .rodata.__func__.24
                 0x2028e804       0x1b /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
  .rodata.CLOCK_EnableClock.str1.4
                 0x2028e81f        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
@@ -8850,7 +8852,7 @@ LOAD linker stubs
  .ARM.attributes
                 0x0000070c       0x26 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v8-m.main+fp/hard/crtn.o
 
-.debug_info     0x00000000    0x2ca8d
+.debug_info     0x00000000    0x2cafd
  .debug_info    0x00000000     0x29f9 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
  .debug_info    0x000029f9     0x1ded /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
  .debug_info    0x000047e6      0xa78 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/hardware_init.o
@@ -8869,12 +8871,12 @@ LOAD linker stubs
  .debug_info    0x000168c6     0x1e68 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexcomm.o
  .debug_info    0x0001872e     0x2d4d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexspi.o
  .debug_info    0x0001b47b     0x1be1 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_gpio.o
- .debug_info    0x0001d05c     0x5d7b /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .debug_info    0x00022dd7     0x2ec6 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
- .debug_info    0x00025c9d     0x33bf /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
- .debug_info    0x0002905c      0x59d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
- .debug_info    0x000295f9     0x1827 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
- .debug_info    0x0002ae20     0x1c6d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
+ .debug_info    0x0001d05c     0x5deb /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .debug_info    0x00022e47     0x2ec6 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
+ .debug_info    0x00025d0d     0x33bf /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
+ .debug_info    0x000290cc      0x59d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
+ .debug_info    0x00029669     0x1827 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
+ .debug_info    0x0002ae90     0x1c6d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
 
 .debug_abbrev   0x00000000     0x3ab8
  .debug_abbrev  0x00000000      0x36a /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
@@ -9144,7 +9146,7 @@ LOAD linker stubs
  .debug_macro   0x00030470      0x462 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
  .debug_macro   0x000308d2       0x1c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
 
-.debug_line     0x00000000    0x1c1f9
+.debug_line     0x00000000    0x1c3b1
  .debug_line    0x00000000     0x1068 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
  .debug_line    0x00001068      0xbfc /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
  .debug_line    0x00001c64      0xb3d /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/hardware_init.o
@@ -9163,64 +9165,64 @@ LOAD linker stubs
  .debug_line    0x0000f3b0      0xf20 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexcomm.o
  .debug_line    0x000102d0     0x19e0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexspi.o
  .debug_line    0x00011cb0      0xd57 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_gpio.o
- .debug_line    0x00012a07     0x3820 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .debug_line    0x00016227      0xd16 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
- .debug_line    0x00016f3d     0x2122 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
- .debug_line    0x0001905f      0xcaa /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
- .debug_line    0x00019d09      0xd54 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
- .debug_line    0x0001aa5d     0x179c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
+ .debug_line    0x00012a07     0x39d8 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .debug_line    0x000163df      0xd16 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
+ .debug_line    0x000170f5     0x2122 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
+ .debug_line    0x00019217      0xcaa /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
+ .debug_line    0x00019ec1      0xd54 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
+ .debug_line    0x0001ac15     0x179c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
 
-.debug_str      0x00000000   0x1d7c3b
- .debug_str     0x00000000   0x1d7c3b /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
+.debug_str      0x00000000   0x1d7c86
+ .debug_str     0x00000000   0x1d7c86 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
                              0x17df41 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
                              0x17b7d4 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/hardware_init.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/hardware_init.o
                              0x17a867 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/pin_mux.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/pin_mux.o
                              0x1780d7 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/component/uart/fsl_adapter_usart.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/component/uart/fsl_adapter_usart.o
                              0x179359 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/device/system_MIMXRT595S_cm33.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/device/system_MIMXRT595S_cm33.o
                              0x171f99 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/src/master/drivers/fsl_i3c_smartdma.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/src/master/drivers/fsl_i3c_smartdma.o
                              0x17aad5 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/local/ezh_features_standalone.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/local/ezh_features_standalone.o
                               0x4bdd4 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/local/ezh_test_standalone.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/local/ezh_test_standalone.o
                              0x18728a (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/source/semihost_hardfault.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/source/semihost_hardfault.o
                                0x33aa (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/startup/startup_mimxrt595s_cm33.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/startup/startup_mimxrt595s_cm33.o
                                0x3bc7 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/utilities/debug_console_lite/fsl_debug_console.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/utilities/debug_console_lite/fsl_debug_console.o
                              0x179a7c (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/utilities/fsl_assert.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/utilities/fsl_assert.o
                              0x177ec7 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_clock.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_clock.o
                              0x17c580 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_common_arm.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_common_arm.o
                              0x177dba (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexcomm.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexcomm.o
                              0x17a534 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexspi.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexspi.o
                              0x17adc6 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_gpio.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_gpio.o
                              0x179f22 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
-                             0x17d737 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+                             0x17d782 (size before relaxing)
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
                              0x17f736 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
                              0x17c39a (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
                              0x1783af (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
                              0x179f28 (size before relaxing)
- .debug_str     0x001d7c3b        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
+ .debug_str     0x001d7c86        0x0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
                              0x179d11 (size before relaxing)
 
-.debug_frame    0x00000000     0x57c8
+.debug_frame    0x00000000     0x57cc
  .debug_frame   0x00000000      0x1e0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/board.o
  .debug_frame   0x000001e0       0xb8 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
  .debug_frame   0x00000298       0x2c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/hardware_init.o
@@ -9239,16 +9241,16 @@ LOAD linker stubs
  .debug_frame   0x00002d28      0x350 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexcomm.o
  .debug_frame   0x00003078      0x494 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_flexspi.o
  .debug_frame   0x0000350c      0x1e0 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_gpio.o
- .debug_frame   0x000036ec     0x10d8 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
- .debug_frame   0x000047c4      0x138 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
- .debug_frame   0x000048fc      0x788 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
- .debug_frame   0x00005084       0x7c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
- .debug_frame   0x00005100      0x1ac /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
- .debug_frame   0x000052ac      0x46c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
- .debug_frame   0x00005718       0x2c /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v8-m.main+fp/hard/libgcc.a(_aeabi_uldivmod.o)
- .debug_frame   0x00005744       0x44 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v8-m.main+fp/hard/libgcc.a(_udivmoddi4.o)
- .debug_frame   0x00005788       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/hard/libc_nano.a(libc_a-memset.o)
- .debug_frame   0x000057a8       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/hard/libc_nano.a(libc_a-strlen.o)
+ .debug_frame   0x000036ec     0x10dc /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+ .debug_frame   0x000047c8      0x138 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_inputmux.o
+ .debug_frame   0x00004900      0x788 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_power.o
+ .debug_frame   0x00005088       0x7c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_reset.o
+ .debug_frame   0x00005104      0x1ac /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_smartdma.o
+ .debug_frame   0x000052b0      0x46c /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_usart.o
+ .debug_frame   0x0000571c       0x2c /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v8-m.main+fp/hard/libgcc.a(_aeabi_uldivmod.o)
+ .debug_frame   0x00005748       0x44 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v8-m.main+fp/hard/libgcc.a(_udivmoddi4.o)
+ .debug_frame   0x0000578c       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/hard/libc_nano.a(libc_a-memset.o)
+ .debug_frame   0x000057ac       0x20 /Users/foxy/Downloads/rt595_sweep_bundle/.local/toolchains/arm-gnu-toolchain-15.2.rel1-darwin-arm64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v8-m.main+fp/hard/libc_nano.a(libc_a-strlen.o)
 
 .debug_loc      0x00000000      0x201
  .debug_loc     0x00000000      0x201 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/startup/startup_mimxrt595s_cm33.o
@@ -10088,6 +10090,8 @@ g_mclkFreq                                        /Users/foxy/Downloads/rt595_sw
 g_pfnVectors                                      /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/startup/startup_mimxrt595s_cm33.o
 g_slaveIbiRequestSent                             /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
 g_slavePostIbiAddressMatched                      /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+g_slavePostIbiEchoArmed                           /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
+g_slavePostIbiEchoPending                         /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
 g_sysPllConfig_BOARD_BootClockRUN                 /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/board/clock_config.o
 g_txBuff                                          /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o
 g_txSize                                          /Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_seed_tail_len_sweep/_build/master/sdk/drivers/fsl_i3c.o

@@ -200,8 +200,8 @@ exact commands after step 3 above.
 ./trace32/run_master_i3c_sdma_seed_tail_len_sweep_5s.sh
 ```
 
-This wrapper now prints the retained replay state automatically after the
-5-second stop.
+This wrapper now prints both the retained replay state and the retained RX
+SmartDMA probe state automatically after the 5-second stop.
 
 ### Continue the current execution for another 5 seconds
 
@@ -209,7 +209,7 @@ This wrapper now prints the retained replay state automatically after the
 ./trace32/continue_master_i3c_sdma_seed_tail_len_sweep_5s.sh
 ```
 
-This wrapper also prints the retained replay state automatically after the
+This wrapper also prints both retained state lines automatically after the
 continue window stops.
 
 ### Print the retained replay state without running
@@ -218,11 +218,44 @@ continue window stops.
 ./trace32/probe_master_i3c_sdma_seed_tail_len_sweep_replay_state.sh
 ```
 
+### Print the retained RX SmartDMA proof state without running
+
+```bash
+./trace32/probe_master_i3c_sdma_seed_tail_len_sweep_rx_smartdma_state.sh
+```
+
 ### Probe the retained failure snapshot
 
 ```bash
 ./trace32/probe_master_i3c_sdma_seed_tail_len_sweep_failure_state.sh
 ```
+
+## Working RX SmartDMA Signature
+
+The shared sweep already contains a dedicated RX-side SmartDMA proof before it
+enters the logical-length sweep. That path does not depend on the native I3C RX
+DMAC request line. Instead it routes `I3C0_IRQn` to SmartDMA through
+`kINPUTMUX_I3c0IrqToSmartDmaInput` and validates that SmartDMA performed the
+post-IBI read tail successfully.
+
+The validated retained-state signature is:
+
+```text
+rxSmartdma= stage=3 result=0 validate=0 v0=0 v1=0 roundStage=5 roundResult=0 completion=0 configured=7 cb=1 tail=1 pendC=0 pendT=0 fifoBounce=0 protoBounce=1
+```
+
+Interpretation:
+
+1. `stage=3` means the RX SmartDMA probe reached `RX_SMARTDMA_PROBE_STAGE_VALIDATED`.
+2. `result=0` and `validate=0` mean the probe and its validator both finished successfully.
+3. `configured=7` means SmartDMA was configured to drain the expected 7-byte tail after the 1-byte seed.
+4. `cb=1` and `tail=1` mean both the SmartDMA completion callback and the read-tail completion path fired.
+5. `pendC=0` and `pendT=0` mean no SmartDMA completion or read-tail work was left pending.
+6. `protoBounce=1` is the allowed single `COMPLETE` bounce that the validator explicitly accepts.
+
+This is the current positive RX result in the bundle: RX works through the
+existing `I3c0IrqToSmartDmaInput` SmartDMA path in the shared sweep, while the
+separate native RX DMAC-request probes remain negative.
 
 ## RX Request-Semantics Probe
 

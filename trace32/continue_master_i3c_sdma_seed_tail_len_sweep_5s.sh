@@ -23,3 +23,4 @@ ENDDO
 EOF
 
 bash "$SCRIPT_DIR/probe_master_i3c_sdma_seed_tail_len_sweep_replay_state.sh"
+bash "$SCRIPT_DIR/probe_master_i3c_sdma_seed_tail_len_sweep_rx_smartdma_state.sh"

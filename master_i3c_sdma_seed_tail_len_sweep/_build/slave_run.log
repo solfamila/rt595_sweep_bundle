@@ -10,3 +10,5 @@ I3C board2board interrupt example -- Slave transfer.
  I3C Freq = 49500000
 slave: armed
 slave: waiting for master traffic
+slave: dynamic addr reg=0xlx
+slave: ibi request sent status=0xlx
