@@ -593,6 +593,51 @@ This rules out the simpler `MDMACTRL.DMAFB=ENABLE` vs `ENABLE_ONE_FRAME`
 explanation. Changing the I3C-side RX DMA mode alone does not restore native
 RX DMA completion.
 
+## RX Seed4 DMA RXREADY-Enabled Poll Probe
+
+Use this handshake-side probe to keep the same direct DMA0 seed-only path but
+leave `kI3C_MasterRxReadyFlag` enabled in `MINTSET` while NVIC for `I3C0_IRQn`
+ remains disabled, so CM33 still does not service the data IRQ.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 still uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. `MINTSET` is left with `kI3C_MasterRxReadyFlag` enabled.
+6. NVIC for `I3C0_IRQn` remains disabled, so CM33 still cannot service RXREADY/TXREADY data IRQs.
+
+### Build the RXREADY-enabled probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma_rxready_enabled_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma_rxready_enabled_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed4RxReady= pc=202885F4 stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=4000030 mdmactrl=12 mintset=800 mintmasked=800 dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0 rxcount=4 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is still the DMA-INTA wait timeout.
+2. `mintset=800` and `mintmasked=800` show that the controller did latch `RXREADY` with the interrupt source enabled.
+3. `dataIrq=0` confirms CM33 still did not service the data IRQ path because NVIC remained disabled.
+4. `rxcount=4` means the RX FIFO still reached the expected 4-byte level.
+5. `dmaIntaCount=0` and `dmaInta=0` mean DMA0 CH24 still never completed the one-byte descriptor.
+
+This rules out the simpler `RXREADY` interrupt-enable gating explanation. Even
+with the `RXREADY` source enabled and pending in `MINTMASKED`, the native RX
+DMA path still does not complete.
+
 ### Very long settle variant
 
 ```bash

@@ -23,6 +23,10 @@
 #define I3C_RX_SEED4_TRACE_LABEL "rx-seed4-dma-inta"
 #endif
 
+#ifndef I3C_RX_SEED4_ENABLE_RXREADY_INT
+#define I3C_RX_SEED4_ENABLE_RXREADY_INT 0U
+#endif
+
 #define I3C_RX_SEED4_LENGTH 4U
 #define I3C_RX_SEED4_DMA_CHANNEL 24U
 #define I3C_RX_SEED4_DMA_CLOCK kCLOCK_Dmac0
@@ -61,6 +65,8 @@ static __NO_INIT volatile uint32_t s_rx_seed4_mstatus;
 static __NO_INIT volatile uint32_t s_rx_seed4_merrwarn;
 static __NO_INIT volatile uint32_t s_rx_seed4_mdatactrl;
 static __NO_INIT volatile uint32_t s_rx_seed4_mdmactrl;
+static __NO_INIT volatile uint32_t s_rx_seed4_mintset;
+static __NO_INIT volatile uint32_t s_rx_seed4_mintmasked;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_active;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_inta;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_ctlstat;
@@ -76,6 +82,8 @@ static volatile uint32_t s_rx_seed4_precleanup_mstatus;
 static volatile uint32_t s_rx_seed4_precleanup_merrwarn;
 static volatile uint32_t s_rx_seed4_precleanup_mdatactrl;
 static volatile uint32_t s_rx_seed4_precleanup_mdmactrl;
+static volatile uint32_t s_rx_seed4_precleanup_mintset;
+static volatile uint32_t s_rx_seed4_precleanup_mintmasked;
 static volatile uint32_t s_rx_seed4_precleanup_dma_active;
 static volatile uint32_t s_rx_seed4_precleanup_dma_inta;
 static volatile uint32_t s_rx_seed4_precleanup_dma_ctlstat;
@@ -95,6 +103,8 @@ static void clear_rx_seed4_probe_state(void)
     s_rx_seed4_merrwarn = 0U;
     s_rx_seed4_mdatactrl = 0U;
     s_rx_seed4_mdmactrl = 0U;
+    s_rx_seed4_mintset = 0U;
+    s_rx_seed4_mintmasked = 0U;
     s_rx_seed4_dma_active = 0U;
     s_rx_seed4_dma_inta = 0U;
     s_rx_seed4_dma_ctlstat = 0U;
@@ -110,6 +120,8 @@ static void clear_rx_seed4_probe_state(void)
     s_rx_seed4_precleanup_merrwarn = 0U;
     s_rx_seed4_precleanup_mdatactrl = 0U;
     s_rx_seed4_precleanup_mdmactrl = 0U;
+    s_rx_seed4_precleanup_mintset = 0U;
+    s_rx_seed4_precleanup_mintmasked = 0U;
     s_rx_seed4_precleanup_dma_active = 0U;
     s_rx_seed4_precleanup_dma_inta = 0U;
     s_rx_seed4_precleanup_dma_ctlstat = 0U;
@@ -138,6 +150,8 @@ static void capture_rx_seed4_precleanup_state(I3C_Type *base)
     s_rx_seed4_precleanup_merrwarn = base->MERRWARN;
     s_rx_seed4_precleanup_mdatactrl = base->MDATACTRL;
     s_rx_seed4_precleanup_mdmactrl = base->MDMACTRL;
+    s_rx_seed4_precleanup_mintset = base->MINTSET;
+    s_rx_seed4_precleanup_mintmasked = base->MINTMASKED;
     s_rx_seed4_precleanup_dma_active = DMA0->COMMON[0].ACTIVE & channelMask;
     s_rx_seed4_precleanup_dma_inta = DMA0->COMMON[0].INTA & channelMask;
     s_rx_seed4_precleanup_dma_ctlstat = DMA0->CHANNEL[I3C_RX_SEED4_DMA_CHANNEL].CTLSTAT;
@@ -169,6 +183,8 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
         s_rx_seed4_merrwarn = s_rx_seed4_precleanup_merrwarn;
         s_rx_seed4_mdatactrl = s_rx_seed4_precleanup_mdatactrl;
         s_rx_seed4_mdmactrl = s_rx_seed4_precleanup_mdmactrl;
+        s_rx_seed4_mintset = s_rx_seed4_precleanup_mintset;
+        s_rx_seed4_mintmasked = s_rx_seed4_precleanup_mintmasked;
         s_rx_seed4_dma_active = s_rx_seed4_precleanup_dma_active;
         s_rx_seed4_dma_inta = s_rx_seed4_precleanup_dma_inta;
         s_rx_seed4_dma_ctlstat = s_rx_seed4_precleanup_dma_ctlstat;
@@ -182,6 +198,8 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
         s_rx_seed4_merrwarn = base->MERRWARN;
         s_rx_seed4_mdatactrl = base->MDATACTRL;
         s_rx_seed4_mdmactrl = base->MDMACTRL;
+        s_rx_seed4_mintset = base->MINTSET;
+        s_rx_seed4_mintmasked = base->MINTMASKED;
         s_rx_seed4_dma_active = DMA0->COMMON[0].ACTIVE & channelMask;
         s_rx_seed4_dma_inta = DMA0->COMMON[0].INTA & channelMask;
         s_rx_seed4_dma_ctlstat = DMA0->CHANNEL[I3C_RX_SEED4_DMA_CHANNEL].CTLSTAT;
@@ -259,6 +277,9 @@ static status_t wait_for_rx_seed4_dma_inta(I3C_Type *base, uint32_t *dmaIntaCoun
 
 static void prepare_rx_seed4_controller(I3C_Type *base)
 {
+    uint32_t interruptMask = I3C_PROTOCOL_IRQ_MASK | (uint32_t)kI3C_MasterTxReadyFlag |
+                             (uint32_t)kI3C_MasterRxReadyFlag;
+
     CLOCK_EnableClock(I3C_RX_SEED4_DMA_CLOCK);
     RESET_PeripheralReset(I3C_RX_SEED4_DMA_RESET);
     DMA0->CTRL = DMA_CTRL_ENABLE(1U);
@@ -267,9 +288,11 @@ static void prepare_rx_seed4_controller(I3C_Type *base)
 
     clear_dma0_rx_channel_state();
     I3C_MasterEnableDMA(base, false, false, 1U);
-    I3C_MasterDisableInterrupts(base,
-                                I3C_PROTOCOL_IRQ_MASK | (uint32_t)kI3C_MasterTxReadyFlag |
-                                    (uint32_t)kI3C_MasterRxReadyFlag);
+    I3C_MasterDisableInterrupts(base, interruptMask);
+    if (I3C_RX_SEED4_ENABLE_RXREADY_INT != 0U)
+    {
+        I3C_MasterEnableInterrupts(base, (uint32_t)kI3C_MasterRxReadyFlag);
+    }
 
     RESET_PeripheralReset(kINPUTMUX_RST_SHIFT_RSTn);
     INPUTMUX_Init(INPUTMUX);
