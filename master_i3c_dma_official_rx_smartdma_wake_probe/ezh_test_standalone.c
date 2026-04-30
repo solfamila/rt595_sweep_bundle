@@ -1,7 +1,12 @@
 /*
- * Minimal RT595 master experiment that exercises the official classic DMA I3C
- * path for the SDR write -> IBI -> SDR readback flow.
+ * Minimal RT595 master experiment that preserves the official classic DMA I3C
+ * RX proof while adding a DMA0 IRQ -> SmartDMA mailbox wake probe.
  */
+
+#include "fsl_common.h"
+#include "fsl_inputmux.h"
+#include "fsl_reset.h"
+#include "fsl_smartdma.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -22,6 +27,9 @@
 #define I3C_PACKET_LENGTH (I3C_DATA_LENGTH + 1U)
 #define I3C_DMA_OFFICIAL_TIMEOUT 100000000U
 #define I3C_DMA_OFFICIAL_LED_PULSE_US 120000U
+#define I3C_DMA_WAKE_API_INDEX 0U
+#define I3C_DMA_WAKE_MAILBOX_COMPLETE 1U
+#define SMART_DMA_TRIGGER_CHANNEL 0U
 
 enum
 {
@@ -33,8 +41,10 @@ enum
     kDmaOfficialStageIbiRegistered = 5U,
     kDmaOfficialStageWriteDone = 6U,
     kDmaOfficialStageIbiSeen = 7U,
-    kDmaOfficialStageReadDone = 8U,
-    kDmaOfficialStageValidated = 9U,
+    kDmaOfficialStageSmartDmaWakeArmed = 8U,
+    kDmaOfficialStageReadDone = 9U,
+    kDmaOfficialStageSmartDmaWakeSeen = 10U,
+    kDmaOfficialStageValidated = 11U,
 };
 
 enum
@@ -51,7 +61,40 @@ enum
     kDmaOfficialResultTimeoutIbi = -2,
     kDmaOfficialResultNoSlaveAddr = -3,
     kDmaOfficialResultDataMismatch = -4,
+    kDmaOfficialResultTimeoutSmartDmaWake = -5,
+    kDmaOfficialResultUnexpectedSmartDmaWake = -6,
 };
+
+typedef struct _i3c_dma_smartdma_wake_param
+{
+    volatile uint32_t mailbox;
+    volatile uint32_t wakeCount;
+    volatile uint32_t dmaIntaCount;
+    volatile uint32_t dmaIntaSnapshot;
+    volatile uint32_t i3cMdmaCtrlSnapshot;
+    volatile uint32_t i3cMstatusSnapshot;
+    volatile uint32_t i3cMdataCtrlSnapshot;
+    uint32_t i3cBaseAddress;
+    uint32_t dmaIntaAddress;
+} i3c_dma_smartdma_wake_param_t;
+
+extern uint8_t __smartdma_start__[];
+extern uint8_t __smartdma_end__[];
+
+void keep_smartdma_api_alive(void);
+
+extern volatile uint32_t g_dma0_dbg_irq_count;
+extern volatile uint32_t g_dma0_dbg_first_intstat;
+extern volatile uint32_t g_dma0_dbg_first_inta;
+extern volatile uint32_t g_dma0_dbg_first_active;
+extern volatile uint32_t g_dma0_dbg_last_intstat;
+extern volatile uint32_t g_dma0_dbg_last_inta;
+extern volatile uint32_t g_dma0_dbg_last_active;
+extern volatile uint32_t g_i3c_dbg_irq_count;
+extern volatile uint32_t g_i3c_dbg_irq_data_count;
+extern volatile uint32_t g_i3c_dbg_irq_protocol_count;
+extern volatile uint32_t g_i3c_dbg_irq_last_pending;
+extern volatile uint32_t g_i3c_dbg_irq_first_data_pending;
 
 static __NO_INIT volatile uint32_t s_dma_official_stage;
 static __NO_INIT volatile uint32_t s_dma_official_outcome;
@@ -66,12 +109,21 @@ static __NO_INIT volatile uint32_t s_dma_official_mismatch_index;
 static __NO_INIT volatile uint32_t s_dma_official_rx_first;
 static __NO_INIT volatile uint32_t s_dma_official_rx_last;
 static __NO_INIT volatile uint32_t s_dma_official_tail_recovery_count;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_mailbox;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_wake_count;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_dma_inta_count;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_dma_inta_snapshot;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_mdmactrl;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_mstatus;
+static __NO_INIT volatile uint32_t s_dma_official_smartdma_mdatactrl;
 static __NO_INIT volatile uint8_t s_dma_official_rx_snapshot[I3C_PACKET_LENGTH];
 
-static uint8_t g_master_txBuff[I3C_PACKET_LENGTH];
-static uint8_t g_master_rxBuff[I3C_PACKET_LENGTH];
-static uint8_t g_master_ibiBuff[10U];
-static uint8_t g_ibiBuff[10U];
+AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_smartdma_wake_param_t s_smartdma_wake_param, 4);
+
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_txBuff[I3C_PACKET_LENGTH], 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_rxBuff[I3C_PACKET_LENGTH], 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_ibiBuff[10U], 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_ibiBuff[10U], 4);
 static uint8_t g_ibiPayloadSize;
 static i3c_master_dma_handle_t g_i3cMasterHandle;
 static dma_handle_t g_txDmaHandle;
@@ -132,7 +184,15 @@ static void reset_retained_state(void)
     s_dma_official_rx_first = 0U;
     s_dma_official_rx_last = 0U;
     s_dma_official_tail_recovery_count = 0U;
+    s_dma_official_smartdma_mailbox = 0U;
+    s_dma_official_smartdma_wake_count = 0U;
+    s_dma_official_smartdma_dma_inta_count = 0U;
+    s_dma_official_smartdma_dma_inta_snapshot = 0U;
+    s_dma_official_smartdma_mdmactrl = 0U;
+    s_dma_official_smartdma_mstatus = 0U;
+    s_dma_official_smartdma_mdatactrl = 0U;
     memset((void *)s_dma_official_rx_snapshot, 0, sizeof(s_dma_official_rx_snapshot));
+    memset((void *)&s_smartdma_wake_param, 0, sizeof(s_smartdma_wake_param));
 }
 
 static void mark_failure(uint32_t stage, int32_t result)
@@ -215,6 +275,69 @@ static uint32_t recover_master_rx_tail(uint32_t startIndex, uint32_t totalSize)
     return writeIndex - startIndex;
 }
 
+static void snapshot_smartdma_wake_state(void)
+{
+    s_dma_official_smartdma_mailbox = s_smartdma_wake_param.mailbox;
+    s_dma_official_smartdma_wake_count = s_smartdma_wake_param.wakeCount;
+    s_dma_official_smartdma_dma_inta_count = s_smartdma_wake_param.dmaIntaCount;
+    s_dma_official_smartdma_dma_inta_snapshot = s_smartdma_wake_param.dmaIntaSnapshot;
+    s_dma_official_smartdma_mdmactrl = s_smartdma_wake_param.i3cMdmaCtrlSnapshot;
+    s_dma_official_smartdma_mstatus = s_smartdma_wake_param.i3cMstatusSnapshot;
+    s_dma_official_smartdma_mdatactrl = s_smartdma_wake_param.i3cMdataCtrlSnapshot;
+}
+
+static void arm_smartdma_wake_probe(void)
+{
+    keep_smartdma_api_alive();
+
+    memset((void *)&s_smartdma_wake_param, 0, sizeof(s_smartdma_wake_param));
+    s_smartdma_wake_param.i3cBaseAddress = (uint32_t)(uintptr_t)EXAMPLE_MASTER;
+    s_smartdma_wake_param.dmaIntaAddress = (uint32_t)(uintptr_t)&EXAMPLE_DMA->COMMON[0].INTA;
+
+    g_dma0_dbg_irq_count = 0U;
+    g_dma0_dbg_first_intstat = 0U;
+    g_dma0_dbg_first_inta = 0U;
+    g_dma0_dbg_first_active = 0U;
+    g_dma0_dbg_last_intstat = 0U;
+    g_dma0_dbg_last_inta = 0U;
+    g_dma0_dbg_last_active = 0U;
+    g_i3c_dbg_irq_count = 0U;
+    g_i3c_dbg_irq_data_count = 0U;
+    g_i3c_dbg_irq_protocol_count = 0U;
+    g_i3c_dbg_irq_last_pending = 0U;
+    g_i3c_dbg_irq_first_data_pending = 0U;
+
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_AttachSignal(INPUTMUX, SMART_DMA_TRIGGER_CHANNEL, kINPUTMUX_Dma0IrqToSmartDmaInput);
+    INPUTMUX_Deinit(INPUTMUX);
+
+    NVIC_ClearPendingIRQ(DMA0_IRQn);
+    NVIC_ClearPendingIRQ(SDMA_IRQn);
+    NVIC_DisableIRQ(SDMA_IRQn);
+
+    SMARTDMA_Init(
+        SMARTDMA_SRAM_ADDR, __smartdma_start__, (uint32_t)((uintptr_t)__smartdma_end__ - (uintptr_t)__smartdma_start__));
+    SMARTDMA_Reset();
+    SMARTDMA_Boot(I3C_DMA_WAKE_API_INDEX, &s_smartdma_wake_param, 0U);
+}
+
+static status_t wait_for_smartdma_wake(uint32_t timeout)
+{
+    while ((s_smartdma_wake_param.mailbox == 0U) && (timeout != 0U))
+    {
+        timeout--;
+    }
+
+    snapshot_smartdma_wake_state();
+
+    if (s_smartdma_wake_param.mailbox == 0U)
+    {
+        return kStatus_Timeout;
+    }
+
+    return kStatus_Success;
+}
+
 static void i3c_master_ibi_callback(I3C_Type *base,
                                     i3c_master_dma_handle_t *handle,
                                     i3c_ibi_type_t ibiType,
@@ -285,7 +408,7 @@ int main(void)
     run_boot_led_self_test();
 
     PRINTF("MCUX SDK version: %s\r\n", MCUXSDK_VERSION_FULL_STR);
-    PRINTF("\r\nI3C DMA official RX probe -- Master transfer.\r\n");
+    PRINTF("\r\nI3C DMA official RX SmartDMA wake probe -- Master transfer.\r\n");
 
     g_masterCompletionFlag = false;
     g_ibiWonFlag = false;
@@ -424,17 +547,20 @@ int main(void)
     masterXfer.ibiResponse = kI3C_IbiRespAckMandatory;
     s_dma_official_rx_size = g_ibiBuff[0];
 
+    arm_smartdma_wake_probe();
+    s_dma_official_stage = kDmaOfficialStageSmartDmaWakeArmed;
+
     result = I3C_MasterTransferDMA(EXAMPLE_MASTER, &g_i3cMasterHandle, &masterXfer);
     if (result != kStatus_Success)
     {
-        mark_failure(kDmaOfficialStageIbiSeen, (int32_t)result);
+        mark_failure(kDmaOfficialStageSmartDmaWakeArmed, (int32_t)result);
         goto fail;
     }
 
     result = wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
     if (result != kStatus_Success)
     {
-        mark_failure(kDmaOfficialStageIbiSeen,
+        mark_failure(kDmaOfficialStageSmartDmaWakeArmed,
                      (result == kStatus_Timeout) ? kDmaOfficialResultTimeoutCompletion : (int32_t)result);
         goto fail;
     }
@@ -453,6 +579,21 @@ int main(void)
     s_dma_official_rx_last = (g_ibiBuff[0] != 0U) ? g_master_rxBuff[g_ibiBuff[0] - 1U] : 0U;
     memcpy((void *)s_dma_official_rx_snapshot, g_master_rxBuff, sizeof(g_master_rxBuff));
 
+    result = wait_for_smartdma_wake(I3C_DMA_OFFICIAL_TIMEOUT);
+    if (result != kStatus_Success)
+    {
+        mark_failure(kDmaOfficialStageReadDone, kDmaOfficialResultTimeoutSmartDmaWake);
+        goto fail;
+    }
+
+    if ((s_smartdma_wake_param.mailbox != I3C_DMA_WAKE_MAILBOX_COMPLETE) || (s_smartdma_wake_param.wakeCount != 1U))
+    {
+        mark_failure(kDmaOfficialStageReadDone, kDmaOfficialResultUnexpectedSmartDmaWake);
+        goto fail;
+    }
+
+    s_dma_official_stage = kDmaOfficialStageSmartDmaWakeSeen;
+
     for (uint32_t index = 0U; index < g_master_txBuff[0]; index++)
     {
         if (g_master_rxBuff[index] != g_master_txBuff[index + 1U])
@@ -466,7 +607,7 @@ int main(void)
     s_dma_official_stage = kDmaOfficialStageValidated;
     s_dma_official_outcome = kDmaOfficialOutcomeSuccess;
     s_dma_official_result = kDmaOfficialResultSuccess;
-    PRINTF("I3C DMA official RX probe successful\r\n");
+    PRINTF("I3C DMA official RX SmartDMA wake probe successful\r\n");
     set_success_led();
     while (1)
     {
@@ -474,7 +615,8 @@ int main(void)
     }
 
 fail:
-    PRINTF("I3C DMA official RX probe failed: stage=%lu result=%ld status=%lu\r\n",
+    snapshot_smartdma_wake_state();
+    PRINTF("I3C DMA official RX SmartDMA wake probe failed: stage=%lu result=%ld status=%lu\r\n",
            (unsigned long)s_dma_official_stage,
            (long)s_dma_official_result,
            (unsigned long)s_dma_official_completion_status);

@@ -13,6 +13,7 @@ environment:
 supported experiments:
   master_i3c_sdma_seed_tail_len_sweep
   master_i3c_dma_official_rx_probe
+  master_i3c_dma_official_rx_smartdma_wake_probe
 EOF
 }
 
@@ -39,7 +40,7 @@ resolve_experiment_dir() {
   fi
 
   case "$(basename "$resolved_dir")" in
-    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe)
+    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe|master_i3c_dma_official_rx_smartdma_wake_probe)
       printf '%s\n' "$resolved_dir"
       ;;
     *)
@@ -501,11 +502,11 @@ compile_master() {
     )
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
     defines+=(I3C_ERRATA_052123_USE_DMA_CHAIN=0)
   fi
 
@@ -634,11 +635,11 @@ compile_slave() {
     defines+=("${extra_slave_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT=6)
   fi
 
@@ -742,6 +743,9 @@ validate_master_output() {
       ;;
     master_i3c_dma_official_rx_probe)
       grep -q 'I3C DMA official RX probe successful' "$output_file"
+      ;;
+    master_i3c_dma_official_rx_smartdma_wake_probe)
+      grep -q 'I3C DMA official RX SmartDMA wake probe successful' "$output_file"
       ;;
     *)
       echo "unknown experiment: $experiment_name" >&2

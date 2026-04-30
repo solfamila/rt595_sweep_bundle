@@ -79,13 +79,15 @@ trace32_run_generated_script() {
   local timeout_seconds=$1
   local wait_ms=$2
   local tmp_root
+  local node
   local wrapper
   local script_file
 
   wrapper=$(trace32_wrapper_path)
+  node=${TRACE32_NODE:-127.0.0.1}
   tmp_root=${TMPDIR:-/tmp}
   script_file=$(mktemp "${tmp_root%/}/rt595_sweep_trace32.XXXXXX")
   trap "rm -f '$script_file'" EXIT
   cat >"$script_file"
-  "$wrapper" "timeout=$timeout_seconds" "wait=$wait_ms" "DO $script_file"
+  "$wrapper" "node=$node" "timeout=$timeout_seconds" "wait=$wait_ms" "DO $script_file"
 }

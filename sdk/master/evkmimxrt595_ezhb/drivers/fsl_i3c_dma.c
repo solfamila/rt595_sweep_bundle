@@ -27,9 +27,34 @@ volatile uint32_t g_i3c_dbg_xfer_count = 0U;
 volatile uint32_t g_i3c_dbg_xfer_last_direction = 0U;
 volatile uint32_t g_i3c_dbg_xfer_last_dataSize = 0U;
 volatile uint32_t g_i3c_dbg_xfer_last_subaddrSize = 0U;
+volatile uint32_t g_i3c_dbg_xfer_entry_mdmactrl = 0U;
 volatile uint32_t g_i3c_dbg_xfer_entry_mdatactrl = 0U;
 volatile uint32_t g_i3c_dbg_xfer_entry_mstatus = 0U;
 volatile uint32_t g_i3c_dbg_xfer_entry_merrwarn = 0U;
+
+/* DEBUG(i3c_errata_052041): RX DMA and IRQ snapshots captured around the
+ * official DMA workaround path. */
+volatile uint32_t g_i3c_dbg_dma_rx_channel_cfg = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_channel_xfercfg = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_desc_xfercfg = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_desc_src = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_desc_dst = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_desc_next = 0U;
+volatile uint32_t g_i3c_dbg_dma_rx_mdmactrl = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_rx_count = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_rx_mdmactrl = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_rx_mstatus = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_rx_mdatactrl = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_rx_merrwarn = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_tx_count = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_tx_mdmactrl = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_tx_mstatus = 0U;
+volatile uint32_t g_i3c_dbg_dma_callback_tx_mdatactrl = 0U;
+volatile uint32_t g_i3c_dbg_irq_count = 0U;
+volatile uint32_t g_i3c_dbg_irq_data_count = 0U;
+volatile uint32_t g_i3c_dbg_irq_protocol_count = 0U;
+volatile uint32_t g_i3c_dbg_irq_last_pending = 0U;
+volatile uint32_t g_i3c_dbg_irq_first_data_pending = 0U;
 
 /*******************************************************************************
  * Definitions
@@ -248,6 +273,16 @@ static void I3C_MasterSetDMARxLoop(i3c_master_dma_handle_t* handle) {
 
   /* DEBUG(i3c_errata_052041): snapshot MDATACTRL AFTER watermark/DMA setup. */
   g_i3c_dbg_rxloop_after_mdatactrl = handle->base->MDATACTRL;
+  g_i3c_dbg_dma_rx_mdmactrl = handle->base->MDMACTRL;
+  g_i3c_dbg_dma_rx_channel_cfg =
+      handle->rxDmaHandle->base->CHANNEL[handle->rxDmaHandle->channel].CFG;
+  g_i3c_dbg_dma_rx_channel_xfercfg =
+      handle->rxDmaHandle->base->CHANNEL[handle->rxDmaHandle->channel].XFERCFG;
+  g_i3c_dbg_dma_rx_desc_xfercfg = s_dma_table[instance][0].xfercfg;
+  g_i3c_dbg_dma_rx_desc_src = (uint32_t)(uintptr_t)s_dma_table[instance][0].srcEndAddr;
+  g_i3c_dbg_dma_rx_desc_dst = (uint32_t)(uintptr_t)s_dma_table[instance][0].dstEndAddr;
+  g_i3c_dbg_dma_rx_desc_next =
+      (uint32_t)(uintptr_t)s_dma_table[instance][0].linkToNextDesc;
 }
 #endif
 
@@ -258,6 +293,11 @@ static void I3C_MasterTransferDMACallbackRx(dma_handle_t* dmaHandle,
   i3c_master_dma_handle_t* i3cHandle = (i3c_master_dma_handle_t*)param;
 
   if (transferDone) {
+    g_i3c_dbg_dma_callback_rx_count++;
+    g_i3c_dbg_dma_callback_rx_mdmactrl = i3cHandle->base->MDMACTRL;
+    g_i3c_dbg_dma_callback_rx_mstatus = i3cHandle->base->MSTATUS;
+    g_i3c_dbg_dma_callback_rx_mdatactrl = i3cHandle->base->MDATACTRL;
+    g_i3c_dbg_dma_callback_rx_merrwarn = i3cHandle->base->MERRWARN;
 #if defined(FSL_FEATURE_I3C_HAS_ERRATA_052123) && \
     (FSL_FEATURE_I3C_HAS_ERRATA_052123)
     while (i3cHandle->transDataSize < i3cHandle->transfer.dataSize) {
@@ -557,6 +597,10 @@ static void I3C_MasterTransferDMACallbackTx(dma_handle_t* dmaHandle,
   i3c_master_dma_handle_t* i3cHandle = (i3c_master_dma_handle_t*)param;
 
   if (transferDone) {
+  g_i3c_dbg_dma_callback_tx_count++;
+  g_i3c_dbg_dma_callback_tx_mdmactrl = i3cHandle->base->MDMACTRL;
+  g_i3c_dbg_dma_callback_tx_mstatus = i3cHandle->base->MSTATUS;
+  g_i3c_dbg_dma_callback_tx_mdatactrl = i3cHandle->base->MDATACTRL;
 #if defined(FSL_FEATURE_I3C_HAS_ERRATA_052123) && \
     (FSL_FEATURE_I3C_HAS_ERRATA_052123)
     uint32_t leftBytes =
@@ -906,6 +950,17 @@ static status_t I3C_MasterRunTransferStateMachineDMA(
 
   /* Check for errors. */
   status = (uint32_t)I3C_MasterGetPendingInterrupts(base);
+  g_i3c_dbg_irq_count++;
+  g_i3c_dbg_irq_last_pending = status;
+  if ((status & ((uint32_t)kI3C_MasterTxReadyFlag | (uint32_t)kI3C_MasterRxReadyFlag)) != 0U) {
+    g_i3c_dbg_irq_data_count++;
+    if (g_i3c_dbg_irq_first_data_pending == 0U) {
+      g_i3c_dbg_irq_first_data_pending = status;
+    }
+  }
+  if ((status & (uint32_t)kMasterDMAIrqFlags) != 0U) {
+    g_i3c_dbg_irq_protocol_count++;
+  }
   I3C_MasterClearStatusFlags(base, status);
 
   i3c_master_state_t masterState = I3C_MasterGetState(base);
@@ -1144,6 +1199,7 @@ status_t I3C_MasterTransferDMA(I3C_Type* base,
   /* DEBUG(i3c_errata_052041): capture HW state on entry to a new DMA
    * transfer (before any clear/flush). Reflects what the previous CCC/read
    * left behind. */
+  g_i3c_dbg_xfer_entry_mdmactrl = base->MDMACTRL;
   g_i3c_dbg_xfer_entry_mdatactrl = base->MDATACTRL;
   g_i3c_dbg_xfer_entry_mstatus = base->MSTATUS;
   g_i3c_dbg_xfer_entry_merrwarn = base->MERRWARN;

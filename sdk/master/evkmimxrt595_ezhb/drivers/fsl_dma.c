@@ -11,6 +11,16 @@
 #include "fsl_memory.h"
 #endif
 
+/* DEBUG(i3c_errata_052041): DMA0 IRQ/INTA snapshots captured at IRQ entry
+ * before the driver clears channel status. */
+volatile uint32_t g_dma0_dbg_irq_count = 0U;
+volatile uint32_t g_dma0_dbg_first_intstat = 0U;
+volatile uint32_t g_dma0_dbg_first_inta = 0U;
+volatile uint32_t g_dma0_dbg_first_active = 0U;
+volatile uint32_t g_dma0_dbg_last_intstat = 0U;
+volatile uint32_t g_dma0_dbg_last_inta = 0U;
+volatile uint32_t g_dma0_dbg_last_active = 0U;
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -1004,6 +1014,27 @@ void DMA_IRQHandle(DMA_Type *base)
     uint32_t startChannel = DMA_GetVirtualStartChannel(base);
     uint32_t i            = 0;
     bool intEnabled = false, intA = false, intB = false;
+
+#if defined(DMA0)
+    if (base == DMA0)
+    {
+        uint32_t intstat = base->INTSTAT;
+        uint32_t inta    = base->COMMON[0].INTA;
+        uint32_t active  = base->COMMON[0].ACTIVE;
+
+        if (g_dma0_dbg_irq_count == 0U)
+        {
+            g_dma0_dbg_first_intstat = intstat;
+            g_dma0_dbg_first_inta = inta;
+            g_dma0_dbg_first_active = active;
+        }
+
+        g_dma0_dbg_irq_count++;
+        g_dma0_dbg_last_intstat = intstat;
+        g_dma0_dbg_last_inta = inta;
+        g_dma0_dbg_last_active = active;
+    }
+#endif
 
     /* Find channels that have completed transfer */
     for (i = 0; i < (uint32_t)FSL_FEATURE_DMA_NUMBER_OF_CHANNELSn(base); i++)
