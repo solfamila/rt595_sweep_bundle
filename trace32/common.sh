@@ -48,7 +48,7 @@ trace32_require_master_axf() {
   master_axf=$(trace32_master_axf_path)
   if [[ ! -f "$master_axf" ]]; then
     echo "missing master ELF: $master_axf" >&2
-    echo "Build it first with: RT595_MASTER_RUN_MODE=none ./run_experiment.sh master_i3c_sdma_seed_tail_len_sweep" >&2
+    echo "Build it first with: RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_sdma_seed_tail_len_sweep" >&2
     return 1
   fi
 }

@@ -9,6 +9,10 @@ usage:
 
 environment:
   RT595_MASTER_RUN_MODE=linkserver|trace32|none  default: linkserver
+
+supported experiments:
+  master_i3c_sdma_seed_tail_len_sweep
+  master_i3c_dma_official_rx_probe
 EOF
 }
 
@@ -23,15 +27,26 @@ SDK_ROOT="$REPO_DIR/sdk"
 
 resolve_experiment_dir() {
   local experiment_arg=$1
+  local resolved_dir
 
   if [[ -d "$REPO_DIR/$experiment_arg" ]]; then
-    cd "$REPO_DIR/$experiment_arg" && pwd
+    resolved_dir=$(cd "$REPO_DIR/$experiment_arg" && pwd)
   elif [[ -d "$experiment_arg" ]]; then
-    cd "$experiment_arg" && pwd
+    resolved_dir=$(cd "$experiment_arg" && pwd)
   else
     echo "unknown experiment directory: $experiment_arg" >&2
     exit 1
   fi
+
+  case "$(basename "$resolved_dir")" in
+    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe)
+      printf '%s\n' "$resolved_dir"
+      ;;
+    *)
+      echo "unsupported experiment directory: $experiment_arg" >&2
+      exit 1
+      ;;
+  esac
 }
 
 clean_build_outputs() {
@@ -478,7 +493,7 @@ compile_master() {
     defines+=("${extra_master_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_rx_request_semantics_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_tail5_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_inta_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_full_len_dma_inta_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_cfg_compare" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma1_inta_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_one_frame_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_rxready_enabled_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_inputmux_live_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_len1_seed_only_dma_inta_poll" || "$EXPERIMENT_NAME" == "master_i3c_rx_len6_full_len_dma_inta_poll" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ]]; then
     master_driver_source="$REPO_DIR/src/master/drivers/fsl_i3c_smartdma.c"
     includes=(
       "$shared_master_driver_include"
@@ -486,7 +501,7 @@ compile_master() {
     )
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
@@ -619,7 +634,7 @@ compile_slave() {
     defines+=("${extra_slave_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
@@ -627,12 +642,8 @@ compile_slave() {
     defines+=(EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT=6)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ]]; then
     defines+=(EXPERIMENT_SKIP_SLAVE_BOOT_LED_TEST=1)
-  fi
-
-  if [[ "$EXPERIMENT_NAME" == "master_interrupt" ]]; then
-    defines+=(EXPERIMENT_SLAVE_MIN_ECHO_COUNT=8)
   fi
 
   sources+=(
@@ -726,68 +737,11 @@ validate_master_output() {
   local output_file=$2
 
   case "$experiment_name" in
-    master_polling|master_interrupt)
-      grep -q 'I3C master transfer successful in I3C SDR mode' "$output_file"
-      ;;
-    master_dma_irq_probe)
-      grep -q 'DMA0 IRQ to SmartDMA proof successful' "$output_file"
-      ;;
-    master_i3c_dma_irq_probe)
-      grep -q 'I3C DMA request to DMA0 IRQ to SmartDMA proof successful' "$output_file"
-      ;;
-    master_i3c_dma_byte_bridge)
-      grep -q 'I3C DMA byte bridge to SmartDMA proof successful' "$output_file"
-      ;;
-    master_i3c_dma_seed_chain_probe)
-      grep -q 'I3C DMA seed chain probe successful' "$output_file"
-      ;;
-    master_i3c_dma_seed_tail_ibi_probe)
-      grep -q 'I3C DMA seed tail IBI probe successful' "$output_file"
-      ;;
     master_i3c_sdma_seed_tail_len_sweep)
       grep -q 'I3C SDMA seed tail length sweep successful' "$output_file"
       ;;
-    master_i3c_rx_request_semantics_probe)
-      grep -q 'I3C RX request semantics probe successful' "$output_file"
-      ;;
-    master_i3c_sdma_rx_seed6_tail5_no_cpu_irq)
-      grep -q 'I3C RX seed6-tail5 no-CPU-IRQ probe successful' "$output_file"
-      ;;
-    master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq)
-      grep -q 'I3C RX seed6 seed-only no-CPU-IRQ probe successful' "$output_file"
-      ;;
-    master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq)
-      grep -q 'I3C RX seed-only matrix no-CPU-IRQ probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma_inta_poll)
-      grep -q 'I3C RX seed4 seed-only DMA INTA poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_full_len_dma_inta_poll)
-      grep -q 'I3C RX seed4 full-length DMA INTA poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma_cfg_compare)
-      grep -q 'I3C RX seed4 seed-only DMA CFG compare probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma1_inta_poll)
-      grep -q 'I3C RX seed4 seed-only DMA1 INTA poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma_one_frame_poll)
-      grep -q 'I3C RX seed4 seed-only DMA one-frame poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma_rxready_enabled_poll)
-      grep -q 'I3C RX seed4 seed-only DMA RXREADY-enabled poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_seed4_seed_only_dma_inputmux_live_poll)
-      grep -q 'I3C RX seed4 seed-only DMA INPUTMUX-live poll probe successful' "$output_file"
-      ;;
-    master_i3c_rx_len1_seed_only_dma_inta_poll)
-      grep -q 'I3C RX len1 seed-only DMA INTA poll probe successful' "$output_file"
-      ;;
     master_i3c_dma_official_rx_probe)
       grep -q 'I3C DMA official RX probe successful' "$output_file"
-      ;;
-    master_led_smoke)
-      grep -q 'LED smoke starting: raw GPIO forever' "$output_file" && grep -q 'readback:' "$output_file"
       ;;
     *)
       echo "unknown experiment: $experiment_name" >&2
@@ -809,27 +763,6 @@ compile_master "$MASTER_LINK_SCRIPT"
 MASTER_ELF="$MASTER_BUILD_DIR/evkmimxrt595_ezhb.axf"
 MASTER_LOG="$BUILD_DIR/master_run.log"
 
-if [[ "$EXPERIMENT_NAME" == "master_led_smoke" ]]; then
-  if [[ "$MASTER_RUN_MODE" != "linkserver" ]]; then
-    skip_master_linkserver_run
-    exit 0
-  fi
-
-  echo "Running master LED smoke only on $MASTER_PROBE"
-  set +e
-  "$LINKSERVER" run -p "$MASTER_PROBE" --exit-timeout "$EXIT_TIMEOUT" "$DEVICE" "$MASTER_ELF" 2>&1 | tee "$MASTER_LOG"
-  MASTER_STATUS=${PIPESTATUS[0]}
-  set -e
-
-  if ! validate_master_output "$EXPERIMENT_NAME" "$MASTER_LOG"; then
-    echo "$EXPERIMENT_NAME FAILED validation" >&2
-    exit 1
-  fi
-
-  echo "master_led_smoke raw GPIO probe finished or timed out with status $MASTER_STATUS"
-  exit 0
-fi
-
 echo "Building $EXPERIMENT_NAME slave"
 compile_slave "$SLAVE_LINK_SCRIPT"
 
@@ -850,7 +783,7 @@ fi
 reset_master_board_quiet
 
 USE_LIVE_SLAVE_RUN=0
-if [[ ( "$MASTER_RUN_MODE" == "linkserver" && ( "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ) ) || "${RT595_SLAVE_LIVE_RUN:-0}" == 1 ]]; then
+if [[ "${RT595_SLAVE_LIVE_RUN:-0}" == 1 ]]; then
   USE_LIVE_SLAVE_RUN=1
 fi
 
