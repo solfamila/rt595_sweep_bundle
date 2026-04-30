@@ -638,6 +638,50 @@ This rules out the simpler `RXREADY` interrupt-enable gating explanation. Even
 with the `RXREADY` source enabled and pending in `MINTMASKED`, the native RX
 DMA path still does not complete.
 
+## RX Seed4 DMA INPUTMUX-Live Poll Probe
+
+Use this mux-side probe to keep the same direct DMA0 seed-only path but leave
+the INPUTMUX clock enabled for the whole transfer instead of calling
+`INPUTMUX_Deinit()` immediately after setting the request-enable bit.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 still uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. `INPUTMUX->DMAC0_REQ_ENA0` stays live while the transfer runs.
+6. The probe snapshots `INPUTMUX->DMAC0_REQ_ENA0` in retained state.
+
+### Build the INPUTMUX-live probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma_inputmux_live_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma_inputmux_live_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed4InputmuxLive= pc=20288604 stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=4000030 mdmactrl=12 mintset=0 mintmasked=0 reqena0=0FDFFFFFF dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is still the DMA-INTA wait timeout.
+2. `reqena0=0FDFFFFFF` shows the DMAC0 request-enable register stayed programmed with the `I3C0_RX` enable bit set and the `I3C0_TX` bit cleared during the failure snapshot.
+3. `dmaIntaCount=0` and `dmaInta=0` mean DMA0 CH24 still never completed the one-byte descriptor.
+4. `mintset=0 mintmasked=0` confirms this variant did not rely on the RXREADY interrupt-enable path.
+
+This rules out the simpler INPUTMUX clock-lifetime explanation. Native RX DMA
+still does not complete even when the INPUTMUX request-enable register remains
+live for the whole transfer.
+
 ### Very long settle variant
 
 ```bash

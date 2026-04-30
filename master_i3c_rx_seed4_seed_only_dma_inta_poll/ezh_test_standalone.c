@@ -27,6 +27,10 @@
 #define I3C_RX_SEED4_ENABLE_RXREADY_INT 0U
 #endif
 
+#ifndef I3C_RX_SEED4_KEEP_INPUTMUX_CLOCK_ENABLED
+#define I3C_RX_SEED4_KEEP_INPUTMUX_CLOCK_ENABLED 0U
+#endif
+
 #define I3C_RX_SEED4_LENGTH 4U
 #define I3C_RX_SEED4_DMA_CHANNEL 24U
 #define I3C_RX_SEED4_DMA_CLOCK kCLOCK_Dmac0
@@ -67,6 +71,7 @@ static __NO_INIT volatile uint32_t s_rx_seed4_mdatactrl;
 static __NO_INIT volatile uint32_t s_rx_seed4_mdmactrl;
 static __NO_INIT volatile uint32_t s_rx_seed4_mintset;
 static __NO_INIT volatile uint32_t s_rx_seed4_mintmasked;
+static __NO_INIT volatile uint32_t s_rx_seed4_inputmux_dmac_req_ena0;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_active;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_inta;
 static __NO_INIT volatile uint32_t s_rx_seed4_dma_ctlstat;
@@ -84,6 +89,7 @@ static volatile uint32_t s_rx_seed4_precleanup_mdatactrl;
 static volatile uint32_t s_rx_seed4_precleanup_mdmactrl;
 static volatile uint32_t s_rx_seed4_precleanup_mintset;
 static volatile uint32_t s_rx_seed4_precleanup_mintmasked;
+static volatile uint32_t s_rx_seed4_precleanup_inputmux_dmac_req_ena0;
 static volatile uint32_t s_rx_seed4_precleanup_dma_active;
 static volatile uint32_t s_rx_seed4_precleanup_dma_inta;
 static volatile uint32_t s_rx_seed4_precleanup_dma_ctlstat;
@@ -105,6 +111,7 @@ static void clear_rx_seed4_probe_state(void)
     s_rx_seed4_mdmactrl = 0U;
     s_rx_seed4_mintset = 0U;
     s_rx_seed4_mintmasked = 0U;
+    s_rx_seed4_inputmux_dmac_req_ena0 = 0U;
     s_rx_seed4_dma_active = 0U;
     s_rx_seed4_dma_inta = 0U;
     s_rx_seed4_dma_ctlstat = 0U;
@@ -122,6 +129,7 @@ static void clear_rx_seed4_probe_state(void)
     s_rx_seed4_precleanup_mdmactrl = 0U;
     s_rx_seed4_precleanup_mintset = 0U;
     s_rx_seed4_precleanup_mintmasked = 0U;
+    s_rx_seed4_precleanup_inputmux_dmac_req_ena0 = 0U;
     s_rx_seed4_precleanup_dma_active = 0U;
     s_rx_seed4_precleanup_dma_inta = 0U;
     s_rx_seed4_precleanup_dma_ctlstat = 0U;
@@ -152,6 +160,7 @@ static void capture_rx_seed4_precleanup_state(I3C_Type *base)
     s_rx_seed4_precleanup_mdmactrl = base->MDMACTRL;
     s_rx_seed4_precleanup_mintset = base->MINTSET;
     s_rx_seed4_precleanup_mintmasked = base->MINTMASKED;
+    s_rx_seed4_precleanup_inputmux_dmac_req_ena0 = INPUTMUX->DMAC0_REQ_ENA0;
     s_rx_seed4_precleanup_dma_active = DMA0->COMMON[0].ACTIVE & channelMask;
     s_rx_seed4_precleanup_dma_inta = DMA0->COMMON[0].INTA & channelMask;
     s_rx_seed4_precleanup_dma_ctlstat = DMA0->CHANNEL[I3C_RX_SEED4_DMA_CHANNEL].CTLSTAT;
@@ -185,6 +194,7 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
         s_rx_seed4_mdmactrl = s_rx_seed4_precleanup_mdmactrl;
         s_rx_seed4_mintset = s_rx_seed4_precleanup_mintset;
         s_rx_seed4_mintmasked = s_rx_seed4_precleanup_mintmasked;
+        s_rx_seed4_inputmux_dmac_req_ena0 = s_rx_seed4_precleanup_inputmux_dmac_req_ena0;
         s_rx_seed4_dma_active = s_rx_seed4_precleanup_dma_active;
         s_rx_seed4_dma_inta = s_rx_seed4_precleanup_dma_inta;
         s_rx_seed4_dma_ctlstat = s_rx_seed4_precleanup_dma_ctlstat;
@@ -200,6 +210,7 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
         s_rx_seed4_mdmactrl = base->MDMACTRL;
         s_rx_seed4_mintset = base->MINTSET;
         s_rx_seed4_mintmasked = base->MINTMASKED;
+        s_rx_seed4_inputmux_dmac_req_ena0 = INPUTMUX->DMAC0_REQ_ENA0;
         s_rx_seed4_dma_active = DMA0->COMMON[0].ACTIVE & channelMask;
         s_rx_seed4_dma_inta = DMA0->COMMON[0].INTA & channelMask;
         s_rx_seed4_dma_ctlstat = DMA0->CHANNEL[I3C_RX_SEED4_DMA_CHANNEL].CTLSTAT;
@@ -298,7 +309,10 @@ static void prepare_rx_seed4_controller(I3C_Type *base)
     INPUTMUX_Init(INPUTMUX);
     INPUTMUX_EnableSignal(INPUTMUX, I3C_RX_SEED4_DMA_INPUTMUX_SIGNAL, true);
     INPUTMUX_EnableSignal(INPUTMUX, kINPUTMUX_I3c0TxToDmac0Ch25RequestEna, false);
-    INPUTMUX_Deinit(INPUTMUX);
+    if (I3C_RX_SEED4_KEEP_INPUTMUX_CLOCK_ENABLED == 0U)
+    {
+        INPUTMUX_Deinit(INPUTMUX);
+    }
 
     DMA0->CHANNEL[I3C_RX_SEED4_DMA_CHANNEL].CFG = DMA_CHANNEL_CFG_PERIPHREQEN(1U);
     NVIC_ClearPendingIRQ(I3C_RX_SEED4_DMA_IRQ);
