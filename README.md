@@ -682,6 +682,50 @@ This rules out the simpler INPUTMUX clock-lifetime explanation. Native RX DMA
 still does not complete even when the INPUTMUX request-enable register remains
 live for the whole transfer.
 
+## RX Len1 Seed-Only DMA INTA Poll Probe
+
+Use this read-terminate probe to keep the same direct DMA0 seed-only path but
+reduce the read length to 1 byte so `MCTRL.RDTERM` is also 1.
+
+Geometry under test:
+
+1. Read length fixed at 1 byte.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 still uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. `INPUTMUX->DMAC0_REQ_ENA0.I3C0_RX` remains enabled for the transfer.
+6. The probe snapshots `MCTRL` so the retained state proves `RDTERM=1` at failure.
+
+### Build the len1 probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_len1_seed_only_dma_inta_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_len1_seed_only_dma_inta_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxLen1= pc=2028863C stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mctrl=16100 mstatus=1E03 merr=0 mdatactrl=1000030 mdmactrl=12 mintset=0 mintmasked=0 reqena0=0FDFFFFFF dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is still the DMA-INTA wait timeout.
+2. `mctrl=16100` means the halted failure snapshot still carried `RDTERM=1`.
+3. `mstatus=1E03` shows the read command had already reached `MCTRLDONE|COMPLETE|RXPEND|TXNOTFULL` in `NORMACT` state.
+4. `mdatactrl=1000030` means one byte was pending in the RX FIFO.
+5. `dmaIntaCount=0` and `dmaInta=0` mean DMA0 CH24 still never completed even for the one-byte read.
+
+This rules out the simpler read-length / `RDTERM`-size explanation. Native RX
+DMA still does not complete even when the transfer is reduced to a 1-byte read
+that should be the easiest possible seed case.
+
 ### Very long settle variant
 
 ```bash

@@ -31,7 +31,9 @@
 #define I3C_RX_SEED4_KEEP_INPUTMUX_CLOCK_ENABLED 0U
 #endif
 
+#ifndef I3C_RX_SEED4_LENGTH
 #define I3C_RX_SEED4_LENGTH 4U
+#endif
 #define I3C_RX_SEED4_DMA_CHANNEL 24U
 #define I3C_RX_SEED4_DMA_CLOCK kCLOCK_Dmac0
 #define I3C_RX_SEED4_DMA_RESET kDMAC0_RST_SHIFT_RSTn
@@ -65,6 +67,7 @@ static __NO_INIT volatile uint32_t s_rx_seed4_dma_inta_count;
 static __NO_INIT volatile uint32_t s_rx_seed4_data_irq_delta;
 static __NO_INIT volatile uint32_t s_rx_seed4_protocol_irq_delta;
 static __NO_INIT volatile uint32_t s_rx_seed4_ibi_irq_delta;
+static __NO_INIT volatile uint32_t s_rx_seed4_mctrl;
 static __NO_INIT volatile uint32_t s_rx_seed4_mstatus;
 static __NO_INIT volatile uint32_t s_rx_seed4_merrwarn;
 static __NO_INIT volatile uint32_t s_rx_seed4_mdatactrl;
@@ -83,6 +86,7 @@ static __NO_INIT volatile uint32_t s_rx_seed4_data1;
 static __NO_INIT volatile uint32_t s_rx_seed4_data2;
 static __NO_INIT volatile uint32_t s_rx_seed4_data3;
 static volatile uint32_t s_rx_seed4_precleanup_valid;
+static volatile uint32_t s_rx_seed4_precleanup_mctrl;
 static volatile uint32_t s_rx_seed4_precleanup_mstatus;
 static volatile uint32_t s_rx_seed4_precleanup_merrwarn;
 static volatile uint32_t s_rx_seed4_precleanup_mdatactrl;
@@ -105,6 +109,7 @@ static void clear_rx_seed4_probe_state(void)
     s_rx_seed4_data_irq_delta = 0U;
     s_rx_seed4_protocol_irq_delta = 0U;
     s_rx_seed4_ibi_irq_delta = 0U;
+    s_rx_seed4_mctrl = 0U;
     s_rx_seed4_mstatus = 0U;
     s_rx_seed4_merrwarn = 0U;
     s_rx_seed4_mdatactrl = 0U;
@@ -154,6 +159,7 @@ static void capture_rx_seed4_precleanup_state(I3C_Type *base)
     const uint32_t channelMask = (1UL << I3C_RX_SEED4_DMA_CHANNEL);
 
     s_rx_seed4_precleanup_valid = 1U;
+    s_rx_seed4_precleanup_mctrl = base->MCTRL;
     s_rx_seed4_precleanup_mstatus = base->MSTATUS;
     s_rx_seed4_precleanup_merrwarn = base->MERRWARN;
     s_rx_seed4_precleanup_mdatactrl = base->MDATACTRL;
@@ -188,6 +194,7 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
     s_rx_seed4_ibi_irq_delta = ibiIrqDelta;
     if (s_rx_seed4_precleanup_valid != 0U)
     {
+        s_rx_seed4_mctrl = s_rx_seed4_precleanup_mctrl;
         s_rx_seed4_mstatus = s_rx_seed4_precleanup_mstatus;
         s_rx_seed4_merrwarn = s_rx_seed4_precleanup_merrwarn;
         s_rx_seed4_mdatactrl = s_rx_seed4_precleanup_mdatactrl;
@@ -204,6 +211,7 @@ static void capture_rx_seed4_snapshot(I3C_Type *base,
     }
     else
     {
+        s_rx_seed4_mctrl = base->MCTRL;
         s_rx_seed4_mstatus = base->MSTATUS;
         s_rx_seed4_merrwarn = base->MERRWARN;
         s_rx_seed4_mdatactrl = base->MDATACTRL;
