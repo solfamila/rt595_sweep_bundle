@@ -478,7 +478,7 @@ compile_master() {
     defines+=("${extra_master_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_rx_request_semantics_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_tail5_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_rx_request_semantics_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_tail5_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq" || "$EXPERIMENT_NAME" == "master_i3c_rx_seed4_seed_only_dma_inta_poll" ]]; then
     master_driver_source="$REPO_DIR/src/master/drivers/fsl_i3c_smartdma.c"
     includes=(
       "$shared_master_driver_include"
@@ -747,6 +747,12 @@ validate_master_output() {
       ;;
     master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq)
       grep -q 'I3C RX seed6 seed-only no-CPU-IRQ probe successful' "$output_file"
+      ;;
+    master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq)
+      grep -q 'I3C RX seed-only matrix no-CPU-IRQ probe successful' "$output_file"
+      ;;
+    master_i3c_rx_seed4_seed_only_dma_inta_poll)
+      grep -q 'I3C RX seed4 seed-only DMA INTA poll probe successful' "$output_file"
       ;;
     master_led_smoke)
       grep -q 'LED smoke starting: raw GPIO forever' "$output_file" && grep -q 'readback:' "$output_file"

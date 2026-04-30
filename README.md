@@ -262,6 +262,16 @@ Interpretation:
 1. `mode=3` means the probe reached the chained RX DMA case.
 2. `stage=0A` means the full probe completed successfully.
 3. `result=0` means no error was latched.
+4. `dataIrqDelta=0`, `protocolIrqDelta=0`, and `ibiIrqDelta=0` show the
+  passing path did not depend on CM33 IRQ cleanup.
+5. `d0..d3 = 1,2,3,4` confirms the returned payload matches the transmitted
+  data.
+
+This probe is still useful, but it does not prove the native RX DMA request
+line is viable for SmartDMA wakeup. The DMA phases in this probe wait for I3C
+read `COMPLETE` and then software-trigger DMA, so a passing result here is
+evidence for the post-`COMPLETE` software-trigger path, not for the native RX
+request source.
 
 ## RX Seed6 Seed-Only Probe
 
@@ -314,10 +324,98 @@ This is the narrower follow-up to the earlier `seed1 + tail5` negative probe.
 Removing the SmartDMA tail reads does not restore the first RX DMA seed wake,
 so the blocker is the native RX DMA request source itself rather than the tail
 logic.
-4. `dataIrqDelta=0`, `protocolIrqDelta=0`, and `ibiIrqDelta=0` show the
-  passing path did not depend on CM33 IRQ cleanup.
-5. `d0..d3 = 1,2,3,4` confirms the returned payload matches the transmitted
-  data.
+
+## RX Seed-Only Geometry Matrix Probe
+
+Use this follow-on probe to vary only the seed-only geometry while keeping the
+same native RX request plus SmartDMA-wake observation path.
+
+Cases under test:
+
+1. Length 4 with `RXTRIG=OnNotEmpty`.
+2. Length 4 with `RXTRIG=OneHalfOrMore`.
+3. Length 6 with `RXTRIG=OneHalfOrMore`.
+4. Length 6 with `RXTRIG=ThreeQuarterOrMore`.
+
+In every case:
+
+1. DMA0 CH24 is configured for a single 1-byte seed transfer from `MRDATAB`.
+2. SmartDMA is used only to observe the DMA0 IRQ and complete a mailbox.
+3. SmartDMA does not read any RX tail bytes.
+4. CM33 data IRQ handling remains disabled.
+
+### Build the matrix probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_sdma_rx_seed_only_matrix_no_cpu_irq.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeedMatrix= pc=20288AB4 case=0 len=4 trig=0 stage=202 result=5 act=1000000 inta=0 rx=4 c0=4/0/5/0/0/4 c1=0/0/0/0/0/0 c2=0/0/0/0/0/0 c3=0/0/0/0/0/0
+```
+
+Interpretation:
+
+1. The probe fails immediately on case 0, before reaching the 6-byte cases.
+2. `len=4 trig=0` means the failure already occurs at 4 bytes with `RXTRIG=OnNotEmpty`.
+3. `stage=202 result=5` is the mailbox wait timeout.
+4. `act=1000000 inta=0 rx=4` means DMA0 channel 24 stayed active, never raised INTA, and the RX FIFO still reached 4 bytes.
+5. `c0=4/0/5/0/0/4` encodes `len/rxtrig/result/wakes/dmaIntaCount/rxcount` for case 0.
+
+This falsifies the earlier hypothesis that the seed-only failure is specific to
+the 6-byte or 3/4-full geometry.
+
+## RX Seed4 Direct DMA INTA Poll Probe
+
+Use this probe to remove SmartDMA from the observation path entirely and test
+whether the native 4-byte RX seed request ever raises DMA INTA when CM33 polls
+the DMA channel directly.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. CM33 polls DMA INTA directly and still does not service RXREADY/TXREADY data IRQs.
+
+### Build the direct-DMA probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma_inta_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma_inta_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed4DmaInta= pc=2028853C stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=4000030 mdmactrl=12 dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0 rxcount=4 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is the DMA-INTA wait timeout.
+2. `dmaIntaCount=0` and `dmaInta=0` mean CM33 never observed a DMA completion interrupt from channel 24.
+3. `rxcount=4` means the RX FIFO still reached the expected 4-byte level.
+4. `dmaActive=1000000` with `mdmactrl=12` means RX DMA remained enabled and the channel stayed armed.
+5. `dataIrq=0` and `protocolIrq=0` mean CM33 still did not service the payload path.
+
+This is the stronger discriminator. Even with SmartDMA removed entirely, the
+native RX DMA request still does not assert DMA0 CH24 INTA for the 4-byte,
+`RXTRIG=OnNotEmpty`, one-byte seed-descriptor path.
 
 ### Very long settle variant
 

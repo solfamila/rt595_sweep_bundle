@@ -1,0 +1,1 @@
+#include "../master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq/ezh_features_standalone.c"
