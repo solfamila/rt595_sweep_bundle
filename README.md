@@ -2,7 +2,9 @@
 
 This folder is a portable sweep bundle for `master_i3c_sdma_seed_tail_len_sweep`.
 It also includes the focused `master_i3c_rx_request_semantics_probe` used to
-validate CPU, bulk DMA, and chained RX behavior on the RT595 master.
+validate CPU, bulk DMA, and chained RX behavior on the RT595 master, plus the
+follow-on `master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq` probe used to test
+whether the native 6-byte RX DMA seed request fires at all.
 It vendors the passing sweep harness, the RT595 SDK payloads, the shared
 SmartDMA driver used by the passing replay, the local macOS arm64 Arm GNU
 toolchain copy, the local LinkServer copy, and the TRACE32 helper binaries and
@@ -13,6 +15,8 @@ wrappers that were used during validation.
 - `master_i3c_sdma_seed_tail_len_sweep/` with the passing harness sources.
 - `master_i3c_rx_request_semantics_probe/` with the focused RX request-semantics
   probe sources.
+- `master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq/` with the narrower 6-byte
+  RX seed-only discriminator sources.
 - `sdk/` with the vendored RT595 master and slave build payloads.
 - `src/master/drivers/fsl_i3c_smartdma.c` and `.h` with the shared driver fix
   that removed the `COMPLETE|RXPEND` SmartDMA IRQ spin.
@@ -27,7 +31,7 @@ wrappers that were used during validation.
   database used by the `rt595-trace` MCP server.
 - `.local/trace32/` with the local TRACE32 wrapper binaries and sources.
 - `trace32/` with bundle-local shell entrypoints for the long-settle,
-  5-second replay, and RX request-semantics probe flows.
+  5-second replay, RX request-semantics probe, and RX seed-only probe flows.
 
 No source files outside this folder are required by the bundle build.
 
@@ -258,6 +262,58 @@ Interpretation:
 1. `mode=3` means the probe reached the chained RX DMA case.
 2. `stage=0A` means the full probe completed successfully.
 3. `result=0` means no error was latched.
+
+## RX Seed6 Seed-Only Probe
+
+Use this narrower flow to reproduce the current RT595 RX boundary where the
+controller reaches a 6-byte FIFO level with RX DMA enabled, but the first
+native DMA seed wake still never arrives.
+
+Geometry under test:
+
+1. Read length fixed at 6 bytes.
+2. RX trigger level set to 3/4 full.
+3. DMA configured to move exactly one seed byte.
+4. SmartDMA booted only to observe the DMA0 IRQ and write the mailbox.
+5. CM33 data IRQ handling disabled for the read.
+
+### Build the seed-only probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq
+```
+
+This leaves the slave running and prepares the master ELF at:
+
+```text
+/Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq/_build/master/evkmimxrt595_ezhb.axf
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed6SeedOnly= pc=202883D8 stage=202 result=5 expected=1 wakes=0 seeds=0 tails=0 frame=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=60000F0 mdmactrl=12 dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0 rxcount=6 d0=0 d1=0 d2=0 d3=0 d4=0 d5=0
+```
+
+Interpretation:
+
+1. `stage=202` is the mailbox wait timeout checkpoint.
+2. `result=5` is `kStatus_Timeout`.
+3. `rxcount=6` means the RX FIFO reached the expected 6-byte level.
+4. `mdmactrl=12` means RX DMA remained enabled.
+5. `dmaActive=1000000` with `dmaInta=0` means DMA0 channel 24 stayed armed but never received the native RX trigger.
+6. `dataIrq=0` and `protocolIrq=0` mean CM33 did not service the payload path.
+
+This is the narrower follow-up to the earlier `seed1 + tail5` negative probe.
+Removing the SmartDMA tail reads does not restore the first RX DMA seed wake,
+so the blocker is the native RX DMA request source itself rather than the tail
+logic.
 4. `dataIrqDelta=0`, `protocolIrqDelta=0`, and `ibiIrqDelta=0` show the
   passing path did not depend on CM33 IRQ cleanup.
 5. `d0..d3 = 1,2,3,4` confirms the returned payload matches the transmitted
