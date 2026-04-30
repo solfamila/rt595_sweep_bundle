@@ -14,6 +14,7 @@ supported experiments:
   master_i3c_sdma_seed_tail_len_sweep
   master_i3c_dma_official_rx_probe
   master_i3c_dma_official_rx_smartdma_wake_probe
+  master_i3c_dma_official_rx_smartdma_wake_chunk_loop
 EOF
 }
 
@@ -40,7 +41,7 @@ resolve_experiment_dir() {
   fi
 
   case "$(basename "$resolved_dir")" in
-    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe|master_i3c_dma_official_rx_smartdma_wake_probe)
+    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe|master_i3c_dma_official_rx_smartdma_wake_probe|master_i3c_dma_official_rx_smartdma_wake_chunk_loop)
       printf '%s\n' "$resolved_dir"
       ;;
     *)
@@ -502,8 +503,12 @@ compile_master() {
     )
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
+    defines+=(EXPERIMENT_IBI_GENERATION_TAG=1)
   fi
 
   if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
@@ -635,12 +640,20 @@ compile_slave() {
     defines+=("${extra_slave_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
+    defines+=(EXPERIMENT_IBI_GENERATION_TAG=1)
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
     defines+=(EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT=6)
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
+    defines+=(EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION=1)
   fi
 
   if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ]]; then

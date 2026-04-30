@@ -29,6 +29,16 @@
 #define EXPERIMENT_SLAVE_IBI_DATA 0xA5U
 #endif
 
+#ifndef EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION
+#define EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION 0
+#endif
+
+#ifndef EXPERIMENT_IBI_GENERATION_TAG
+#define EXPERIMENT_IBI_GENERATION_TAG 0
+#endif
+
+#define I3C_SLAVE_IBI_PAYLOAD_LENGTH 1U
+
 #ifndef EXPERIMENT_SLAVE_MIN_ECHO_COUNT
 #define EXPERIMENT_SLAVE_MIN_ECHO_COUNT 0U
 #endif
@@ -259,6 +269,7 @@ __attribute__((section(".usb_ram"), used, aligned(4))) volatile slave_retained_t
 static volatile bool g_slaveIbiPending = false;
 static volatile bool g_slaveRearmAfterInvalidStart = false;
 static volatile uint32_t g_slaveInvalidStartRearmCount = 0U;
+static volatile bool g_slaveCompletionRearmPending = false;
 volatile bool g_slaveIbiIssued = false;
 volatile bool g_slaveIbiRequestSent = false;
 volatile bool g_slavePostIbiAddressMatched = false;
@@ -266,7 +277,7 @@ volatile bool g_slavePostIbiEchoPending = false;
 volatile bool g_slavePostIbiEchoArmed = false;
 static volatile bool g_slavePostIbiEchoConsumed = false;
 static volatile uint32_t g_slaveIbiDelayLoops = 0U;
-static uint8_t g_slaveIbiPayload[1] = {EXPERIMENT_SLAVE_IBI_DATA};
+static uint8_t g_slaveIbiPayload[I3C_SLAVE_IBI_PAYLOAD_LENGTH] = {EXPERIMENT_SLAVE_IBI_DATA};
 static volatile bool g_slaveActivityLedActive = false;
 static volatile bool g_slaveActivityLedCompletionPending = false;
 static volatile bool g_slaveActivityLedFinal = false;
@@ -411,6 +422,7 @@ static void i3c_slave_rearm_after_invalid_start(uint32_t eventMask)
     g_slaveIbiPending = false;
     g_slaveIbiIssued = false;
     g_slaveIbiRequestSent = false;
+    g_slaveCompletionRearmPending = false;
     g_slavePostIbiAddressMatched = false;
     g_slavePostIbiEchoPending = false;
     g_slavePostIbiEchoArmed = false;
@@ -433,11 +445,29 @@ static void i3c_slave_rearm_after_invalid_start(uint32_t eventMask)
     semihost_write0("slave: rearmed after pre-DAA invalid start\n");
 }
 
+static void i3c_slave_reset_ibi_generation_state(void);
+
+static void i3c_slave_rearm_after_completion(uint32_t eventMask)
+{
+    g_slaveCompletionFlag = false;
+    g_slaveCompletionRearmPending = false;
+    g_lastTransferWasReceive = false;
+    i3c_slave_reset_ibi_generation_state();
+
+    I3C_SlaveTransferAbort(EXAMPLE_SLAVE, &g_i3c_s_handle);
+    I3C_SlaveClearErrorStatusFlags(EXAMPLE_SLAVE, I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE));
+    I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveClearFlags);
+    EXAMPLE_SLAVE->SDATACTRL |= I3C_SDATACTRL_FLUSHTB_MASK | I3C_SDATACTRL_FLUSHFB_MASK;
+
+    (void)I3C_SlaveTransferNonBlocking(EXAMPLE_SLAVE, &g_i3c_s_handle, eventMask);
+}
+
 static void i3c_slave_reset_ibi_generation_state(void)
 {
     g_slaveIbiPending = false;
     g_slaveIbiIssued = false;
     g_slaveIbiRequestSent = false;
+    g_slaveCompletionRearmPending = false;
     g_slavePostIbiAddressMatched = false;
     g_slavePostIbiEchoPending = false;
     g_slavePostIbiEchoArmed = false;
@@ -458,6 +488,7 @@ void i3c_slave_mark_post_ibi_echo_queued_complete(void)
 
     g_slaveRetainedTrace.postIbiEchoTxCompletionCount++;
     g_slaveRetainedTrace.lastTxCompletionGeneration = g_slaveRetainedTrace.currentGeneration;
+    g_slaveCompletionRearmPending = true;
     if (((g_slaveRetainedTrace.eventFlags & kSlaveRetainedTraceEchoArmedSeen) != 0U) &&
         (g_slaveRetainedTrace.postEchoTxCompletionCount == 0U))
     {
@@ -897,7 +928,11 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                     g_slaveRetainedTrace.currentEchoedCount = g_txSize;
                     i3c_slave_record_trace(kSlaveTraceEchoArmed, g_txBuff, g_txSize, 0U);
 #if EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX
+#if EXPERIMENT_IBI_GENERATION_TAG
+                    g_slaveIbiPayload[0] = (uint8_t)g_slaveRetainedTrace.currentGeneration;
+#else
                     g_slaveIbiPayload[0] = (uint8_t)g_txSize;
+#endif
                     g_slaveIbiPending = true;
                     g_slaveIbiIssued = false;
                     g_slaveIbiRequestSent = false;
@@ -916,6 +951,7 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                     {
                         g_slaveRetainedTrace.postIbiEchoTxCompletionCount++;
                         g_slaveRetainedTrace.lastTxCompletionGeneration = g_slaveRetainedTrace.currentGeneration;
+                        g_slaveCompletionRearmPending = true;
                         g_slavePostIbiEchoConsumed = true;
                         g_slavePostIbiEchoArmed = false;
                         g_slavePostIbiEchoPending = false;
@@ -1058,6 +1094,7 @@ int main(void)
     g_slaveIbiPending = false;
     g_slaveIbiIssued = false;
     g_slaveIbiRequestSent = false;
+    g_slaveCompletionRearmPending = false;
     g_slavePostIbiEchoPending = false;
     g_slavePostIbiEchoArmed = false;
     g_slavePostIbiEchoConsumed = false;
@@ -1086,6 +1123,13 @@ int main(void)
             i3c_slave_rearm_after_invalid_start(eventMask);
         }
 
+    #if EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION
+        if (g_slaveCompletionRearmPending && !g_i3c_s_handle.isBusy)
+        {
+            i3c_slave_rearm_after_completion(eventMask);
+        }
+    #endif
+
 #if EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX
         if (g_slaveIbiPending && !g_slaveIbiRequestSent)
         {
@@ -1099,8 +1143,10 @@ int main(void)
                 /* The request API only arms EVENT; keep retrying until the
                  * controller reports RequestSentEvent.
                  */
+                I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveEventSentFlag);
+                I3C_SlaveClearErrorStatusFlags(EXAMPLE_SLAVE, I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE));
                 g_slaveRetainedTrace.ibiStatusBeforeRequest = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
-                I3C_SlaveRequestIBIWithData(EXAMPLE_SLAVE, g_slaveIbiPayload, 1U);
+                I3C_SlaveRequestIBIWithData(EXAMPLE_SLAVE, g_slaveIbiPayload, I3C_SLAVE_IBI_PAYLOAD_LENGTH);
                 i3c_slave_record_trace(kSlaveTraceIbiIssued,
                                        NULL,
                                        g_slaveRetainedTrace.ibiIssuedCount + 1U,

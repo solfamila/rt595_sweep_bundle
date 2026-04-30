@@ -1,0 +1,86 @@
+#include "fsl_SMARTDMA_armclang.h"
+
+#define SMARTDMA_CODE __attribute__((used, section(".smartdma_code"), aligned(4)))
+#define SMARTDMA_DATA __attribute__((used, section(".smartdma_data"), aligned(4)))
+
+#define EZH_ARM2EZH 0x27040
+
+#define I3C_MSTATUS_OFFSET 0x88
+#define I3C_MDMACTRL_OFFSET 0xA0
+#define I3C_MDATACTRL_OFFSET 0xAC
+
+#define PARAM_MAILBOX_INDEX 0
+#define PARAM_WAKE_COUNT_INDEX 1
+#define PARAM_DMA_INTA_COUNT_INDEX 2
+#define PARAM_DMA_INTA_SNAPSHOT_INDEX 3
+#define PARAM_I3C_MDMACTRL_SNAPSHOT_INDEX 4
+#define PARAM_I3C_MSTATUS_SNAPSHOT_INDEX 5
+#define PARAM_I3C_MDATACTRL_SNAPSHOT_INDEX 6
+#define PARAM_I3C_BASE_ADDRESS_INDEX 7
+#define PARAM_DMA_INTA_ADDRESS_INDEX 8
+
+void SMARTDMA_CODE EZHB_Dma0WakeMailboxProbe(void);
+
+SMARTDMA_DATA void (*g_SMARTDMA_api[16])(void);
+
+void SMARTDMA_CODE EZHB_Dma0WakeMailboxProbe(void)
+{
+	E_NOP;
+	E_NOP;
+
+	E_PER_READ(R6, EZH_ARM2EZH);
+	E_LSR(R6, R6, 2);
+	E_LSL(R6, R6, 2);
+
+	E_LOAD_IMM(CFS, 0x0);
+	E_LOAD_IMM(CFM, 0x101);
+
+E_LABEL("wait_dma_irq");
+	E_HOLD;
+	E_BCLR_IMM(CFM, CFM, 0);
+
+	E_LDR(R0, R6, PARAM_WAKE_COUNT_INDEX);
+	E_ADD_IMM(R0, R0, 1);
+	E_STR(R6, R0, PARAM_WAKE_COUNT_INDEX);
+
+	E_LDR(R1, R6, PARAM_DMA_INTA_COUNT_INDEX);
+	E_ADD_IMM(R1, R1, 1);
+	E_STR(R6, R1, PARAM_DMA_INTA_COUNT_INDEX);
+
+	E_LDR(R2, R6, PARAM_DMA_INTA_ADDRESS_INDEX);
+	E_LDR(R3, R2, 0);
+	E_STR(R6, R3, PARAM_DMA_INTA_SNAPSHOT_INDEX);
+
+	E_LDR(R2, R6, PARAM_I3C_BASE_ADDRESS_INDEX);
+
+	E_LOAD_SIMM(R4, I3C_MDMACTRL_OFFSET, 0);
+	E_ADD(R5, R2, R4);
+	E_LDR(R5, R5, 0);
+	E_STR(R6, R5, PARAM_I3C_MDMACTRL_SNAPSHOT_INDEX);
+
+	E_LOAD_SIMM(R4, I3C_MSTATUS_OFFSET, 0);
+	E_ADD(R5, R2, R4);
+	E_LDR(R5, R5, 0);
+	E_STR(R6, R5, PARAM_I3C_MSTATUS_SNAPSHOT_INDEX);
+
+	E_LOAD_SIMM(R4, I3C_MDATACTRL_OFFSET, 0);
+	E_ADD(R5, R2, R4);
+	E_LDR(R5, R5, 0);
+	E_STR(R6, R5, PARAM_I3C_MDATACTRL_SNAPSHOT_INDEX);
+
+	E_LOAD_IMM(R0, 0x1);
+	E_STR(R6, R0, PARAM_MAILBOX_INDEX);
+
+E_LABEL("end");
+	E_NOP;
+	E_GOSUB(end);
+}
+
+void keep_smartdma_api_alive(void)
+{
+	volatile void *ptr = &g_SMARTDMA_api;
+
+	g_SMARTDMA_api[0] = (void (*)(void))(((uint32_t)EZHB_Dma0WakeMailboxProbe + 4U) & (~3U));
+
+	(void)ptr;
+}

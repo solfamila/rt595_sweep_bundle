@@ -5,6 +5,8 @@ It also includes the focused `master_i3c_rx_request_semantics_probe` used to
 validate CPU, bulk DMA, and chained RX behavior on the RT595 master, plus the
 follow-on `master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq` probe used to test
 whether the native 6-byte RX DMA seed request fires at all.
+It now also includes the official DMA RX SmartDMA wake proofs, including the
+validated repeated chunk-loop path.
 It vendors the passing sweep harness, the RT595 SDK payloads, the shared
 SmartDMA driver used by the passing replay, the local macOS arm64 Arm GNU
 toolchain copy, the local LinkServer copy, and the TRACE32 helper binaries and
@@ -17,6 +19,8 @@ wrappers that were used during validation.
   probe sources.
 - `master_i3c_sdma_rx_seed6_seed_only_no_cpu_irq/` with the narrower 6-byte
   RX seed-only discriminator sources.
+- `master_i3c_dma_official_rx_smartdma_wake_chunk_loop/` with the repeated
+  official 6-byte DMA RX plus SmartDMA wake proof sources.
 - `sdk/` with the vendored RT595 master and slave build payloads.
 - `src/master/drivers/fsl_i3c_smartdma.c` and `.h` with the shared driver fix
   that removed the `COMPLETE|RXPEND` SmartDMA IRQ spin.
@@ -31,7 +35,8 @@ wrappers that were used during validation.
   database used by the `rt595-trace` MCP server.
 - `.local/trace32/` with the local TRACE32 wrapper binaries and sources.
 - `trace32/` with bundle-local shell entrypoints for the long-settle,
-  5-second replay, RX request-semantics probe, and RX seed-only probe flows.
+  5-second replay, RX request-semantics probe, RX seed-only probe, and the
+  official DMA RX chunk-loop proof flows.
 
 No source files outside this folder are required by the bundle build.
 
@@ -347,6 +352,73 @@ Interpretation:
 4. `di=0` means CM33 did not service `DMA0_IRQn` during the read.
 5. `idc=0` means CM33 did not service `RXREADY` or `TXNOTFULL` data IRQs during the read, while `ipc=3` shows the remaining CM33 I3C activity stayed on protocol IRQs only.
 6. `rxc=0` means the CM33 RX DMA callback did not run on the validated path.
+
+## Official Master DMA RX SmartDMA Wake Chunk-Loop Proof
+
+The bundle also includes `master_i3c_dma_official_rx_smartdma_wake_chunk_loop/`,
+which repeats the same official 6-byte DMA RX plus SmartDMA wake handoff across
+multiple write/IBI/read chunks while keeping CM33 off `DMA0_IRQn`,
+`RXREADY`/`TXNOTFULL`, and the RX DMA callback path.
+
+This loop now uses three stabilizers that were required on real hardware:
+
+1. The master scrubs protocol and error flags plus flushes the FIFOs at each chunk boundary.
+2. The slave rearms only after a real post-IBI echo completion.
+3. The slave clears stale `kI3C_SlaveEventSentFlag` and slave error status before each repeated `I3C_SlaveRequestIBIWithData()` retry.
+
+The chunk-loop also uses the mandatory one-byte IBI payload as a generation tag,
+so the retained `i0=` field proves that each accepted IBI is fresh rather than a
+stale replay.
+
+The experiment defaults to a conservative `10 ms` inter-chunk settle because the
+shorter gaps that were adequate for `2 x 6` were not stable over longer loops.
+
+### Build the chunk-loop proof
+
+The default build validates the `2 x 6` case:
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
+```
+
+### Validated scaled repro command
+
+The camera-scale proof that was validated on hardware uses `42 x 6` chunks:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
+```
+
+This leaves the master ELF at:
+
+```text
+/Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_dma_official_rx_smartdma_wake_chunk_loop/_build/master/evkmimxrt595_ezhb.axf
+```
+
+### Run the chunk-loop proof with TRACE32
+
+```bash
+./trace32/run_master_i3c_dma_official_rx_smartdma_wake_chunk_loop.sh
+```
+
+This wrapper prints the retained `dmaWakeLoopFinal=` signature after it stops at
+either `set_success_led` or `set_failure_led`.
+
+### Current validated 42 x 6 signature
+
+```text
+dmaWakeLoopFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=2A cc=2A ci=29 ip=1 i0=2A i1=0 rx=0FC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2A si=2A ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=55 xd=1 xs=6 txc=2 di=0 idc=0 ipc=7E rxc=0
+```
+
+Interpretation:
+
+1. `st=0B`, `out=1`, and `rs=0` mean the repeated wake proof reached `kDmaOfficialStageValidated` and reported success.
+2. `ec=2A`, `cc=2A`, and `ci=29` mean all 42 logical chunks completed and the final chunk index was 41.
+3. `ip=1` and `i0=2A` show the final accepted IBI carried the one-byte generation tag for chunk 42, proving the loop was still seeing fresh IBIs at the end of the run.
+4. `rx=0FC` means the validated aggregate receive length was 252 bytes.
+5. `sm=1`, `sw=2A`, and `si=2A` mean SmartDMA observed and acknowledged exactly one DMA-completion wake for each chunk.
+6. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no data IRQs, and no RX DMA callback across the full repeated loop.
+7. `mi=0FFFFFFFF`, `rf=0`, and `rl=5` mean no mismatch was latched and the validated payload still began at `0` and ended at `5`.
 
 ## RX Request-Semantics Probe
 
