@@ -505,6 +505,94 @@ Interpretation:
 This rules out the simpler channel-CFG explanation. Copying the earlier
 software-trigger path CFG does not restore native RX DMA completion.
 
+## RX Seed4 DMA1 INTA Poll Probe
+
+Use this routing-side probe to keep the same native 4-byte, one-byte seed
+descriptor path but switch the request route from DMA0 CH24 to DMA1 CH24.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA1 CH24 uses the same 1-byte seed descriptor from `MRDATAB`.
+4. INPUTMUX enables `kINPUTMUX_I3c0RxToDmac1Ch24RequestEna`.
+5. SmartDMA wake routing is not used.
+6. CM33 polls DMA1 INTA directly and still does not service RXREADY/TXREADY data IRQs.
+
+### Build the DMA1 routing probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma1_inta_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma1_inta_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed4Dma1Inta= pc=2028853C stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=4000030 mdmactrl=12 dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0 rxcount=4 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is the DMA-INTA wait timeout.
+2. `dmaIntaCount=0` and `dmaInta=0` mean DMA1 CH24 never completed the 1-byte descriptor.
+3. `rxcount=4` means the RX FIFO still reached the expected 4-byte level.
+4. `mdmactrl=12` shows the I3C-side RX DMA enable mode was unchanged from the DMA0 direct probe.
+5. The retained signature matches the DMA0 direct poll result apart from the selected DMA controller.
+
+This falsifies the simple controller-route hypothesis. The native I3C0 RX
+request still does not produce a DMA completion when the path is moved from
+DMA0 CH24 to DMA1 CH24.
+
+## RX Seed4 DMA One-Frame Poll Probe
+
+Use this I3C-side handshake probe to keep the same DMA0 direct seed-only path
+but change only `MDMACTRL.DMAFB` from `ENABLE` to `ENABLE_ONE_FRAME`.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 still uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. CM33 polls DMA0 INTA directly and still does not service RXREADY/TXREADY data IRQs.
+6. The probe forces `MDMACTRL = DMAFB(1) | DMAWIDTH(byte)` after enabling RX DMA.
+
+### Build the one-frame probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma_one_frame_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma_one_frame_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxSeed4OneFrame= pc=2028854C stage=202 result=5 dmaIntaCount=0 dataIrq=0 protocolIrq=0 ibiIrq=0 mstatus=1E03 merr=0 mdatactrl=4000030 mdmactrl=10 dmaActive=1000000 dmaInta=0 dmaCtl=1 dmaCfg=4011 dmaErr=0 rxcount=4 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `stage=202 result=5` is the DMA-INTA wait timeout.
+2. `dmaIntaCount=0` and `dmaInta=0` mean the one-frame mode still does not produce a DMA completion.
+3. `rxcount=4` means the RX FIFO still reached the expected 4-byte level.
+4. `mdmactrl=10` shows the probe no longer retained the earlier `DMAFB(2)` value at timeout, but the transfer still did not complete.
+5. `dmaActive=1000000` means DMA0 CH24 stayed armed even though no completion arrived.
+
+This rules out the simpler `MDMACTRL.DMAFB=ENABLE` vs `ENABLE_ONE_FRAME`
+explanation. Changing the I3C-side RX DMA mode alone does not restore native
+RX DMA completion.
+
 ### Very long settle variant
 
 ```bash

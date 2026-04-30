@@ -11,6 +11,18 @@
 #include "../master_i3c_sdma_seed_tail_len_sweep/ezh_test_standalone.c"
 #undef main
 
+#ifndef I3C_RX_SEED4_PROBE_NAME
+#define I3C_RX_SEED4_PROBE_NAME "I3C RX seed4 seed-only DMA INTA poll probe"
+#endif
+
+#ifndef I3C_RX_SEED4_DMAFB_MODE
+#define I3C_RX_SEED4_DMAFB_MODE 2U
+#endif
+
+#ifndef I3C_RX_SEED4_TRACE_LABEL
+#define I3C_RX_SEED4_TRACE_LABEL "rx-seed4-dma-inta"
+#endif
+
 #define I3C_RX_SEED4_LENGTH 4U
 #define I3C_RX_SEED4_DMA_CHANNEL 24U
 #define I3C_RX_SEED4_DMA_CLOCK kCLOCK_Dmac0
@@ -298,6 +310,12 @@ static void arm_rx_seed4_descriptor(void)
     DMA0->COMMON[0].SETVALID = channelMask;
 }
 
+static void set_rx_seed4_dma_mode(I3C_Type *base)
+{
+    base->MDMACTRL = I3C_MDMACTRL_DMAFB(I3C_RX_SEED4_DMAFB_MODE) | I3C_MDMACTRL_DMATB(0U) |
+                     I3C_MDMACTRL_DMAWIDTH(1U);
+}
+
 static status_t write_logical_payload_blocking(I3C_Type *base, uint8_t slaveAddr)
 {
     i3c_master_transfer_t masterXfer;
@@ -398,6 +416,7 @@ static status_t run_i3c_rx_seed4_seed_only_dma_inta_poll_probe(I3C_Type *base, u
     I3C_MasterSetWatermarks(base, savedTxTriggerLevel, kI3C_RxTriggerOnNotEmpty, false, false);
     configure_rx_seed4_descriptor(base);
     I3C_MasterEnableDMA(base, false, true, 1U);
+    set_rx_seed4_dma_mode(base);
     arm_rx_seed4_descriptor();
 
     capture_rx_seed4_snapshot(base, kRxSeed4StageReadStarted, kStatus_Success, 0U, 0U, 0U, 0U);
@@ -450,14 +469,14 @@ static status_t run_i3c_rx_seed4_seed_only_dma_inta_poll_probe(I3C_Type *base, u
     }
 
     capture_rx_seed4_snapshot(base, kRxSeed4StageSuccess, kStatus_Success, dmaIntaCount, dataIrqDelta, protocolIrqDelta, ibiIrqDelta);
-    PRINTF("rx-seed4-dma-inta dmaInta=%lu rxcount=%lu data=%02x %02x %02x %02x\r\n",
+        PRINTF(I3C_RX_SEED4_TRACE_LABEL " dmaInta=%lu rxcount=%lu data=%02x %02x %02x %02x\r\n",
            (unsigned long)dmaIntaCount,
            (unsigned long)s_rx_seed4_rxcount,
            (unsigned int)s_rx_seed4_data0,
            (unsigned int)s_rx_seed4_data1,
            (unsigned int)s_rx_seed4_data2,
            (unsigned int)s_rx_seed4_data3);
-    EXP_LOG_INFO("rx-seed4-dma-inta dmaInta=%lu rxcount=%lu data=%02x %02x %02x %02x",
+        EXP_LOG_INFO(I3C_RX_SEED4_TRACE_LABEL " dmaInta=%lu rxcount=%lu data=%02x %02x %02x %02x",
                  (unsigned long)dmaIntaCount,
                  (unsigned long)s_rx_seed4_rxcount,
                  (unsigned int)s_rx_seed4_data0,
@@ -483,8 +502,8 @@ int main(void)
         __NOP();
     }
 
-    PRINTF("\r\nI3C RX seed4 seed-only DMA INTA poll probe -- master.\r\n");
-    EXP_LOG_INFO("I3C RX seed4 seed-only DMA INTA poll probe -- master.");
+    PRINTF("\r\n%s -- master.\r\n", I3C_RX_SEED4_PROBE_NAME);
+    EXP_LOG_INFO("%s -- master.", I3C_RX_SEED4_PROBE_NAME);
 
     I3C_MasterGetDefaultConfig(&masterConfig);
     masterConfig.baudRate_Hz.i2cBaud = I3C_DMA_SEED_CHAIN_I2C_BAUDRATE;
@@ -504,14 +523,14 @@ int main(void)
     result = run_i3c_rx_seed4_seed_only_dma_inta_poll_probe(EXAMPLE_MASTER, slaveAddr);
     if (result != kStatus_Success)
     {
-        EXP_LOG_ERROR("I3C RX seed4 seed-only DMA INTA poll probe failed: %d", result);
+        EXP_LOG_ERROR("%s failed: %d", I3C_RX_SEED4_PROBE_NAME, result);
         dump_debug_state(EXAMPLE_MASTER);
         set_failure_led();
         return -1;
     }
 
-    PRINTF("I3C RX seed4 seed-only DMA INTA poll probe successful.\r\n");
-    EXP_LOG_INFO("I3C RX seed4 seed-only DMA INTA poll probe successful.");
+    PRINTF("%s successful.\r\n", I3C_RX_SEED4_PROBE_NAME);
+    EXP_LOG_INFO("%s successful.", I3C_RX_SEED4_PROBE_NAME);
     set_success_led();
     return 0;
 }
