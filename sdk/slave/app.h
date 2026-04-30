@@ -12,6 +12,9 @@
 /*${macro:start}*/
 #define EXAMPLE_SLAVE              I3C0
 #define I3C_SLAVE_CLOCK_FREQUENCY  CLOCK_GetLpOscFreq()
+#define EXAMPLE_DMA                DMA0
+#define EXAMPLE_I3C_RX_CHANNEL     24
+#define EXAMPLE_I3C_TX_CHANNEL     25
 /*${macro:end}*/
 
 /*******************************************************************************

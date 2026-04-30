@@ -486,8 +486,12 @@ compile_master() {
     )
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+    defines+=(I3C_ERRATA_052123_USE_DMA_CHAIN=0)
   fi
 
   sources+=(
@@ -615,8 +619,12 @@ compile_slave() {
     defines+=("${extra_slave_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_interrupt" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
+  fi
+
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" ]]; then
+    defines+=(EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT=6)
   fi
 
   if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_seed_tail_ibi_probe" || "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" ]]; then
@@ -774,6 +782,9 @@ validate_master_output() {
       ;;
     master_i3c_rx_len1_seed_only_dma_inta_poll)
       grep -q 'I3C RX len1 seed-only DMA INTA poll probe successful' "$output_file"
+      ;;
+    master_i3c_dma_official_rx_probe)
+      grep -q 'I3C DMA official RX probe successful' "$output_file"
       ;;
     master_led_smoke)
       grep -q 'LED smoke starting: raw GPIO forever' "$output_file" && grep -q 'readback:' "$output_file"

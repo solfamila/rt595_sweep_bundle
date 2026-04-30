@@ -41,6 +41,10 @@
 #define EXPERIMENT_FORCE_ECHO_ON_ANY_TRANSMIT 0
 #endif
 
+#ifndef EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
+#define EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT 0U
+#endif
+
 #define EXPERIMENT_SLAVE_BCR_IBI_REQUEST_CAPABLE (1U << 1)
 #define EXPERIMENT_SLAVE_BCR_IBI_PAYLOAD (1U << 2)
 
@@ -845,16 +849,29 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
 
                     i3c_slave_record_trace(
                         kSlaveTraceRxComplete, g_slave_rxBuff, (uint32_t)xfer->transferredCount, 0U);
+
+#if EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
+                    g_txBuff = g_slave_txBuff;
+                    g_txSize =
+                        (EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT <= I3C_SLAVE_TX_DATA_LENGTH)
+                            ? EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
+                            : I3C_SLAVE_TX_DATA_LENGTH;
+                    for (uint32_t txIndex = 0U; txIndex < g_txSize; txIndex++)
+                    {
+                        g_slave_txBuff[txIndex] = (uint8_t)txIndex;
+                    }
+#else
                     g_txBuff = g_slave_rxBuff;
                     g_txSize = echoedCount;
+#endif
                     g_slavePostIbiEchoPending = (echoedCount != 0U);
                     g_slavePostIbiEchoArmed = false;
                     g_slavePostIbiEchoConsumed = false;
                     g_slaveRetainedTrace.currentGeneration++;
-                    g_slaveRetainedTrace.currentEchoedCount = echoedCount;
+                    g_slaveRetainedTrace.currentEchoedCount = g_txSize;
                     i3c_slave_record_trace(kSlaveTraceEchoArmed, g_txBuff, g_txSize, 0U);
 #if EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX
-                    g_slaveIbiPayload[0] = (uint8_t)echoedCount;
+                    g_slaveIbiPayload[0] = (uint8_t)g_txSize;
                     g_slaveIbiPending = true;
                     g_slaveIbiIssued = false;
                     g_slaveIbiRequestSent = false;

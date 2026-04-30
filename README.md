@@ -257,6 +257,54 @@ This is the current positive RX result in the bundle: RX works through the
 existing `I3c0IrqToSmartDmaInput` SmartDMA path in the shared sweep, while the
 separate native RX DMAC-request probes remain negative.
 
+## Official Master DMA RX Proof
+
+The bundle also now includes `master_i3c_dma_official_rx_probe/`, which uses
+the vendored classic DMA master API from `fsl_i3c_dma.c` and proves the master
+side RX path in a focused board-to-board flow.
+
+This proof currently runs with a 6-byte payload. The master side is the
+official `I3C_MasterTransferDMA()` path. The companion slave is the shared
+interrupt-based standalone slave with an experiment-specific fixed
+`0..5` transmit payload after the write/IBI handshake, because the local slave
+DMA path in this bundle still corrupts data and the longer 32-byte master RX
+path still does not complete correctly.
+
+### Build the official master DMA RX proof
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_probe
+```
+
+This command:
+
+1. Builds the master ELF at `master_i3c_dma_official_rx_probe/_build/master/evkmimxrt595_ezhb.axf`.
+2. Builds the companion slave ELF at `master_i3c_dma_official_rx_probe/_build/slave/slave.axf`.
+3. Flashes the slave if needed.
+4. Starts the slave and leaves it waiting for the TRACE32-driven master run.
+
+### Run the official master DMA RX proof
+
+```bash
+./trace32/run_master_i3c_dma_official_rx_probe.sh
+```
+
+This TRACE32 wrapper loads the master ELF, runs to either `set_success_led` or
+`set_failure_led`, and prints the retained `dmaOfficialFinal=` signature.
+
+### Current passing signature
+
+```text
+dmaOfficialFinal= st=9 out=1 rs=0 cs=0 sa=31 rx=6 mi=FFFFFFFF tr=0 rf=0 rl=5 rc=1 b0=0 b1=1 b2=2 b3=3 b4=4 b5=5
+```
+
+Interpretation:
+
+1. `st=9`, `out=1`, and `rs=0` mean the probe reached `kDmaOfficialStageValidated` and reported success.
+2. `rx=6` means the validated payload length is 6 bytes.
+3. `mi=FFFFFFFF` means no mismatch was latched.
+4. `b0..b5 = 0..5` confirms the master DMA RX buffer matched the expected payload.
+
 ## RX Request-Semantics Probe
 
 Use this flow to reproduce the verified RT595 RX result where all three cases
