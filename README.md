@@ -417,6 +417,94 @@ This is the stronger discriminator. Even with SmartDMA removed entirely, the
 native RX DMA request still does not assert DMA0 CH24 INTA for the 4-byte,
 `RXTRIG=OnNotEmpty`, one-byte seed-descriptor path.
 
+## RX Seed4 Full-Length DMA INTA Poll Probe
+
+Use this follow-on probe to keep the same native 4-byte RX request path but
+replace the one-byte seed descriptor with a single full-length 4-byte native
+DMA descriptor.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 uses one native descriptor with `XFERCOUNT=4`.
+4. SmartDMA wake routing is not used.
+5. CM33 polls DMA INTA directly and still does not service RXREADY/TXREADY data IRQs.
+
+### Build the full-length direct-DMA probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_full_len_dma_inta_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_full_len_dma_inta_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxFull4= pc=2028863C st=202 rs=5 ic=0 di=0 pi=0 ii=0 ms=1E03 me=0 md=4000030 mc=12 act=1000000 inta=0 cfg=1 ctl=1 xcfg=34011 xcnt=3 err=0 rx=4 ds=400360C0 dd=2028CF6F dc=34011 dn=4 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `st=202 rs=5` is the DMA-INTA wait timeout.
+2. `ic=0` and `inta=0` mean DMA0 channel 24 never completed the full-length descriptor.
+3. `rx=4` means the RX FIFO still reached the expected 4-byte level.
+4. `xcfg=34011`, `xcnt=3`, and `dn=4` confirm the armed descriptor was the intended 4-byte transfer.
+5. `act=1000000` with `mc=12` means RX DMA remained enabled and the channel stayed armed.
+
+This rules out the earlier idea that the native RX failure might be specific to
+the 1-byte seed-descriptor form. The native 4-byte full-length descriptor also
+fails to complete.
+
+## RX Seed4 Seed-Only DMA CFG-Compare Probe
+
+Use this sibling probe to keep the failing native 1-byte seed descriptor, but
+copy only the DMA channel CFG bits from the older software-trigger-success
+probe.
+
+Geometry under test:
+
+1. Read length fixed at 4 bytes.
+2. `RXTRIG=OnNotEmpty`.
+3. DMA0 CH24 still uses the same 1-byte seed descriptor.
+4. SmartDMA wake routing is not used.
+5. DMA channel CFG is changed to `PERIPHREQEN|TRIGBURST|BURSTPOWER(2)`.
+6. CM33 polls DMA INTA directly and still does not service RXREADY/TXREADY data IRQs.
+
+### Build the CFG-compare probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_seed4_seed_only_dma_cfg_compare
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_seed4_seed_only_dma_cfg_compare.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxCfgCmp= pc=2028862C st=202 rs=5 ic=0 di=0 pi=0 ii=0 ms=1E03 me=0 md=4000030 mc=12 act=1000000 inta=0 cfg=241 ctl=1 xcfg=4011 xcnt=0 err=0 rx=4 ds=400360C0 dd=2028CF6C dc=4011 dn=1 d0=0 d1=0 d2=0 d3=0
+```
+
+Interpretation:
+
+1. `st=202 rs=5` is the DMA-INTA wait timeout.
+2. `cfg=241` confirms the DMA channel CFG matched the older software-trigger-success path.
+3. `ic=0` and `inta=0` mean the native RX request still never completed the 1-byte descriptor.
+4. `rx=4` means the RX FIFO still reached the expected 4-byte level.
+5. `dc=4011` and `dn=1` confirm the descriptor stayed in the one-byte seed form while only CFG changed.
+
+This rules out the simpler channel-CFG explanation. Copying the earlier
+software-trigger path CFG does not restore native RX DMA completion.
+
 ### Very long settle variant
 
 ```bash
