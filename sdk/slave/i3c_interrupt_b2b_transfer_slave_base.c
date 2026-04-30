@@ -238,7 +238,7 @@ static void semihost_write0(const char *message)
 #define I3C_SLAVE_LED_TOGGLE_INTERVAL 250000U
 #define I3C_SLAVE_LED_VISIBLE_PULSE_US 200000U
 #define I3C_SLAVE_LED_VISIBLE_PULSE_COUNT 2U
-#define I3C_SLAVE_IBI_POST_STOP_DELAY_LOOPS 1U
+#define I3C_SLAVE_IBI_POST_STOP_DELAY_LOOPS 1000U
 
 /*******************************************************************************
  * Variables
@@ -371,6 +371,7 @@ static void i3c_slave_service_activity_led(void)
  * Code
  ******************************************************************************/
 static void i3c_slave_update_retained_ibi_state(void);
+void i3c_slave_mark_post_ibi_echo_queued_complete(void);
 
 static void i3c_slave_reset_retained_trace(void)
 {
@@ -445,6 +446,31 @@ static void i3c_slave_reset_ibi_generation_state(void)
     g_txBuff = g_slave_txBuff;
     g_txSize = I3C_SLAVE_TX_DATA_LENGTH;
     g_slaveRetainedTrace.currentEchoedCount = 0U;
+    i3c_slave_update_retained_ibi_state();
+}
+
+void i3c_slave_mark_post_ibi_echo_queued_complete(void)
+{
+    if (!g_slavePostIbiEchoPending || !g_slavePostIbiEchoArmed)
+    {
+        return;
+    }
+
+    g_slaveRetainedTrace.postIbiEchoTxCompletionCount++;
+    g_slaveRetainedTrace.lastTxCompletionGeneration = g_slaveRetainedTrace.currentGeneration;
+    if (((g_slaveRetainedTrace.eventFlags & kSlaveRetainedTraceEchoArmedSeen) != 0U) &&
+        (g_slaveRetainedTrace.postEchoTxCompletionCount == 0U))
+    {
+        g_slaveRetainedTrace.postEchoTxCompletionCount = g_txSize;
+    }
+
+    g_slavePostIbiEchoConsumed = true;
+    g_slavePostIbiEchoArmed = false;
+    g_slavePostIbiEchoPending = false;
+    g_slaveIbiPending = false;
+    g_slaveIbiIssued = false;
+    g_slaveIbiRequestSent = false;
+    g_slavePostIbiAddressMatched = false;
     i3c_slave_update_retained_ibi_state();
 }
 

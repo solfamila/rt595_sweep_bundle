@@ -10,6 +10,7 @@
 #define I3C_MINTSET_OFFSET 0x90
 #define I3C_MINTCLR_OFFSET 0x94
 #define I3C_MINTMASKED_OFFSET 0x98
+#define I3C_MDMACTRL_OFFSET 0xA0
 #define I3C_MDATACTRL_OFFSET 0xAC
 #define I3C_MWDATAB_OFFSET 0xB0
 #define I3C_MWDATABE_OFFSET 0xB4
@@ -37,6 +38,7 @@
 
 void SMARTDMA_CODE EZHB_I3cDmaSeedChainProbe(void);
 void SMARTDMA_CODE EZHB_I3CReading(void);
+void SMARTDMA_CODE EZHB_I3cDmaSeedReadTail(void);
 
 SMARTDMA_DATA void (*g_SMARTDMA_api[16])(void);
 
@@ -268,12 +270,142 @@ E_LABEL("read_end0");
     E_GOSUB(read_end0);
 }
 
+void SMARTDMA_CODE EZHB_I3cDmaSeedReadTail(void)
+{
+    E_NOP;
+    E_NOP;
+
+    E_PER_READ(R6, EZH_ARM2EZH);
+    E_LSR(R6, R6, 2);
+    E_LSL(R6, R6, 2);
+
+    E_LOAD_IMM(CFS, 0x0);
+    E_LOAD_IMM(CFM, 0x101);
+
+    E_ADD_IMM(R7, PC, 0);
+    E_ADD_IMM(PC, PC, 4 * 4);
+
+    E_DCD(rx_wait_dma_irq);
+    E_DCD(read_tail_wait);
+    E_DCD(read_tail_byte_loop);
+    E_DCD(rx_complete_mailbox);
+    E_DCD(read_tail_arm_rdterm);
+
+    E_LDR(R5, R7, 0);
+    E_COND_GOTO_REGL(EU, R5);
+
+E_LABEL("rx_wait_dma_irq");
+    E_HOLD;
+    E_BCLR_IMM(CFM, CFM, 0);
+
+    E_LDR(R0, R6, PARAM_WAKE_COUNT_INDEX);
+    E_ADD_IMM(R0, R0, 1);
+    E_STR(R6, R0, PARAM_WAKE_COUNT_INDEX);
+
+    E_LDR(R1, R6, PARAM_DMA_INTA_COUNT_INDEX);
+    E_ADD_IMM(R1, R1, 1);
+    E_STR(R6, R1, PARAM_DMA_INTA_COUNT_INDEX);
+
+    E_LDR(R1, R6, PARAM_DMA_INTA_ADDRESS_INDEX);
+    E_LDR(R2, R6, PARAM_DMA_CHANNEL_MASK_INDEX);
+    E_STR(R1, R2, 0);
+
+    E_LDR(R0, R6, PARAM_NEXT_TX_BYTE_INDEX);
+    E_LDR(R1, R6, PARAM_REMAINING_COUNT_INDEX);
+    E_LDR(R2, R6, PARAM_I3C_BASE_ADDRESS_INDEX);
+
+    E_LOAD_IMM(GPD, I3C_MDMACTRL_OFFSET);
+    E_ADD(GPD, R2, GPD);
+    E_LDR(GPO, GPD, 0);
+    E_BCLR_IMM(GPO, GPO, 0);
+    E_BCLR_IMM(GPO, GPO, 1);
+    E_STR(GPD, GPO, 0);
+
+    E_LOAD_IMM(R5, I3C_MDATACTRL_OFFSET);
+    E_ADD(R3, R2, R5);
+    E_LOAD_IMM(R5, I3C_MRDATAB_OFFSET);
+    E_ADD(R4, R2, R5);
+
+    E_SUB_IMMS(R5, R1, 0);
+    E_LDR(R5, R7, 3);
+    E_COND_GOTO_REGL(ZE, R5);
+
+    E_LDR(R5, R7, 1);
+    E_COND_GOTO_REGL(EU, R5);
+
+E_LABEL("read_tail_wait");
+    E_LDR(R5, R3, 0);
+    E_LOAD_SIMM(GPD, 0x1F, 24);
+    E_AND_LSRS(R5, R5, GPD, 24);
+    E_SUB_IMMS(GPD, R5, 0);
+    E_LDR(GPD, R7, 2);
+    E_COND_GOTO_REGL(NZ, GPD);
+    E_LDR(GPD, R7, 1);
+    E_COND_GOTO_REGL(EU, GPD);
+
+E_LABEL("read_tail_byte_loop");
+    E_SUB_IMMS(GPD, R1, 0);
+    E_LDR(GPD, R7, 3);
+    E_COND_GOTO_REGL(ZE, GPD);
+
+    E_SUB_IMMS(GPD, R5, 0);
+    E_LDR(GPD, R7, 1);
+    E_COND_GOTO_REGL(ZE, GPD);
+
+    E_SUB_IMMS(GPD, R1, 1);
+    E_LDR(GPD, R7, 4);
+    E_COND_GOTO_REGL(ZE, GPD);
+
+    E_LDR(GPD, R4, 0);
+    E_STRB(R0, GPD, 0);
+    E_ADD_IMM(R0, R0, 1);
+    E_SUB_IMMS(R1, R1, 1);
+    E_SUB_IMMS(R5, R5, 1);
+
+    E_LDR(GPD, R6, PARAM_SMARTDMA_BYTES_INDEX);
+    E_ADD_IMM(GPD, GPD, 1);
+    E_STR(R6, GPD, PARAM_SMARTDMA_BYTES_INDEX);
+    E_STR(R6, R1, PARAM_REMAINING_COUNT_INDEX);
+
+    E_LDR(GPD, R7, 2);
+    E_COND_GOTO_REGL(EU, GPD);
+
+E_LABEL("read_tail_arm_rdterm");
+    E_LOAD_IMM(GPD, I3C_MCTRL_OFFSET);
+    E_ADD(GPD, R2, GPD);
+    E_LDR(GPO, GPD, 0);
+    E_LOAD_SIMM(R5, (EZH_I3C_RDTERM_ONE >> 16), 16);
+    E_ORS(GPO, GPO, R5);
+    E_STR(GPD, GPO, 0);
+
+    E_LDR(GPO, R4, 0);
+    E_STRB(R0, GPO, 0);
+    E_ADD_IMM(R0, R0, 1);
+    E_LOAD_IMM(R1, 0x0);
+    E_LOAD_IMM(R5, 0x0);
+
+    E_LDR(GPO, R6, PARAM_SMARTDMA_BYTES_INDEX);
+    E_ADD_IMM(GPO, GPO, 1);
+    E_STR(R6, GPO, PARAM_SMARTDMA_BYTES_INDEX);
+    E_STR(R6, R1, PARAM_REMAINING_COUNT_INDEX);
+
+E_LABEL("rx_complete_mailbox");
+    E_LDR(R5, R6, PARAM_MAILBOX_INDEX);
+    E_ADD_IMM(R5, R5, 1);
+    E_STR(R6, R5, PARAM_MAILBOX_INDEX);
+
+E_LABEL("read_tail_end0");
+    E_NOP;
+    E_GOSUB(read_tail_end0);
+}
+
 void keep_smartdma_api_alive(void)
 {
     volatile void *ptr = &g_SMARTDMA_api;
 
     g_SMARTDMA_api[0] = (void (*)(void))(((uint32_t)EZHB_I3cDmaSeedChainProbe + 4U) & (~3U));
     g_SMARTDMA_api[1] = (void (*)(void))(((uint32_t)EZHB_I3CReading + 4U) & (~3U));
+    g_SMARTDMA_api[2] = (void (*)(void))(((uint32_t)EZHB_I3cDmaSeedReadTail + 4U) & (~3U));
 
     (void)ptr;
 }

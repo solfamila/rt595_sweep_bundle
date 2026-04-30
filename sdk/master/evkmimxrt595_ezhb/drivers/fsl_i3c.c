@@ -14,6 +14,7 @@ extern volatile bool g_slaveIbiRequestSent;
 extern volatile bool g_slavePostIbiAddressMatched;
 extern volatile bool g_slavePostIbiEchoPending;
 extern volatile bool g_slavePostIbiEchoArmed;
+extern void i3c_slave_mark_post_ibi_echo_queued_complete(void);
 
 /*******************************************************************************
  * Definitions
@@ -3943,47 +3944,6 @@ static void I3C_SlaveTransferHandleBusStop(I3C_Type *base,
             handle->callback(base, &handle->transfer, handle->userData);
         }
 
-        if (!handle->wasTransmit && g_slavePostIbiEchoPending && (g_txBuff != NULL) && (g_txSize != 0U))
-        {
-            size_t txCount;
-
-            handle->transfer.txData = g_txBuff;
-            handle->transfer.txDataSize = g_txSize;
-            handle->transferredCount = 0U;
-            handle->rxDataBase = NULL;
-            handle->rxDataSize = 0U;
-            handle->wasTransmit = true;
-            g_slavePostIbiEchoArmed = true;
-
-            I3C_SlaveGetFifoCounts(base, NULL, &txCount);
-            assert(handle->txFifoSize >= txCount);
-            txCount = handle->txFifoSize - txCount;
-
-            while ((handle->transfer.txDataSize != 0UL) && (txCount != 0U))
-            {
-                if (handle->transfer.txDataSize > 1UL)
-                {
-                    base->SWDATAB = *handle->transfer.txData++;
-                }
-                else
-                {
-                    base->SWDATABE = *handle->transfer.txData++;
-                }
-
-                handle->transfer.txDataSize--;
-                handle->transferredCount++;
-                txCount--;
-            }
-
-            if (handle->transfer.txDataSize != 0UL)
-            {
-                I3C_SlaveEnableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
-                stateParams->pendingInts |= (uint32_t)kI3C_SlaveTxReadyFlag;
-            }
-
-            return;
-        }
-
         /* Clean up transfer info on completion, after the callback has been invoked. */
         (void)memset(&handle->transfer, 0, sizeof(handle->transfer));
         handle->rxDataBase = NULL;
@@ -4324,6 +4284,11 @@ static void I3C_SlaveTransferHandleTxReady(I3C_Type *base,
     if (postIbiReqReadLatchArmed)
     {
         g_i3cSlaveTxReadyDebug.postIbiReqReadTxDataSizeAfterWrite = handle->transfer.txDataSize;
+    }
+
+    if ((handle->transfer.txDataSize == 0UL) && g_slavePostIbiEchoPending && g_slavePostIbiEchoArmed)
+    {
+        i3c_slave_mark_post_ibi_echo_queued_complete();
     }
 }
 
