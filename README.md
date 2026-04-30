@@ -494,6 +494,52 @@ This rules out the earlier idea that the native RX failure might be specific to
 the 1-byte seed-descriptor form. The native 4-byte full-length descriptor also
 fails to complete.
 
+## RX Len6 Full-Length DMA INTA Poll Probe
+
+Use this follow-on probe to mirror the RX-DMA errata geometry as literally as
+possible while still keeping SmartDMA out of the observation path.
+
+Geometry under test:
+
+1. Read length fixed at 6 bytes.
+2. `RXTRIG=ThreeQuarterOrMore`.
+3. DMA0 CH24 uses one native descriptor with `XFERCOUNT=6`.
+4. DMA width stays byte-sized.
+5. SmartDMA wake routing is not used.
+6. CM33 polls DMA INTA directly and still does not service RXREADY/TXREADY data IRQs.
+
+### Build the len6 full-length probe and arm the slave
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_rx_len6_full_len_dma_inta_poll
+```
+
+### Run the master with TRACE32
+
+```bash
+./trace32/run_master_i3c_rx_len6_full_len_dma_inta_poll.sh
+```
+
+The validated retained-state signature is:
+
+```text
+rxFull6= pc=20288694 st=202 rs=5 ic=0 di=0 pi=0 ii=0 ms=1E03 me=0 md=60000F0 mc=12 act=1000000 inta=0 cfg=1 ctl=1 xcfg=54011 xcnt=5 err=0 rx=6 ds=400360C0 dd=2028CF71 dc=54011 dn=6 d0=0 d1=0 d2=0 d3=0 d4=0 d5=0
+```
+
+Interpretation:
+
+1. `st=202 rs=5` is the DMA-INTA wait timeout.
+2. `rx=6` means the RX FIFO still reached the expected 6-byte errata-safe level.
+3. `xcfg=54011`, `xcnt=5`, and `dn=6` confirm the armed descriptor was the intended 6-byte full-length transfer.
+4. `act=1000000` with `mc=12` means RX DMA remained enabled and the channel stayed armed.
+5. `ic=0` and `inta=0` mean DMA0 channel 24 still never completed even in the literal 6-byte errata geometry.
+
+This falsifies the narrower hypothesis that native RX DMA might only fail for
+1-byte seed descriptors and recover when moved to the documented 6-byte
+workaround geometry. On this board and SDK setup, the native RX DMAC request
+still does not produce DMA completion even for a byte-width, full-length,
+`RXTRIG=3/4`, 6-byte descriptor.
+
 ## RX Seed4 Seed-Only DMA CFG-Compare Probe
 
 Use this sibling probe to keep the failing native 1-byte seed descriptor, but
