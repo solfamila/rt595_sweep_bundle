@@ -305,6 +305,49 @@ Interpretation:
 3. `mi=FFFFFFFF` means no mismatch was latched.
 4. `b0..b5 = 0..5` confirms the master DMA RX buffer matched the expected payload.
 
+## Official Master DMA RX SmartDMA Wake Proof
+
+The bundle also includes `master_i3c_dma_official_rx_smartdma_wake_probe/`,
+which keeps the same passing official 6-byte master DMA RX flow but routes the
+DMA0 completion event into SmartDMA and verifies that CM33 does not service
+`DMA0_IRQn` or `RXREADY`/`TXNOTFULL` data IRQs during the read.
+
+### Build the official DMA RX SmartDMA wake proof
+
+```bash
+RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_probe
+```
+
+This leaves the slave running and prepares the master ELF at:
+
+```text
+/Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_dma_official_rx_smartdma_wake_probe/_build/master/evkmimxrt595_ezhb.axf
+```
+
+### Run the official DMA RX SmartDMA wake proof
+
+```bash
+./trace32/run_master_i3c_dma_official_rx_smartdma_wake_probe.sh
+```
+
+This TRACE32 wrapper loads the master ELF, runs to either `set_success_led` or
+`set_failure_led`, and prints the retained `dmaWakeFinal=` signature.
+
+### Current passing signature
+
+```text
+dmaWakeFinal= st=0B out=1 rs=0 cs=0 sa=31 rx=6 mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=1 si=1 ss=0 smd=28 sms=1000 sdc=800000C0 xc=3 xd=1 xs=6 txc=2 di=0 idc=0 ipc=3 rxc=0 b0=0 b1=1 b2=2 b3=3 b4=4 b5=5
+```
+
+Interpretation:
+
+1. `st=0B`, `out=1`, and `rs=0` mean the wake probe reached `kDmaOfficialStageValidated` and reported success.
+2. `b0..b5 = 0..5` confirms the official 6-byte RX payload still validated.
+3. `sm=1`, `sw=1`, and `si=1` mean SmartDMA observed exactly one DMA-completion wake and wrote the mailbox exactly once.
+4. `di=0` means CM33 did not service `DMA0_IRQn` during the read.
+5. `idc=0` means CM33 did not service `RXREADY` or `TXNOTFULL` data IRQs during the read, while `ipc=3` shows the remaining CM33 I3C activity stayed on protocol IRQs only.
+6. `rxc=0` means the CM33 RX DMA callback did not run on the validated path.
+
 ## RX Request-Semantics Probe
 
 Use this flow to reproduce the verified RT595 RX result where all three cases

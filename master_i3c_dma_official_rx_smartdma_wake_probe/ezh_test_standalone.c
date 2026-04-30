@@ -66,6 +66,11 @@ enum
     kDmaOfficialResultUnexpectedSmartDmaWake = -6,
 };
 
+enum
+{
+    kI3cDmaStateWaitForCompletion = 6U,
+};
+
 typedef struct _i3c_dma_smartdma_wake_param
 {
     volatile uint32_t mailbox;
@@ -317,6 +322,7 @@ static void arm_smartdma_wake_probe(void)
     INPUTMUX_Deinit(INPUTMUX);
 
     NVIC_ClearPendingIRQ(DMA0_IRQn);
+    NVIC_DisableIRQ(DMA0_IRQn);
     NVIC_ClearPendingIRQ(SDMA_IRQn);
     NVIC_DisableIRQ(SDMA_IRQn);
 
@@ -341,6 +347,16 @@ static status_t wait_for_smartdma_wake(uint32_t timeout)
     }
 
     return kStatus_Success;
+}
+
+static void suppress_read_data_irq_bounce(void)
+{
+    I3C_MasterDisableInterrupts(EXAMPLE_MASTER,
+                                (uint32_t)kI3C_MasterTxReadyFlag | (uint32_t)kI3C_MasterRxReadyFlag);
+    I3C_MasterClearStatusFlags(EXAMPLE_MASTER,
+                               (uint32_t)kI3C_MasterTxReadyFlag | (uint32_t)kI3C_MasterRxReadyFlag);
+    g_i3cMasterHandle.state = (uint8_t)kI3cDmaStateWaitForCompletion;
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
 }
 
 static void i3c_master_ibi_callback(I3C_Type *base,
@@ -555,12 +571,19 @@ int main(void)
     arm_smartdma_wake_probe();
     s_dma_official_stage = kDmaOfficialStageSmartDmaWakeArmed;
 
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
+    NVIC_DisableIRQ(I3C0_IRQn);
+
     result = I3C_MasterTransferDMA(EXAMPLE_MASTER, &g_i3cMasterHandle, &masterXfer);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageSmartDmaWakeArmed, (int32_t)result);
         goto fail;
     }
+
+    suppress_read_data_irq_bounce();
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
+    NVIC_EnableIRQ(I3C0_IRQn);
 
     result = wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
     if (result != kStatus_Success)

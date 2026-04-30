@@ -15,6 +15,10 @@
       "env": {
         "RT595_TRACE_SOURCE_ROOT": "/Users/foxy/intent/workspaces/hidden-gibbon/repo/src"
       }
+    },
+    "ida-pro-mcp": {
+      "type": "http",
+      "url": "http://127.0.0.1:13337/mcp"
     }
   }
 }
