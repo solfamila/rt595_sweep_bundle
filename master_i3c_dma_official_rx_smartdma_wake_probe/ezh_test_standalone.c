@@ -5,6 +5,7 @@
 
 #include "fsl_common.h"
 #include "fsl_inputmux.h"
+#include "fsl_power.h"
 #include "fsl_reset.h"
 #include "fsl_smartdma.h"
 
@@ -288,6 +289,10 @@ static void snapshot_smartdma_wake_state(void)
 
 static void arm_smartdma_wake_probe(void)
 {
+    POWER_DisablePD(kPDRUNCFG_APD_SMARTDMA_SRAM);
+    POWER_DisablePD(kPDRUNCFG_PPD_SMARTDMA_SRAM);
+    POWER_ApplyPD();
+
     keep_smartdma_api_alive();
 
     memset((void *)&s_smartdma_wake_param, 0, sizeof(s_smartdma_wake_param));
