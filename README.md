@@ -485,9 +485,15 @@ the same `10 ms` settle:
 1. `170 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AA cc=0AA ci=0A9 ip=1 i0=0AA i1=0 rx=3FC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=0AA si=0AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=155 xd=1 xs=6 txc=2 di=0 idc=0 ipc=1FE rxc=0`
 2. `341 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=155 cc=155 ci=154 ip=1 i0=55 i1=0 rx=7FE mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=155 si=155 ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=2AB xd=1 xs=6 txc=2 di=0 idc=0 ipc=3FF rxc=0`
 3. `682 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=2AA cc=2AA ci=2A9 ip=1 i0=0AA i1=0 rx=0FFC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2AA si=2AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=555 xd=1 xs=6 txc=2 di=0 idc=0 ipc=7FE rxc=0`
+4. `2731 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AAB cc=0AAB ci=0AAA ip=1 i0=0AB i1=0 rx=4002 mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=0AAB si=0AAB ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=1557 xd=1 xs=6 txc=2 di=0 idc=0 ipc=2001 rxc=0`
+5. `10923 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=2AAB cc=2AAB ci=2AAA ip=1 i0=0AB i1=0 rx=10002 mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2AAB si=2AAB ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=5557 xd=1 xs=6 txc=2 di=0 idc=0 ipc=8001 rxc=0`
 
 These all preserved the same zero-CM33-payload-IRQ property: `di=0`, `idc=0`,
 and `rxc=0` throughout the validated runs.
+
+For the larger scale points, the one-byte `i0=` generation tag wraps modulo 256.
+At that point the authoritative completion fields are `ec`, `cc`, `ci`, and
+`rx`, not the raw final `i0=` byte by itself.
 
 ### Validated `7`-byte remainder signature
 
