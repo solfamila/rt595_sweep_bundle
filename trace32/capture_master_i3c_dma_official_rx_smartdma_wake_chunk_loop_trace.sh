@@ -20,7 +20,7 @@ trace_list_block=
 
 if [[ ! -f "$master_axf" ]]; then
   echo "missing master ELF: $master_axf" >&2
-  echo "Build it first with: RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=1200' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop" >&2
+  echo "Build it first with: RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop" >&2
   exit 1
 fi
 
