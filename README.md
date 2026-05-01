@@ -360,11 +360,12 @@ which repeats the same official 6-byte DMA RX plus SmartDMA wake handoff across
 multiple write/IBI/read chunks while keeping CM33 off `DMA0_IRQn`,
 `RXREADY`/`TXNOTFULL`, and the RX DMA callback path.
 
-This loop now uses three stabilizers that were required on real hardware:
+This loop now uses four stabilizers that were required on real hardware:
 
 1. The master scrubs protocol and error flags plus flushes the FIFOs at each chunk boundary.
 2. The slave rearms only after a real post-IBI echo completion.
 3. The slave clears stale `kI3C_SlaveEventSentFlag` and slave error status before each repeated `I3C_SlaveRequestIBIWithData()` retry.
+4. The slave drops stale completion rearm before a newly received generation queues its next IBI, and it only runs completion rearm while no next-generation IBI or post-echo work is pending.
 
 The chunk-loop also uses the mandatory one-byte IBI payload as a generation tag,
 so the retained `i0=` field proves that each accepted IBI is fresh rather than a
@@ -379,6 +380,9 @@ instead of changing the proven full-chunk path.
 
 The experiment defaults to a conservative `10 ms` inter-chunk settle because the
 shorter gaps that were adequate for `2 x 6` were not stable over longer loops.
+After the stale-completion-rearm fix below, that settle floor is still real:
+`42 x 6` continues to fail at `1000 us`, `100 us`, `10 us`, and `0 us` on the
+second chunk with the same `st=6 / rs=-2` next-IBI timeout boundary.
 
 ### Build the chunk-loop proof
 
@@ -420,6 +424,13 @@ This leaves the master ELF at:
 This wrapper prints the retained `dmaWakeLoopFinal=` signature after it stops at
 either `set_success_led` or `set_failure_led`.
 
+For larger scale points, override the built-in wait with environment variables
+instead of editing the script. For example:
+
+```bash
+RT595_TRACE32_RUN_WAIT_SECONDS=1800 RT595_TRACE32_TIMEOUT_SECONDS=1860 RT595_TRACE32_WAIT_MS=1860000 ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_chunk_loop.sh
+```
+
 ### Run the chunk-count, settle, and remainder ladders
 
 ```bash
@@ -455,6 +466,29 @@ Interpretation:
 6. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no data IRQs, and no RX DMA callback across the full repeated loop.
 7. `mi=0FFFFFFFF`, `rf=0`, and `rl=5` mean no mismatch was latched and the validated payload still began at `0` and ended at `5`.
 
+### Long-loop root cause and new scale points
+
+The earlier intermittent long-loop failures beyond `42` chunks turned out not to
+be a hard chunk-count ceiling. The retained slave state showed that generation
+`N+1` could queue its IBI while the previous generation's completion-triggered
+rearm request was still live. That stale rearm then cleared the new
+`g_slaveIbiPending` state before `I3C_SlaveRequestIBIWithData()` issued.
+
+The fix in `sdk/slave/i3c_interrupt_b2b_transfer_slave_base.c` was:
+
+1. clear stale `g_slaveCompletionRearmPending` as soon as a new RX generation queues its post-IBI work.
+2. refuse to run `i3c_slave_rearm_after_completion()` while next-generation IBI or post-echo work is already pending.
+
+After that fix, the repeated official DMA RX chunk path scaled substantially at
+the same `10 ms` settle:
+
+1. `170 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AA cc=0AA ci=0A9 ip=1 i0=0AA i1=0 rx=3FC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=0AA si=0AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=155 xd=1 xs=6 txc=2 di=0 idc=0 ipc=1FE rxc=0`
+2. `341 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=155 cc=155 ci=154 ip=1 i0=55 i1=0 rx=7FE mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=155 si=155 ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=2AB xd=1 xs=6 txc=2 di=0 idc=0 ipc=3FF rxc=0`
+3. `682 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=2AA cc=2AA ci=2A9 ip=1 i0=0AA i1=0 rx=0FFC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2AA si=2AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=555 xd=1 xs=6 txc=2 di=0 idc=0 ipc=7FE rxc=0`
+
+These all preserved the same zero-CM33-payload-IRQ property: `di=0`, `idc=0`,
+and `rxc=0` throughout the validated runs.
+
 ### Validated `7`-byte remainder signature
 
 ```text
@@ -468,6 +502,29 @@ Interpretation:
 3. `xs=1` shows the final slave-side data phase was a one-byte transfer.
 4. `i0=2`, `sw=2`, and `si=2` show the second IBI generation and SmartDMA wake were still clean on the remainder boundary.
 5. `di=0`, `idc=0`, and `rxc=0` mean the remainder path preserved the same zero-CM33-payload-IRQ property as the full-chunk proof.
+
+### Scaled remainder proof at `1025` bytes
+
+The same repaired path also passes a larger non-multiple-of-6 transfer at the
+stable `10 ms` settle:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_TOTAL_BYTES=1025 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=10000' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
+```
+
+Validated signature:
+
+```text
+dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AB cc=0AB ci=0AA ip=1 i0=0AB i1=0 rx=401 mi=0FFFFFFFF tr=1 rf=0 rl=4 sm=1 sw=0AB si=0AB ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=157 xd=1 xs=5 txc=2 di=0 idc=0 ipc=201 rxc=0
+```
+
+Interpretation:
+
+1. `ec=0AB`, `cc=0AB`, and `ci=0AA` mean the loop completed `171` chunks total.
+2. `rx=401` proves the aggregate validated receive length was `1025` bytes.
+3. `xs=5` and `rl=4` show the final chunk was a `5`-byte remainder carrying the expected `0..4` payload.
+4. `sw=0AB` and `si=0AB` show SmartDMA still observed one DMA-completion wake per chunk across the full scaled remainder run.
+5. `di=0`, `idc=0`, and `rxc=0` mean the scaled remainder path also preserved zero CM33 DMA IRQ, zero CM33 data IRQ, and zero RX DMA callback involvement.
 
 ## RX Request-Semantics Probe
 

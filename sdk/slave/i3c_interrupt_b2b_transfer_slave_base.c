@@ -102,13 +102,20 @@ enum
 };
 
 #define SLAVE_RETAINED_TRACE_MAGIC 0x53545243U
-#define SLAVE_RETAINED_TRACE_VERSION 6U
+#define SLAVE_RETAINED_TRACE_VERSION 7U
 
 enum
 {
     kSlavePostIbiEchoSourceNone = 0U,
     kSlavePostIbiEchoSourceAddressMatch = 1U,
     kSlavePostIbiEchoSourceTransmitEvent = 2U,
+};
+
+enum
+{
+    kSlaveIbiStateResetReasonNone = 0U,
+    kSlaveIbiStateResetReasonInvalidStart = 1U,
+    kSlaveIbiStateResetReasonCompletionRearm = 2U,
 };
 
 enum
@@ -185,6 +192,11 @@ typedef struct slave_retained_trace
     uint32_t lastAddressMatchGeneration;
     uint32_t lastTransmitServeGeneration;
     uint32_t lastTxCompletionGeneration;
+    uint32_t invalidStartRearmCount;
+    uint32_t completionRearmCount;
+    uint32_t ibiStateResetCount;
+    uint32_t lastIbiStateResetGeneration;
+    uint32_t lastIbiStateResetReason;
 } slave_retained_trace_t;
 
 #if APP_ENABLE_SEMIHOST
@@ -425,6 +437,10 @@ static void i3c_slave_rearm_after_invalid_start(uint32_t eventMask)
 {
     g_slaveRearmAfterInvalidStart = false;
     g_slaveInvalidStartRearmCount++;
+    g_slaveRetainedTrace.invalidStartRearmCount++;
+    g_slaveRetainedTrace.ibiStateResetCount++;
+    g_slaveRetainedTrace.lastIbiStateResetGeneration = g_slaveRetainedTrace.currentGeneration;
+    g_slaveRetainedTrace.lastIbiStateResetReason = kSlaveIbiStateResetReasonInvalidStart;
     g_slaveCompletionFlag = false;
     g_lastTransferWasReceive = false;
     g_slaveIbiPending = false;
@@ -457,6 +473,10 @@ static void i3c_slave_reset_ibi_generation_state(void);
 
 static void i3c_slave_rearm_after_completion(uint32_t eventMask)
 {
+    g_slaveRetainedTrace.completionRearmCount++;
+    g_slaveRetainedTrace.ibiStateResetCount++;
+    g_slaveRetainedTrace.lastIbiStateResetGeneration = g_slaveRetainedTrace.currentGeneration;
+    g_slaveRetainedTrace.lastIbiStateResetReason = kSlaveIbiStateResetReasonCompletionRearm;
     g_slaveCompletionFlag = false;
     g_slaveCompletionRearmPending = false;
     g_lastTransferWasReceive = false;
@@ -940,6 +960,11 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                     g_slavePostIbiEchoPending = (echoedCount != 0U);
                     g_slavePostIbiEchoArmed = false;
                     g_slavePostIbiEchoConsumed = false;
+                    /* If the next generation has already been received, any
+                     * prior completion-triggered rearm request is stale and
+                     * would clear the freshly queued IBI state.
+                     */
+                    g_slaveCompletionRearmPending = false;
                     g_slaveRetainedTrace.currentGeneration++;
                     g_slaveRetainedTrace.currentEchoedCount = g_txSize;
                     i3c_slave_record_trace(kSlaveTraceEchoArmed, g_txBuff, g_txSize, 0U);
@@ -1140,7 +1165,8 @@ int main(void)
         }
 
     #if EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION
-        if (g_slaveCompletionRearmPending && !g_i3c_s_handle.isBusy)
+        if (g_slaveCompletionRearmPending && !g_i3c_s_handle.isBusy && !g_slaveIbiPending &&
+            !g_slavePostIbiEchoPending)
         {
             i3c_slave_rearm_after_completion(eventMask);
         }

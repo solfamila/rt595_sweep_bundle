@@ -6,6 +6,9 @@ source "$SCRIPT_DIR/common.sh"
 
 bundle_root=$(trace32_bundle_root)
 master_axf="$bundle_root/master_i3c_dma_official_rx_smartdma_wake_chunk_loop/_build/master/evkmimxrt595_ezhb.axf"
+trace32_timeout_seconds=${RT595_TRACE32_TIMEOUT_SECONDS:-240}
+trace32_wait_ms=${RT595_TRACE32_WAIT_MS:-240000}
+trace32_run_wait_seconds=${RT595_TRACE32_RUN_WAIT_SECONDS:-180}
 
 if [[ ! -f "$master_axf" ]]; then
   echo "missing master ELF: $master_axf" >&2
@@ -13,7 +16,7 @@ if [[ ! -f "$master_axf" ]]; then
   exit 1
 fi
 
-trace32_run_generated_script 240 240000 <<EOF
+trace32_run_generated_script "$trace32_timeout_seconds" "$trace32_wait_ms" <<EOF
 $(trace32_loader_preamble "$master_axf")
 
 Break.Delete
@@ -21,7 +24,7 @@ Break.Set set_success_led /Program
 Break.Set set_failure_led /Program
 
 Go
-WAIT !STATE.RUN() 180.s
+WAIT !STATE.RUN() ${trace32_run_wait_seconds}.s
 IF STATE.RUN()
 (
   Break
