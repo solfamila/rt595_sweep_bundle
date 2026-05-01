@@ -40,6 +40,7 @@
 #define I3C_PACKET_LENGTH (I3C_DATA_LENGTH + 1U)
 #define I3C_DMA_OFFICIAL_TIMEOUT 100000000U
 #define I3C_DMA_OFFICIAL_LED_PULSE_US 120000U
+#define I3C_SLAVE_SESSION_RESET_TOKEN 0xFFU
 #ifndef I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US
 #define I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US 10000U
 #endif
@@ -375,6 +376,33 @@ static void prepare_chunk_write_payload(uint32_t chunkDataLength)
     {
         g_master_txBuff[index] = (uint8_t)(index - 1U);
     }
+}
+
+static status_t reset_slave_session_generation(uint8_t slaveAddr)
+{
+    status_t result;
+    i3c_master_transfer_t masterXfer;
+    uint8_t resetToken = I3C_SLAVE_SESSION_RESET_TOKEN;
+
+    g_masterCompletionFlag = false;
+    g_completionStatus = kStatus_Success;
+
+    memset(&masterXfer, 0, sizeof(masterXfer));
+    masterXfer.slaveAddress = slaveAddr;
+    masterXfer.data = &resetToken;
+    masterXfer.dataSize = sizeof(resetToken);
+    masterXfer.direction = kI3C_Write;
+    masterXfer.busType = kI3C_TypeI3CSdr;
+    masterXfer.flags = kI3C_TransferDefaultFlag;
+    masterXfer.ibiResponse = kI3C_IbiRespAckMandatory;
+
+    result = I3C_MasterTransferDMA(EXAMPLE_MASTER, &g_i3cMasterHandle, &masterXfer);
+    if (result != kStatus_Success)
+    {
+        return result;
+    }
+
+    return wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
 }
 
 static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
@@ -787,6 +815,14 @@ int main(void)
 
     s_dma_official_slave_addr = slaveAddr;
     s_dma_official_stage = kDmaOfficialStageDaaDone;
+
+    result = reset_slave_session_generation(slaveAddr);
+    if (result != kStatus_Success)
+    {
+        mark_failure(kDmaOfficialStageDaaDone,
+                     (result == kStatus_Timeout) ? kDmaOfficialResultTimeoutCompletion : (int32_t)result);
+        goto fail;
+    }
 
     s_dma_official_stage = kDmaOfficialStageIbiRegistered;
 

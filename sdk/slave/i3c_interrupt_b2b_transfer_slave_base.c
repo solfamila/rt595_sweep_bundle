@@ -47,6 +47,10 @@
 
 #define I3C_SLAVE_IBI_PAYLOAD_LENGTH 1U
 
+#ifndef I3C_SLAVE_SESSION_RESET_TOKEN
+#define I3C_SLAVE_SESSION_RESET_TOKEN 0xFFU
+#endif
+
 #ifndef I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS
 #define I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS 1200U
 #endif
@@ -483,6 +487,16 @@ static void i3c_slave_rearm_after_invalid_start(uint32_t eventMask)
 }
 
 static void i3c_slave_reset_ibi_generation_state(void);
+
+static void i3c_slave_reset_ibi_generation_sequence(void)
+{
+    g_slaveRetainedTrace.currentGeneration = 0U;
+    g_slaveRetainedTrace.lastQueuedGeneration = 0U;
+    g_slaveRetainedTrace.lastIssuedGeneration = 0U;
+    g_slaveRetainedTrace.lastRequestSentGeneration = 0U;
+    g_slaveRetainedTrace.lastTxCompletionGeneration = 0U;
+    i3c_slave_reset_ibi_generation_state();
+}
 
 static void i3c_slave_rearm_after_completion(uint32_t eventMask)
 {
@@ -952,6 +966,25 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
 
                     i3c_slave_record_trace(
                         kSlaveTraceRxComplete, g_slave_rxBuff, (uint32_t)xfer->transferredCount, 0U);
+
+                    if (((uint32_t)xfer->transferredCount == 1U) &&
+                        (g_slave_rxBuff[0] == I3C_SLAVE_SESSION_RESET_TOKEN))
+                    {
+                        i3c_slave_reset_ibi_generation_sequence();
+                        g_slaveCompletionFlag = true;
+                        break;
+                    }
+
+                    /* Ignore pre-DAA receive traffic for generation-tagged IBI
+                     * sequencing. The master expects generation 1 on the first
+                     * post-DAA chunk, so broadcast/CCC setup before DAVALID must
+                     * not advance the slave generation counter.
+                     */
+                    if ((EXAMPLE_SLAVE->SDYNADDR & I3C_SDYNADDR_DAVALID_MASK) == 0U)
+                    {
+                        i3c_slave_reset_ibi_generation_state();
+                        break;
+                    }
 
 #if EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
                     g_txBuff = g_slave_txBuff;
