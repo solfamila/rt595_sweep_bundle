@@ -177,6 +177,80 @@ editing `.cmm` files.
 If the bundled wrapper is not usable on the target host, set
 `TRACE32_WRAPPER=/path/to/t32cmd_nostop` before running the trace32 helpers.
 
+## Taking An Off-Chip Trace Capture
+
+The bundle also includes an example wrapper that captures an RT595 off-chip ETM
+trace from the passing sweep master:
+
+```bash
+./trace32/capture_master_i3c_sdma_seed_tail_len_sweep_trace.sh
+```
+
+Use this flow when you want a real trace capture that you can reopen in
+TRACE32, rather than just running to the success or failure LEDs.
+
+### What the example does
+
+1. Loads `master_i3c_sdma_seed_tail_len_sweep/_build/master/evkmimxrt595_ezhb.axf`.
+2. Runs directly to `init_transfer_led()` so trace is armed only after
+  `BOARD_InitHardware()` has finished reprogramming the clock tree.
+3. Configures the RT595 EVK off-chip 4-bit trace pins and enables ETM plus ITM.
+4. Uses `Trace.AutoFocus`, then forces the analyzer trace data rate to
+  `198MHz`.
+5. Runs the target for the requested capture window.
+6. Halts the core, saves the trace as a TRACE32 `.ad` file, and also exports a
+  plain-text `Trace.List` dump for quick grepping.
+
+The explicit `198MHz` setting is intentional. In this bundle's SDK payload, the
+core clock is `198000000Hz` and `CLOCK_SetClkDiv(kCLOCK_DivPfc0Clk, 2U)` is set
+in `sdk/master/evkmimxrt595_ezhb/board/clock_config.c`. The example therefore
+uses the same fixed data-rate setting that was validated for this RT595 setup.
+
+### Hardware prerequisites
+
+1. Build the master ELF first using step 3 from the validated flow above.
+2. Connect the TRACE32 AutoFocus preprocessor or equivalent supported analyzer
+  to the EVK off-chip trace header.
+3. Start TRACE32 so `t32cmd_nostop` can connect to the active node, or point
+  `TRACE32_WRAPPER` at a working wrapper binary.
+4. If TRACE32 is listening on a non-default node, set `TRACE32_NODE` before
+  running the helper.
+
+### Example usage
+
+Capture 5 seconds and write the outputs under the default capture directory:
+
+```bash
+./trace32/capture_master_i3c_sdma_seed_tail_len_sweep_trace.sh
+```
+
+Capture 12 seconds and write to a custom directory:
+
+```bash
+TRACE_CAPTURE_SECONDS=12 \
+TRACE_CAPTURE_OUT_DIR="$PWD/.local/trace-captures/custom" \
+./trace32/capture_master_i3c_sdma_seed_tail_len_sweep_trace.sh
+```
+
+The helper creates:
+
+1. `<capture-name>.ad` with the raw TRACE32 trace capture.
+2. `<capture-name>.txt` with a `Trace.List` export for quick search.
+
+The default output directory is `.local/trace-captures/`.
+
+### Reading the result
+
+The quickest sanity checks are:
+
+```bash
+ls -lh .local/trace-captures/
+rg -n "FLOW ?ERROR|HARDERROR|set_success_led|set_failure_led" .local/trace-captures/*.txt
+```
+
+Open the `.ad` file in TRACE32 when you want the full trace UI, timing view, or
+trackback analysis.
+
 ## Exact Passing Signature
 
 The validated long-settle passing output is:
