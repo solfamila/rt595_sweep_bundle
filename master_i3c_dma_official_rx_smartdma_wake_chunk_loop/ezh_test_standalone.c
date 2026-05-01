@@ -1,7 +1,7 @@
 /*
  * Minimal RT595 master experiment that preserves the official classic DMA I3C
- * RX proof while repeating the validated 6-byte DMA read twice and routing
- * each DMA completion to SmartDMA with zero CM33 payload IRQ service.
+ * RX proof while repeating bounded official DMA reads and routing each DMA
+ * completion to SmartDMA with zero CM33 payload IRQ service.
  */
 
 #include "fsl_common.h"
@@ -26,10 +26,17 @@
 
 #define I3C_MASTER_SLAVE_ADDR_7BIT 0x1EU
 #define I3C_DATA_LENGTH 6U
+#ifndef I3C_LOGICAL_TOTAL_BYTES
 #ifndef I3C_LOGICAL_CHUNK_COUNT
 #define I3C_LOGICAL_CHUNK_COUNT 2U
 #endif
-#define I3C_LOGICAL_DATA_LENGTH (I3C_DATA_LENGTH * I3C_LOGICAL_CHUNK_COUNT)
+#define I3C_LOGICAL_TOTAL_BYTES (I3C_DATA_LENGTH * I3C_LOGICAL_CHUNK_COUNT)
+#else
+#ifndef I3C_LOGICAL_CHUNK_COUNT
+#define I3C_LOGICAL_CHUNK_COUNT ((I3C_LOGICAL_TOTAL_BYTES + I3C_DATA_LENGTH - 1U) / I3C_DATA_LENGTH)
+#endif
+#endif
+#define I3C_LOGICAL_DATA_LENGTH I3C_LOGICAL_TOTAL_BYTES
 #define I3C_PACKET_LENGTH (I3C_DATA_LENGTH + 1U)
 #define I3C_DMA_OFFICIAL_TIMEOUT 100000000U
 #define I3C_DMA_OFFICIAL_LED_PULSE_US 120000U
@@ -343,11 +350,28 @@ static void snapshot_smartdma_wake_state(void)
     s_dma_official_smartdma_mdatactrl = s_smartdma_wake_param.i3cMdataCtrlSnapshot;
 }
 
-static void prepare_chunk_write_payload(uint32_t chunkIndex)
+static uint32_t get_chunk_data_length(uint32_t chunkIndex)
 {
-    (void)chunkIndex;
-    g_master_txBuff[0] = I3C_DATA_LENGTH;
-    for (uint32_t index = 1U; index < I3C_PACKET_LENGTH; index++)
+    uint32_t chunkOffset = chunkIndex * I3C_DATA_LENGTH;
+
+    if (chunkOffset >= I3C_LOGICAL_DATA_LENGTH)
+    {
+        return 0U;
+    }
+
+    if ((I3C_LOGICAL_DATA_LENGTH - chunkOffset) < I3C_DATA_LENGTH)
+    {
+        return I3C_LOGICAL_DATA_LENGTH - chunkOffset;
+    }
+
+    return I3C_DATA_LENGTH;
+}
+
+static void prepare_chunk_write_payload(uint32_t chunkDataLength)
+{
+    memset(g_master_txBuff, 0, sizeof(g_master_txBuff));
+    g_master_txBuff[0] = (uint8_t)chunkDataLength;
+    for (uint32_t index = 1U; index <= chunkDataLength; index++)
     {
         g_master_txBuff[index] = (uint8_t)(index - 1U);
     }
@@ -359,11 +383,12 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     i3c_master_transfer_t masterXfer;
     i3c_register_ibi_addr_t ibiRecord;
     uint32_t chunkOffset = chunkIndex * I3C_DATA_LENGTH;
-    uint32_t expectedReadSize = I3C_DATA_LENGTH;
+    uint32_t expectedReadSize = get_chunk_data_length(chunkIndex);
+    uint32_t chunkPacketSize = expectedReadSize + 1U;
     uint32_t rxCallbackBaseline = g_i3c_dbg_dma_callback_rx_count;
 
     s_dma_official_current_chunk_index = chunkIndex;
-    prepare_chunk_write_payload(chunkIndex);
+    prepare_chunk_write_payload(expectedReadSize);
     memset(g_chunk_rxBuff, 0, sizeof(g_chunk_rxBuff));
     memset(g_master_ibiBuff, 0, sizeof(g_master_ibiBuff));
     memset(g_ibiBuff, 0, sizeof(g_ibiBuff));
@@ -380,7 +405,7 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     memset(&masterXfer, 0, sizeof(masterXfer));
     masterXfer.slaveAddress = slaveAddr;
     masterXfer.data = g_master_txBuff;
-    masterXfer.dataSize = I3C_PACKET_LENGTH;
+    masterXfer.dataSize = chunkPacketSize;
     masterXfer.direction = kI3C_Write;
     masterXfer.busType = kI3C_TypeI3CSdr;
     masterXfer.flags = kI3C_TransferDefaultFlag;
@@ -418,13 +443,11 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
         return kStatus_Fail;
     }
 #else
-    if (g_ibiBuff[0] != I3C_DATA_LENGTH)
+    if (g_ibiBuff[0] != expectedReadSize)
     {
         mark_failure(kDmaOfficialStageIbiSeen, kDmaOfficialResultUnexpectedChunkLength);
         return kStatus_Fail;
     }
-
-    expectedReadSize = g_ibiBuff[0];
 #endif
 
     memset(&masterXfer, 0, sizeof(masterXfer));
@@ -513,7 +536,7 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
 
     s_dma_official_stage = kDmaOfficialStageSmartDmaWakeSeen;
 
-    for (uint32_t index = 0U; index < I3C_DATA_LENGTH; index++)
+    for (uint32_t index = 0U; index < expectedReadSize; index++)
     {
         if (g_chunk_rxBuff[index] != (uint8_t)index)
         {
@@ -523,9 +546,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
         }
     }
 
-    memcpy(&g_master_rxBuff[chunkOffset], g_chunk_rxBuff, I3C_DATA_LENGTH);
+    memcpy(&g_master_rxBuff[chunkOffset], g_chunk_rxBuff, expectedReadSize);
 
-    s_dma_official_rx_size += I3C_DATA_LENGTH;
+    s_dma_official_rx_size += expectedReadSize;
     s_dma_official_completed_chunk_count = chunkIndex + 1U;
     return kStatus_Success;
 }

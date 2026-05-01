@@ -257,6 +257,23 @@ file_hash() {
   fi
 }
 
+extract_define_value() {
+  local definitions=$1
+  local key=$2
+  local token
+
+  for token in $definitions; do
+    case "$token" in
+      "$key"=*)
+        printf '%s\n' "${token#*=}"
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
 slave_flash_stamp_file() {
   printf '%s/slave-flash-%s.sha256\n' "$FLASH_STATE_DIR" "$SLAVE_PROBE"
 }
@@ -606,6 +623,9 @@ compile_slave() {
   local src
   local rel
   local obj
+  local master_total_bytes
+  local slave_final_tx_count
+  local slave_final_tx_generation
   local -a includes
   local -a defines
   local -a cflags=("${COMMON_CFLAGS[@]}")
@@ -646,6 +666,16 @@ compile_slave() {
 
   if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
     defines+=(EXPERIMENT_IBI_GENERATION_TAG=1)
+
+    master_total_bytes=$(extract_define_value "${RT595_EXTRA_MASTER_DEFINES:-}" I3C_LOGICAL_TOTAL_BYTES || true)
+    if [[ -n "$master_total_bytes" ]]; then
+      slave_final_tx_count=$((master_total_bytes % 6))
+      slave_final_tx_generation=$(((master_total_bytes + 6 - 1) / 6))
+      if (( slave_final_tx_count != 0 )); then
+        defines+=(EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT="$slave_final_tx_count")
+        defines+=(EXPERIMENT_SLAVE_FINAL_TX_GENERATION="$slave_final_tx_generation")
+      fi
+    fi
   fi
 
   if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then

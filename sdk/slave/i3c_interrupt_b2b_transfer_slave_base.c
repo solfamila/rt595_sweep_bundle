@@ -37,6 +37,14 @@
 #define EXPERIMENT_IBI_GENERATION_TAG 0
 #endif
 
+#ifndef EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT
+#define EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT 0U
+#endif
+
+#ifndef EXPERIMENT_SLAVE_FINAL_TX_GENERATION
+#define EXPERIMENT_SLAVE_FINAL_TX_GENERATION 0U
+#endif
+
 #define I3C_SLAVE_IBI_PAYLOAD_LENGTH 1U
 
 #ifndef EXPERIMENT_SLAVE_MIN_ECHO_COUNT
@@ -913,6 +921,14 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                         (EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT <= I3C_SLAVE_TX_DATA_LENGTH)
                             ? EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
                             : I3C_SLAVE_TX_DATA_LENGTH;
+                    if ((EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT != 0U) &&
+                        (g_slaveRetainedTrace.currentGeneration == EXPERIMENT_SLAVE_FINAL_TX_GENERATION))
+                    {
+                        g_txSize =
+                            (EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT <= I3C_SLAVE_TX_DATA_LENGTH)
+                                ? EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT
+                                : I3C_SLAVE_TX_DATA_LENGTH;
+                    }
                     for (uint32_t txIndex = 0U; txIndex < g_txSize; txIndex++)
                     {
                         g_slave_txBuff[txIndex] = (uint8_t)txIndex;

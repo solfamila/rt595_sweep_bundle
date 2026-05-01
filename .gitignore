@@ -1,3 +1,4 @@
 .DS_Store
 **/_build/
 /.local/state/
+/.local/chunk_loop_matrix_results.tsv

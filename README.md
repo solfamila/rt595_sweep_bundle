@@ -370,6 +370,13 @@ The chunk-loop also uses the mandatory one-byte IBI payload as a generation tag,
 so the retained `i0=` field proves that each accepted IBI is fresh rather than a
 stale replay.
 
+The same experiment can now also be built against a compile-time
+`I3C_LOGICAL_TOTAL_BYTES` target. That keeps the validated official `6`-byte DMA
+RX chunk size for full chunks while allowing the final chunk to be shorter. The
+slave still returns the fixed `0..n-1` byte pattern, but it now applies a
+compile-time final-chunk override derived from the requested total-byte target
+instead of changing the proven full-chunk path.
+
 The experiment defaults to a conservative `10 ms` inter-chunk settle because the
 shorter gaps that were adequate for `2 x 6` were not stable over longer loops.
 
@@ -389,6 +396,15 @@ The camera-scale proof that was validated on hardware uses `42 x 6` chunks:
 RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
 ```
 
+### Validated remainder repro command
+
+The narrow remainder proof that was validated on hardware uses `7` total bytes,
+which forces a single-byte final chunk:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_TOTAL_BYTES=7' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
+```
+
 This leaves the master ELF at:
 
 ```text
@@ -403,6 +419,25 @@ This leaves the master ELF at:
 
 This wrapper prints the retained `dmaWakeLoopFinal=` signature after it stops at
 either `set_success_led` or `set_failure_led`.
+
+### Run the chunk-count, settle, and remainder ladders
+
+```bash
+./trace32/run_master_i3c_dma_official_rx_smartdma_wake_chunk_loop_matrix.sh
+```
+
+By default this writes a TSV record to `.local/chunk_loop_matrix_results.tsv`
+while running:
+
+1. a settle sweep for the validated `42 x 6` chunk loop at `10000`, `1000`, `100`, `10`, and `0` microseconds.
+2. a remainder ladder for `253`, `257`, `511`, and `1025` total bytes at the stable `10000` microsecond settle.
+
+You can override those ladders directly from the shell. For example, the larger
+camera-scale chunk ladder discussed in this repo can be run with:
+
+```bash
+RT595_CHUNK_LOOP_MATRIX_CHUNK_COUNTS='42 170 682 2731 10923' RT595_CHUNK_LOOP_MATRIX_SETTLES_US='10000 1000 100 10 0' RT595_CHUNK_LOOP_MATRIX_MODE=chunks ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_chunk_loop_matrix.sh
+```
 
 ### Current validated 42 x 6 signature
 
@@ -419,6 +454,20 @@ Interpretation:
 5. `sm=1`, `sw=2A`, and `si=2A` mean SmartDMA observed and acknowledged exactly one DMA-completion wake for each chunk.
 6. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no data IRQs, and no RX DMA callback across the full repeated loop.
 7. `mi=0FFFFFFFF`, `rf=0`, and `rl=5` mean no mismatch was latched and the validated payload still began at `0` and ended at `5`.
+
+### Validated `7`-byte remainder signature
+
+```text
+dmaWakeLoopFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=2 cc=2 ci=1 ip=1 i0=2 i1=0 rx=7 mi=0FFFFFFFF tr=0 rf=0 rl=0 sm=1 sw=2 si=2 ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=5 xd=1 xs=1 txc=2 di=0 idc=0 ipc=6 rxc=0 b0=0 b1=1 b2=2 b3=3 b4=4 b5=5 b6=0
+```
+
+Interpretation:
+
+1. `ec=2`, `cc=2`, and `ci=1` mean the loop completed a full `6`-byte chunk plus a one-byte remainder chunk.
+2. `rx=7` proves the aggregate validated receive length followed the requested total-byte target rather than rounding up to `12`.
+3. `xs=1` shows the final slave-side data phase was a one-byte transfer.
+4. `i0=2`, `sw=2`, and `si=2` show the second IBI generation and SmartDMA wake were still clean on the remainder boundary.
+5. `di=0`, `idc=0`, and `rxc=0` mean the remainder path preserved the same zero-CM33-payload-IRQ property as the full-chunk proof.
 
 ## RX Request-Semantics Probe
 
