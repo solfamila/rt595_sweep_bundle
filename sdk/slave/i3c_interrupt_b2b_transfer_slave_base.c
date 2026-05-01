@@ -283,8 +283,12 @@ static void semihost_write0(const char *message)
 #endif
 
 #define I3C_SLAVE_LED_TOGGLE_INTERVAL 250000U
-#define I3C_SLAVE_LED_VISIBLE_PULSE_US 200000U
+#ifndef I3C_SLAVE_LED_VISIBLE_PULSE_US
+#define I3C_SLAVE_LED_VISIBLE_PULSE_US 1000U
+#endif
+#ifndef I3C_SLAVE_LED_VISIBLE_PULSE_COUNT
 #define I3C_SLAVE_LED_VISIBLE_PULSE_COUNT 2U
+#endif
 #define I3C_SLAVE_IBI_POST_STOP_DELAY_LOOPS 1000U
 
 /*******************************************************************************
@@ -408,6 +412,7 @@ static void i3c_slave_service_activity_led(void)
         return;
     }
 
+    /* Keep the original completion path, but with short pulses so it no longer dominates runtime. */
     EXP_LED_Blink(false, true, false, I3C_SLAVE_LED_VISIBLE_PULSE_COUNT, I3C_SLAVE_LED_VISIBLE_PULSE_US);
     EXP_LED_Set(false, true, false);
     g_slaveActivityLedPollCount = 0U;

@@ -166,6 +166,12 @@ static __NO_INIT volatile uint32_t s_dma_official_smartdma_dma_inta_snapshot;
 static __NO_INIT volatile uint32_t s_dma_official_smartdma_mdmactrl;
 static __NO_INIT volatile uint32_t s_dma_official_smartdma_mstatus;
 static __NO_INIT volatile uint32_t s_dma_official_smartdma_mdatactrl;
+static __NO_INIT volatile uint32_t s_dma_official_total_chunk_time_us;
+static __NO_INIT volatile uint32_t s_dma_official_total_write_wait_us;
+static __NO_INIT volatile uint32_t s_dma_official_total_ibi_wait_us;
+static __NO_INIT volatile uint32_t s_dma_official_total_read_wait_us;
+static __NO_INIT volatile uint32_t s_dma_official_total_smartdma_arm_us;
+static __NO_INIT volatile uint32_t s_dma_official_total_smartdma_wait_us;
 static __NO_INIT volatile uint32_t s_dma_official_total_dma0_irq_count;
 static __NO_INIT volatile uint32_t s_dma_official_total_data_irq_count;
 static __NO_INIT volatile uint32_t s_dma_official_total_protocol_irq_count;
@@ -186,6 +192,7 @@ static dma_handle_t g_rxDmaHandle;
 static volatile bool g_masterCompletionFlag;
 static volatile bool g_ibiWonFlag;
 static volatile status_t g_completionStatus = kStatus_Success;
+static bool g_smartdmaWakeProbeInitialized;
 
 static void i3c_master_ibi_callback(I3C_Type *base,
                                     i3c_master_dma_handle_t *handle,
@@ -199,6 +206,29 @@ static void arm_smartdma_wake_probe(void);
 static status_t wait_for_smartdma_wake(uint32_t timeout);
 static void suppress_read_data_irq_bounce(void);
 static void scrub_master_chunk_boundary_state(void);
+
+static void rearm_smartdma_wake_probe(void)
+{
+    NVIC_ClearPendingIRQ(SDMA_IRQn);
+    SMARTDMA->CTRL = 0xC0DE0000U | (1U << 4U);
+}
+
+static inline void init_cycle_counter(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    DWT->CYCCNT = 0U;
+}
+
+static inline uint32_t read_cycle_counter(void)
+{
+    return DWT->CYCCNT;
+}
+
+static inline uint32_t cycles_to_us(uint32_t elapsedCycles)
+{
+    return (uint32_t)(((uint64_t)elapsedCycles * 1000000ULL) / SystemCoreClock);
+}
 
 static const i3c_master_dma_callback_t s_masterCallback = {
     .slave2Master = NULL,
@@ -254,6 +284,12 @@ static void reset_retained_state(void)
     s_dma_official_smartdma_mdmactrl = 0U;
     s_dma_official_smartdma_mstatus = 0U;
     s_dma_official_smartdma_mdatactrl = 0U;
+    s_dma_official_total_chunk_time_us = 0U;
+    s_dma_official_total_write_wait_us = 0U;
+    s_dma_official_total_ibi_wait_us = 0U;
+    s_dma_official_total_read_wait_us = 0U;
+    s_dma_official_total_smartdma_arm_us = 0U;
+    s_dma_official_total_smartdma_wait_us = 0U;
     s_dma_official_total_dma0_irq_count = 0U;
     s_dma_official_total_data_irq_count = 0U;
     s_dma_official_total_protocol_irq_count = 0U;
@@ -409,11 +445,12 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
 {
     status_t result;
     i3c_master_transfer_t masterXfer;
-    i3c_register_ibi_addr_t ibiRecord;
     uint32_t chunkOffset = chunkIndex * I3C_DATA_LENGTH;
     uint32_t expectedReadSize = get_chunk_data_length(chunkIndex);
     uint32_t chunkPacketSize = expectedReadSize + 1U;
     uint32_t rxCallbackBaseline = g_i3c_dbg_dma_callback_rx_count;
+    uint32_t chunkCycleStart = read_cycle_counter();
+    uint32_t phaseCycleStart;
 
     s_dma_official_current_chunk_index = chunkIndex;
     prepare_chunk_write_payload(expectedReadSize);
@@ -424,11 +461,6 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     g_ibiWonFlag = false;
     g_completionStatus = kStatus_Success;
     g_ibiPayloadSize = 0U;
-
-    memset(&ibiRecord, 0, sizeof(ibiRecord));
-    ibiRecord.address[0] = slaveAddr;
-    ibiRecord.ibiHasPayload = true;
-    I3C_MasterRegisterIBI(EXAMPLE_MASTER, &ibiRecord);
 
     memset(&masterXfer, 0, sizeof(masterXfer));
     masterXfer.slaveAddress = slaveAddr;
@@ -446,7 +478,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
         return result;
     }
 
+    phaseCycleStart = read_cycle_counter();
     result = wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
+    s_dma_official_total_write_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageIbiRegistered,
@@ -455,7 +489,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     }
     s_dma_official_stage = kDmaOfficialStageWriteDone;
 
+    phaseCycleStart = read_cycle_counter();
     result = wait_for_ibi(I3C_DMA_OFFICIAL_TIMEOUT);
+    s_dma_official_total_ibi_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageWriteDone,
@@ -487,7 +523,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     masterXfer.flags = kI3C_TransferDefaultFlag;
     masterXfer.ibiResponse = kI3C_IbiRespAckMandatory;
 
+    phaseCycleStart = read_cycle_counter();
     arm_smartdma_wake_probe();
+    s_dma_official_total_smartdma_arm_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     s_dma_official_stage = kDmaOfficialStageSmartDmaWakeArmed;
 
     NVIC_ClearPendingIRQ(I3C0_IRQn);
@@ -504,7 +542,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     NVIC_ClearPendingIRQ(I3C0_IRQn);
     NVIC_EnableIRQ(I3C0_IRQn);
 
+    phaseCycleStart = read_cycle_counter();
     result = wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
+    s_dma_official_total_read_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageSmartDmaWakeArmed,
@@ -512,7 +552,9 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
         return result;
     }
 
+    phaseCycleStart = read_cycle_counter();
     result = wait_for_smartdma_wake(I3C_DMA_OFFICIAL_TIMEOUT);
+    s_dma_official_total_smartdma_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageReadDone, kDmaOfficialResultTimeoutSmartDmaWake);
@@ -578,16 +620,36 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
 
     s_dma_official_rx_size += expectedReadSize;
     s_dma_official_completed_chunk_count = chunkIndex + 1U;
+    s_dma_official_total_chunk_time_us += cycles_to_us(read_cycle_counter() - chunkCycleStart);
     return kStatus_Success;
 }
 
 static void arm_smartdma_wake_probe(void)
 {
-    POWER_DisablePD(kPDRUNCFG_APD_SMARTDMA_SRAM);
-    POWER_DisablePD(kPDRUNCFG_PPD_SMARTDMA_SRAM);
-    POWER_ApplyPD();
+    if (!g_smartdmaWakeProbeInitialized)
+    {
+        POWER_DisablePD(kPDRUNCFG_APD_SMARTDMA_SRAM);
+        POWER_DisablePD(kPDRUNCFG_PPD_SMARTDMA_SRAM);
+        POWER_ApplyPD();
 
-    keep_smartdma_api_alive();
+        keep_smartdma_api_alive();
+
+        INPUTMUX_Init(INPUTMUX);
+        INPUTMUX_AttachSignal(INPUTMUX, SMART_DMA_TRIGGER_CHANNEL, kINPUTMUX_Dma0IrqToSmartDmaInput);
+        INPUTMUX_Deinit(INPUTMUX);
+
+        NVIC_ClearPendingIRQ(DMA0_IRQn);
+        if (EXPERIMENT_ALLOW_CM33_DMA_IRQ == 0U)
+        {
+            NVIC_DisableIRQ(DMA0_IRQn);
+        }
+        NVIC_ClearPendingIRQ(SDMA_IRQn);
+        NVIC_DisableIRQ(SDMA_IRQn);
+
+        SMARTDMA_Init(
+            SMARTDMA_SRAM_ADDR, __smartdma_start__, (uint32_t)((uintptr_t)__smartdma_end__ - (uintptr_t)__smartdma_start__));
+        g_smartdmaWakeProbeInitialized = true;
+    }
 
     memset((void *)&s_smartdma_wake_param, 0, sizeof(s_smartdma_wake_param));
     s_smartdma_wake_param.i3cBaseAddress = (uint32_t)(uintptr_t)EXAMPLE_MASTER;
@@ -606,21 +668,7 @@ static void arm_smartdma_wake_probe(void)
     g_i3c_dbg_irq_last_pending = 0U;
     g_i3c_dbg_irq_first_data_pending = 0U;
 
-    INPUTMUX_Init(INPUTMUX);
-    INPUTMUX_AttachSignal(INPUTMUX, SMART_DMA_TRIGGER_CHANNEL, kINPUTMUX_Dma0IrqToSmartDmaInput);
-    INPUTMUX_Deinit(INPUTMUX);
-
-    NVIC_ClearPendingIRQ(DMA0_IRQn);
-    if (EXPERIMENT_ALLOW_CM33_DMA_IRQ == 0U)
-    {
-        NVIC_DisableIRQ(DMA0_IRQn);
-    }
-    NVIC_ClearPendingIRQ(SDMA_IRQn);
-    NVIC_DisableIRQ(SDMA_IRQn);
-
-    SMARTDMA_Init(
-        SMARTDMA_SRAM_ADDR, __smartdma_start__, (uint32_t)((uintptr_t)__smartdma_end__ - (uintptr_t)__smartdma_start__));
-    SMARTDMA_Reset();
+    rearm_smartdma_wake_probe();
     SMARTDMA_Boot(I3C_DMA_WAKE_API_INDEX, &s_smartdma_wake_param, 0U);
 }
 
@@ -720,6 +768,7 @@ int main(void)
     status_t result;
     i3c_master_config_t masterConfig;
     i3c_master_transfer_t masterXfer;
+    i3c_register_ibi_addr_t ibiRecord;
     uint8_t addressList[6] = {0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U};
     uint8_t devCount = 0U;
     i3c_device_info_t *devList;
@@ -729,6 +778,7 @@ int main(void)
     s_dma_official_stage = kDmaOfficialStageInit;
 
     BOARD_InitHardware();
+    init_cycle_counter();
     init_transfer_led();
     run_boot_led_self_test();
 
@@ -823,6 +873,11 @@ int main(void)
                      (result == kStatus_Timeout) ? kDmaOfficialResultTimeoutCompletion : (int32_t)result);
         goto fail;
     }
+
+    memset(&ibiRecord, 0, sizeof(ibiRecord));
+    ibiRecord.address[0] = slaveAddr;
+    ibiRecord.ibiHasPayload = true;
+    I3C_MasterRegisterIBI(EXAMPLE_MASTER, &ibiRecord);
 
     s_dma_official_stage = kDmaOfficialStageIbiRegistered;
 
