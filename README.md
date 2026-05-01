@@ -454,9 +454,10 @@ instead of changing the proven full-chunk path.
 
 The experiment defaults to a conservative `10 ms` inter-chunk settle because the
 shorter gaps that were adequate for `2 x 6` were not stable over longer loops.
-After the stale-completion-rearm fix below, that settle floor is still real:
-`42 x 6` continues to fail at `1000 us`, `100 us`, `10 us`, and `0 us` on the
-second chunk with the same `st=6 / rs=-2` next-IBI timeout boundary.
+After the stale-completion-rearm and post-IBI queued-complete guard fixes
+below, `42 x 6` is now validated at `1200 us`. `1000 us`, `100 us`, `10 us`,
+and `0 us` still fail on the second chunk with the same `st=6 / rs=-2`
+next-IBI timeout boundary.
 
 ### Build the chunk-loop proof
 
@@ -472,6 +473,15 @@ The camera-scale proof that was validated on hardware uses `42 x 6` chunks:
 
 ```bash
 RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
+```
+
+### Validated 1200 us scaled repro command
+
+The shortest settle that is currently validated on hardware for `42 x 6`
+rebuilds the same loop with a `1200 us` inter-chunk gap:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_LOGICAL_CHUNK_COUNT=42 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=1200' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_chunk_loop
 ```
 
 ### Validated remainder repro command
@@ -504,6 +514,32 @@ instead of editing the script. For example:
 ```bash
 RT595_TRACE32_RUN_WAIT_SECONDS=1800 RT595_TRACE32_TIMEOUT_SECONDS=1860 RT595_TRACE32_WAIT_MS=1860000 ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_chunk_loop.sh
 ```
+
+### Capture the 1200 us chunk-loop run with TRACE32
+
+```bash
+./trace32/capture_master_i3c_dma_official_rx_smartdma_wake_chunk_loop_trace.sh
+```
+
+This capture helper now defaults to a `60 s` run wait and a `90 s` wrapper
+timeout because the validated `42 x 6 @ 1200 us` run outlives the previous
+`5 s` capture default. Override those defaults with
+`TRACE_CAPTURE_RUN_WAIT_SECONDS`, `TRACE_CAPTURE_TIMEOUT_SECONDS`, and
+`TRACE_CAPTURE_WAIT_MS` if you want a shorter or longer stop window.
+
+### Validated 1200 us capture signature
+
+```text
+dmaWakeLoopFinal= st=0B out=1 rs=0 ec=2A cc=2A ci=29 ip=1 i0=2A rx=0FC sw=2A si=2A di=0 idc=0 ipc=7E rxc=0
+```
+
+Interpretation:
+
+1. `st=0B`, `out=1`, and `rs=0` mean the repeated wake proof still reached `kDmaOfficialStageValidated` and reported success at the shorter settle.
+2. `ec=2A`, `cc=2A`, and `ci=29` mean all 42 logical chunks completed and the final chunk index was 41.
+3. `ip=1` and `i0=2A` show the final accepted IBI still carried the chunk-42 generation tag at `1200 us`.
+4. `rx=0FC`, `sw=2A`, and `si=2A` mean the aggregate 252-byte RX completed while SmartDMA still observed one wake and one DMA INTA acknowledgement per chunk.
+5. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no data IRQs, and no RX DMA callback across the full sub-`10 ms` loop.
 
 ### Run the chunk-count, settle, and remainder ladders
 
@@ -552,12 +588,16 @@ The fix in `sdk/slave/i3c_interrupt_b2b_transfer_slave_base.c` was:
 
 1. clear stale `g_slaveCompletionRearmPending` as soon as a new RX generation queues its post-IBI work.
 2. refuse to run `i3c_slave_rearm_after_completion()` while next-generation IBI or post-echo work is already pending.
+3. keep a short bounded post-IBI queued-complete guard before the next chunk starts and refuse to reissue while `g_slaveIbiIssued` is still latched.
 
 After that fix, the repeated official DMA RX chunk path scaled substantially at
 the same `10 ms` settle:
 
 1. `170 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AA cc=0AA ci=0A9 ip=1 i0=0AA i1=0 rx=3FC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=0AA si=0AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=155 xd=1 xs=6 txc=2 di=0 idc=0 ipc=1FE rxc=0`
 2. `341 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=155 cc=155 ci=154 ip=1 i0=55 i1=0 rx=7FE mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=155 si=155 ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=2AB xd=1 xs=6 txc=2 di=0 idc=0 ipc=3FF rxc=0`
+
+The same slave-side guard also lowered the `42 x 6` settle floor from `10 ms`
+to `1200 us` while leaving the `1000 us` and below failures reproducible.
 3. `682 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=2AA cc=2AA ci=2A9 ip=1 i0=0AA i1=0 rx=0FFC mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2AA si=2AA ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=555 xd=1 xs=6 txc=2 di=0 idc=0 ipc=7FE rxc=0`
 4. `2731 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=0AAB cc=0AAB ci=0AAA ip=1 i0=0AB i1=0 rx=4002 mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=0AAB si=0AAB ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=1557 xd=1 xs=6 txc=2 di=0 idc=0 ipc=2001 rxc=0`
 5. `10923 x 6`: `dmaWakeLoopFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=2AAB cc=2AAB ci=2AAA ip=1 i0=0AB i1=0 rx=10002 mi=0FFFFFFFF tr=0 rf=0 rl=5 sm=1 sw=2AAB si=2AAB ss=3000000 smd=28 sms=1000 sdc=800000C0 xc=5557 xd=1 xs=6 txc=2 di=0 idc=0 ipc=8001 rxc=0`

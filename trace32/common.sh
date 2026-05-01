@@ -1,10 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+trace32_common_source_path() {
+  if [[ -n "${BASH_SOURCE-}" ]]; then
+    printf '%s\n' "${BASH_SOURCE}"
+    return 0
+  fi
+
+  if [[ -n "${ZSH_VERSION:-}" ]]; then
+    eval 'printf "%s\n" "${(%):-%x}"'
+    return 0
+  fi
+
+  if [[ -n "${0:-}" ]]; then
+    printf '%s\n' "$0"
+    return 0
+  fi
+
+  echo "unable to determine trace32 helper path" >&2
+  return 1
+}
+
 trace32_bundle_root() {
+  local source_path
   local script_dir
 
-  script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  source_path=$(trace32_common_source_path)
+  script_dir=$(cd "$(dirname "$source_path")" && pwd)
   cd "$script_dir/.." && pwd
 }
 

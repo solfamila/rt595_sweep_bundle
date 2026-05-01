@@ -47,6 +47,10 @@
 
 #define I3C_SLAVE_IBI_PAYLOAD_LENGTH 1U
 
+#ifndef I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS
+#define I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS 1200U
+#endif
+
 #ifndef EXPERIMENT_SLAVE_MIN_ECHO_COUNT
 #define EXPERIMENT_SLAVE_MIN_ECHO_COUNT 0U
 #endif
@@ -67,6 +71,15 @@
 #define EXPERIMENT_SLAVE_BCR_IBI_PAYLOAD (1U << 2)
 
 static void semihost_write0(const char *message);
+
+static inline void i3c_slave_post_ibi_queued_complete_guard(void)
+{
+    for (volatile uint32_t guardLoops = I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS; guardLoops != 0U;
+         guardLoops--)
+    {
+        __NOP();
+    }
+}
 
 static void semihost_write_hex32(uint32_t value)
 {
@@ -531,6 +544,11 @@ void i3c_slave_mark_post_ibi_echo_queued_complete(void)
     g_slaveIbiRequestSent = false;
     g_slavePostIbiAddressMatched = false;
     i3c_slave_update_retained_ibi_state();
+    /* The last echo byte can leave this hook slightly ahead of the bus state
+     * that the next write expects. Keep a short bounded guard here so the
+     * subsequent chunk does not race the post-IBI tail.
+     */
+    i3c_slave_post_ibi_queued_complete_guard();
 }
 
 static void i3c_slave_record_trace(uint32_t type, const uint8_t *buffer, uint32_t count, uint32_t status)
@@ -1058,9 +1076,6 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                                    NULL,
                                    g_slaveRetainedTrace.ibiRequestSentCount + 1U,
                                    I3C_SlaveGetStatusFlags(base));
-#ifdef ENABLE_PRINTF
-            PRINTF("slave: ibi request sent status=0x%08lx\r\n", (unsigned long)I3C_SlaveGetStatusFlags(base));
-#endif
             break;
 
 #if defined(I3C_ASYNC_WAKE_UP_INTR_CLEAR)
@@ -1173,7 +1188,7 @@ int main(void)
     #endif
 
 #if EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX
-        if (g_slaveIbiPending && !g_slaveIbiRequestSent)
+        if (g_slaveIbiPending && !g_slaveIbiRequestSent && !g_slaveIbiIssued)
         {
             if (g_slaveIbiDelayLoops != 0U)
             {
