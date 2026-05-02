@@ -8,7 +8,7 @@ bundle_root=$(trace32_bundle_root)
 experiment=master_i3c_dma_official_rx_smartdma_wake_block_stream
 runner="$SCRIPT_DIR/run_master_i3c_dma_official_rx_smartdma_wake_block_stream.sh"
 
-block_bytes=${RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES:-32}
+block_bytes_text=${RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES:-"32"}
 counts_text=${RT595_BLOCK_STREAM_MATRIX_COUNTS:-"4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768"}
 settles_text=${RT595_BLOCK_STREAM_MATRIX_SETTLES_US:-"0"}
 stop_on_fail=${RT595_BLOCK_STREAM_MATRIX_STOP_ON_FAIL:-1}
@@ -52,8 +52,9 @@ write_line() {
 }
 
 run_case() {
-  local block_count=$1
-  local settle_us=$2
+  local block_bytes=$1
+  local block_count=$2
+  local settle_us=$3
   local requested_bytes=$((block_count * block_bytes))
   local defines="I3C_STREAM_BLOCK_BYTES=${block_bytes} I3C_STREAM_BLOCK_COUNT=${block_count} I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=${settle_us}"
   local case_name="blocks_${block_count}_bytes_${block_bytes}_settle_${settle_us}"
@@ -187,13 +188,16 @@ write_line "$header"
 
 read -r -a counts <<<"$counts_text"
 read -r -a settles <<<"$settles_text"
+read -r -a block_bytes_values <<<"$block_bytes_text"
 
 for settle_us in "${settles[@]}"; do
-  for block_count in "${counts[@]}"; do
-    run_case "$block_count" "$settle_us" || {
-      printf 'Wrote partial results to %s\n' "$output_file" >&2
-      exit 1
-    }
+  for block_bytes in "${block_bytes_values[@]}"; do
+    for block_count in "${counts[@]}"; do
+      run_case "$block_bytes" "$block_count" "$settle_us" || {
+        printf 'Wrote partial results to %s\n' "$output_file" >&2
+        exit 1
+      }
+    done
   done
 done
 

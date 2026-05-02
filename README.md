@@ -701,7 +701,7 @@ Interpretation:
 6. `sw=4` and `si=4` mean SmartDMA still observed one DMA-completion wake and one DMA INTA acknowledgement per block.
 7. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no I3C data IRQs, and no RX DMA callback on the passing path.
 
-### Run the committed block-count benchmark
+### Run the committed block-size and block-count benchmark
 
 The committed benchmark helper rebuilds the experiment, runs the master through
 TRACE32, parses the retained `dmaWakeBlockStreamFinal=` signature, and writes a
@@ -713,10 +713,14 @@ TSV with both raw counters and derived throughput columns:
 
 Default benchmark settings:
 
-1. `RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES=32`
+1. `RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES='32'`
 2. `RT595_BLOCK_STREAM_MATRIX_COUNTS='4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768'`
 3. `RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0'`
 4. output file `.local/block_stream_count_sweep_results.tsv`
+
+`RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES` now accepts one width or a
+space-separated list of widths. The runner sweeps settle first, then block
+width, then block count.
 
 You can override any of those directly from the shell. For example, the exact
 benchmark captured in this README was run with:
@@ -725,13 +729,20 @@ benchmark captured in this README was run with:
 RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES=32 RT595_BLOCK_STREAM_MATRIX_COUNTS='4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768' RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream_matrix.sh
 ```
 
+To sweep multiple widths on the same setup, pass multiple values. For example:
+
+```bash
+RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES='32 64 128 240' RT595_BLOCK_STREAM_MATRIX_COUNTS='4 16 64 256' RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream_matrix.sh
+```
+
 Reproduction notes:
 
 1. `run_experiment.sh` automatically derives the slave stream source block width from `I3C_STREAM_BLOCK_BYTES`, so the slave only needs to be reflashed when the block width changes.
 2. Changing only `I3C_STREAM_BLOCK_COUNT` rebuilds the master for each point while reusing the same live slave image.
-3. The matrix helper computes throughput from the on-target DWT cycle-counter timers in `master_i3c_dma_official_rx_smartdma_wake_block_stream/ezh_test_standalone.c`, not from host-side wall clock time.
-4. `chunk_time_us` comes from `cu=` and measures the full write -> IBI -> DMA read -> SmartDMA-wake cycle.
-5. `read_wait_us` comes from `ru=` and measures only the DMA read-completion wait portion of that cycle.
+3. Sweeping `RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES` causes the runner to rebuild both sides as needed because the slave stream-source byte generator depends on that width.
+4. The matrix helper computes throughput from the on-target DWT cycle-counter timers in `master_i3c_dma_official_rx_smartdma_wake_block_stream/ezh_test_standalone.c`, not from host-side wall clock time.
+5. `chunk_time_us` comes from `cu=` and measures the full write -> IBI -> DMA read -> SmartDMA-wake cycle.
+6. `read_wait_us` comes from `ru=` and measures only the DMA read-completion wait portion of that cycle.
 
 ### Benchmarked result
 
@@ -779,6 +790,33 @@ So the current bottleneck is not the DMA read path; it is the per-block
 write-plus-IBI turnaround. If other developers want more bandwidth from the
 same driver path, the next knob to turn is a larger `I3C_STREAM_BLOCK_BYTES`
 value or a protocol shape that amortizes one IBI across more payload.
+
+### Multi-width snapshot
+
+After extending the matrix helper to accept multiple block widths, the same
+hardware setup was exercised with this smaller width-vs-count ladder:
+
+```bash
+RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES='32 64 128 240' RT595_BLOCK_STREAM_MATRIX_COUNTS='4 16 64 256 1024 4096' RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream_matrix.sh
+```
+
+Representative plateau points from that run family are below. The exact
+microsecond totals varied slightly between reruns, but the throughput trend was
+stable:
+
+| Block bytes | Plateau count | Payload bytes | End-to-end KiB/s | Read-only KiB/s |
+| ---: | ---: | ---: | ---: | ---: |
+| 32 | 256 | 8192 | 32.3 | 193.5 |
+| 64 | 256 | 16384 | 54.2 | 199.7 |
+| 128 | 256 | 32768 | 81.7 | 203.3 |
+| 240 | 256 | 61440 | 106.7 | 204.7 |
+
+Observed scaling from that sweep:
+
+1. The read phase itself stayed roughly flat at about `194` to `205 KiB/s`, which matches the single-width results and shows the DMA read is not the part flattening first.
+2. End-to-end throughput kept increasing with wider blocks because the fixed write-plus-IBI turnaround was amortized across more payload per block.
+3. One initial `128-byte x 256-block` run produced a transient mismatch, but three immediate reruns of that exact point passed at about `81.7 KiB/s`, so it was not treated as a stable ceiling.
+4. On the tested ladder, `240`-byte blocks reached about `108.4 KiB/s` by `4096` blocks and still did not reveal a new hard limit in the master-driver path.
 
 ## RX Request-Semantics Probe
 
