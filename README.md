@@ -847,27 +847,31 @@ Observed behavior from the current seed-tail run family:
 
 1. The read phase is still slower than the earlier pure official-DMA-read path on every overlapping width, so the seed-tail variant is not a read-only bandwidth win.
 2. End-to-end throughput is slightly worse at `32` and `64` bytes, then slightly better at `128` and `240` bytes because the fixed write-plus-IBI turnaround dominates once the blocks are wide enough.
-3. After trimming the retained RX snapshot down to the bytes surfaced in the TRACE32 signature, the current top validated point moved to `255 x 32768`, which transferred `8,355,840` bytes at about `114.3 KiB/s` end to end and `195.0 KiB/s` for the read phase.
-4. The initial width sweep still showed transient early-chunk `st=5 rs=1EDC` failures at `32 x 256` and `255 x 16`, so this seed-tail variant is benchmarked but not yet hardened.
+3. After trimming the retained RX snapshot down to the bytes surfaced in the TRACE32 signature, the current top validated point moved to `255 x 32768`, which transferred `8,355,840` bytes at about `114.4 KiB/s` end to end and `195.0 KiB/s` for the read phase.
+4. The old `255 x 16` and `255 x 8192` early-chunk `st=5 rs=1EDC` flakes were traced to a slave polled post-IBI rearm visibility race at zero inter-chunk settle. Adding a short bounded fence after `i3c_slave_rearm_after_completion()` cleared the `255`-byte ladder, but `32 x 256` still shows a separate zero-settle failure (`st=6 rs=0xFFFFFFFFFFFFFFFE`) and remains unresolved.
 
-### Larger-Count 255-Byte Stability Sweep
+### Post-Fix Larger-Count 255-Byte Stability Sweep
 
-After removing the count-scaled retained aggregate RX buffers, the same `255`-byte
-path was rerun at larger block counts with the results collected in
-`.local/block_stream_seed_tail_255_stability.tsv`.
+After moving the slave-side guard to after `i3c_slave_rearm_after_completion()`
+in the polled post-IBI completion path, the same `255`-byte path was rerun at
+larger block counts with the results collected in
+`.local/block_stream_seed_tail_255_postfix_stability.tsv`. Focused zero-settle
+probe artifacts for the previously flaky points are in
+`.local/block_stream_seed_tail_255_8192_zero_settle_probe.tsv` and
+`.local/block_stream_seed_tail_255_16_zero_settle_probe.tsv`.
 
 | Block count | Attempts | Passing attempts | Best end-to-end KiB/s | Best read-only KiB/s | Notes |
 | ---: | ---: | ---: | ---: | ---: | --- |
-| 4096 | 3 | 3 | 114.3 | 195.0 | All three attempts passed with identical signatures aside from timer jitter. |
-| 8192 | 3 | 1 | 114.3 | 195.0 | Attempts 1 and 2 failed immediately with `st=5 rs=1EDC` after the first completed chunk; attempt 3 passed. |
-| 16384 | 3 | 3 | 114.3 | 195.0 | All three attempts passed. |
-| 32768 | 1 | 1 | 114.3 | 195.0 | Single spot-check pass at the new top validated payload size. |
+| 4096 | 3 | 3 | 114.4 | 195.0 | All three attempts passed with identical signatures aside from timer jitter. |
+| 8192 | 3 | 3 | 114.4 | 195.0 | The formerly flaky early-`1EDC` point now passed cleanly on every rerun. |
+| 16384 | 3 | 3 | 114.4 | 195.0 | All three attempts passed. |
+| 32768 | 1 | 1 | 114.4 | 195.0 | Single spot-check pass at the new top validated payload size. |
 
 The current stability conclusion at `255` bytes is therefore:
 
-1. The datapath itself sustains about `114.3 KiB/s` end to end and `195.0 KiB/s` read-only from `4096` through `32768` blocks when the run passes.
-2. The intermittent failure is not a simple monotonic size ceiling because `16384` and `32768` both validate while `8192` is currently flaky.
-3. The remaining work is to explain why some `255 x 8192` runs fail immediately with the same early-chunk `st=5 rs=1EDC` signature.
+1. The zero-settle `255`-byte path now sustains about `114.4 KiB/s` end to end and `195.0 KiB/s` read-only from `4096` through `32768` blocks, with `4096`, `8192`, and `16384` all passing `3/3` plus a `32768` spot-check pass.
+2. The old early `st=5 rs=1EDC` failure was a slave-side post-IBI rearm visibility race, not a monotonic size ceiling or throughput limit.
+3. The remaining hardening work has narrowed away from the `255`-byte path: `32 x 256` still fails at zero settle, but with a different stage/result signature (`st=6 rs=0xFFFFFFFFFFFFFFFE`).
 
 ## RX Request-Semantics Probe
 

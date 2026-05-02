@@ -639,6 +639,12 @@ static void i3c_slave_finish_polled_post_ibi(uint32_t eventMask, status_t comple
     g_slavePolledTransferredCount = 0U;
 
     i3c_slave_rearm_after_completion(eventMask);
+
+    /* The zero-settle block-stream master can issue the next request almost
+     * immediately after the slave rearm. Keep a short bounded fence here so
+     * the fresh receive arm is visible before the next write begins.
+     */
+    i3c_slave_post_ibi_queued_complete_guard();
 }
 
 static void i3c_slave_start_polled_post_ibi(void)
