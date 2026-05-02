@@ -647,6 +647,139 @@ Interpretation:
 4. `sw=0AB` and `si=0AB` show SmartDMA still observed one DMA-completion wake per chunk across the full scaled remainder run.
 5. `di=0`, `idc=0`, and `rxc=0` mean the scaled remainder path also preserved zero CM33 DMA IRQ, zero CM33 data IRQ, and zero RX DMA callback involvement.
 
+## Official Master DMA RX SmartDMA Wake Block-Stream Proof
+
+The bundle also includes
+`master_i3c_dma_official_rx_smartdma_wake_block_stream/`, which keeps the
+master on the official `fsl_i3c_dma.c` RX path while switching the slave's
+post-IBI reply path to a stream-only polled sender in
+`sdk/slave/i3c_interrupt_b2b_transfer_slave_base.c`.
+
+The original shared slave IRQ path stalled after the first FIFO window and
+failed the `32`-byte repro at `mi=8`. The validated fix is slave-only: once the
+slave emits the post-write IBI, it starts a polled post-IBI transfer directly
+inside `kI3C_SlaveRequestSentEvent` so the slave owns the following master read
+immediately rather than waiting for the foreground loop to notice it later.
+
+This preserves the user-visible requirement for this repo: the master stays on
+the official DMA driver path and SmartDMA is still only used as the DMA wake
+observer.
+
+### Build the exact validated repro
+
+This is the smallest hardware-validated passing repro for the new slave path:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=32 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_block_stream
+```
+
+This leaves the master ELF at:
+
+```text
+/Users/foxy/Downloads/rt595_sweep_bundle/master_i3c_dma_official_rx_smartdma_wake_block_stream/_build/master/evkmimxrt595_ezhb.axf
+```
+
+### Run the block-stream proof with TRACE32
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=32 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream.sh
+```
+
+Validated signature:
+
+```text
+dmaWakeBlockStreamFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=4 cc=4 ci=3 ip=1 i0=4 i1=0 rx=80 mi=0FFFFFFFF tr=8 rf=0 rl=7F sm=1 sw=4 si=4 ss=3000000 smd=28 sms=1000 sdc=800000C0 cu=2BE8 wu=53 iu=27DB ru=284 au=18 su=0 xc=0A xd=1 xs=20 txc=3 di=0 idc=0 ipc=0 rxc=0
+```
+
+Interpretation:
+
+1. `st=0B`, `out=1`, and `rs=0` mean the stream proof reached `kDmaOfficialStageValidated` and reported success.
+2. `ec=4`, `cc=4`, and `ci=3` mean all four logical `32`-byte blocks completed and the final block index was `3`.
+3. `ip=1` and `i0=4` mean the final accepted IBI still carried the expected generation tag for block `4`.
+4. `rx=80`, `rf=0`, and `rl=7F` mean the validated aggregate receive length was `128` bytes and the captured payload still ranged from `0x00` through `0x7F`.
+5. `mi=0FFFFFFFF` means no mismatch was latched anywhere in the aggregate receive buffer.
+6. `sw=4` and `si=4` mean SmartDMA still observed one DMA-completion wake and one DMA INTA acknowledgement per block.
+7. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no I3C data IRQs, and no RX DMA callback on the passing path.
+
+### Run the committed block-count benchmark
+
+The committed benchmark helper rebuilds the experiment, runs the master through
+TRACE32, parses the retained `dmaWakeBlockStreamFinal=` signature, and writes a
+TSV with both raw counters and derived throughput columns:
+
+```bash
+./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream_matrix.sh
+```
+
+Default benchmark settings:
+
+1. `RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES=32`
+2. `RT595_BLOCK_STREAM_MATRIX_COUNTS='4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768'`
+3. `RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0'`
+4. output file `.local/block_stream_count_sweep_results.tsv`
+
+You can override any of those directly from the shell. For example, the exact
+benchmark captured in this README was run with:
+
+```bash
+RT595_BLOCK_STREAM_MATRIX_BLOCK_BYTES=32 RT595_BLOCK_STREAM_MATRIX_COUNTS='4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768' RT595_BLOCK_STREAM_MATRIX_SETTLES_US='0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream_matrix.sh
+```
+
+Reproduction notes:
+
+1. `run_experiment.sh` automatically derives the slave stream source block width from `I3C_STREAM_BLOCK_BYTES`, so the slave only needs to be reflashed when the block width changes.
+2. Changing only `I3C_STREAM_BLOCK_COUNT` rebuilds the master for each point while reusing the same live slave image.
+3. The matrix helper computes throughput from the on-target DWT cycle-counter timers in `master_i3c_dma_official_rx_smartdma_wake_block_stream/ezh_test_standalone.c`, not from host-side wall clock time.
+4. `chunk_time_us` comes from `cu=` and measures the full write -> IBI -> DMA read -> SmartDMA-wake cycle.
+5. `read_wait_us` comes from `ru=` and measures only the DMA read-completion wait portion of that cycle.
+
+### Benchmarked result
+
+Every benchmark point below passed with `st=0B`, `rs=0`, and
+`mi=0xFFFFFFFF`.
+
+The exact microsecond counters vary slightly from run to run, but the plateau
+and the all-pass boundary below were stable across repeated reruns.
+
+| Blocks | Total bytes | Full cycle us | End-to-end KiB/s | Read wait us | Read-only KiB/s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 4 | 128 | 11240 | 11.1 | 644 | 194.1 |
+| 8 | 256 | 14984 | 16.7 | 1288 | 194.1 |
+| 16 | 512 | 22492 | 22.2 | 2576 | 194.1 |
+| 32 | 1024 | 37512 | 26.7 | 5152 | 194.1 |
+| 64 | 2048 | 67541 | 29.6 | 10304 | 194.1 |
+| 128 | 4096 | 127606 | 31.3 | 20608 | 194.1 |
+| 256 | 8192 | 247689 | 32.3 | 41327 | 193.6 |
+| 512 | 16384 | 487967 | 32.8 | 82892 | 193.0 |
+| 1024 | 32768 | 968482 | 33.0 | 165763 | 193.0 |
+| 2048 | 65536 | 1929493 | 33.2 | 331515 | 193.1 |
+| 4096 | 131072 | 3849991 | 33.2 | 659456 | 194.1 |
+| 8192 | 262144 | 7692473 | 33.3 | 1318912 | 194.1 |
+| 16384 | 524288 | 15279625 | 33.5 | 2637824 | 194.1 |
+| 32768 | 1048576 | 30552522 | 33.5 | 5275648 | 194.1 |
+
+The largest validated point in this commit is therefore:
+
+1. `32768` blocks at `32` bytes per block.
+2. `1,048,576` bytes total validated payload.
+3. about `33.5 KiB/s` sustained end-to-end throughput.
+4. about `194.1 KiB/s` read-phase throughput once the read has started.
+
+### 1 MiB timing breakdown
+
+For the `32768 x 32` point, the full-cycle `cu=` time splits as follows:
+
+1. `iu=22,327,956 us` or `73.1%`: waiting for the slave's IBI between the write and the read.
+2. `ru=5,275,648 us` or `17.3%`: waiting for the DMA read completion itself.
+3. `wu=688,127 us` or `2.3%`: waiting for the per-block request write to finish.
+4. `au=98,316 us` or `0.3%`: arming the SmartDMA wake observer.
+5. `2,162,475 us` or `7.1%`: everything else in the block loop.
+
+So the current bottleneck is not the DMA read path; it is the per-block
+write-plus-IBI turnaround. If other developers want more bandwidth from the
+same driver path, the next knob to turn is a larger `I3C_STREAM_BLOCK_BYTES`
+value or a protocol shape that amortizes one IBI across more payload.
+
 ## RX Request-Semantics Probe
 
 Use this flow to reproduce the verified RT595 RX result where all three cases

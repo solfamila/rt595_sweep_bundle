@@ -71,6 +71,22 @@
 #define EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT 0U
 #endif
 
+#ifndef EXPERIMENT_SLAVE_STREAM_SOURCE
+#define EXPERIMENT_SLAVE_STREAM_SOURCE 0U
+#endif
+
+#ifndef EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES
+#define EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES 0U
+#endif
+
+#ifndef EXPERIMENT_SLAVE_STREAM_REQUEST_TOKEN
+#define EXPERIMENT_SLAVE_STREAM_REQUEST_TOKEN 0x53U
+#endif
+
+#if EXPERIMENT_SLAVE_STREAM_SOURCE && (EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES == 0U)
+#error "EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES must be non-zero when EXPERIMENT_SLAVE_STREAM_SOURCE is enabled"
+#endif
+
 #define EXPERIMENT_SLAVE_BCR_IBI_REQUEST_CAPABLE (1U << 1)
 #define EXPERIMENT_SLAVE_BCR_IBI_PAYLOAD (1U << 2)
 
@@ -290,6 +306,7 @@ static void semihost_write0(const char *message)
 #define I3C_SLAVE_LED_VISIBLE_PULSE_COUNT 2U
 #endif
 #define I3C_SLAVE_IBI_POST_STOP_DELAY_LOOPS 1000U
+#define I3C_SLAVE_POLLED_POST_IBI_TIMEOUT_LOOPS 50000000U
 
 /*******************************************************************************
  * Variables
@@ -319,11 +336,28 @@ volatile bool g_slavePostIbiEchoArmed = false;
 static volatile bool g_slavePostIbiEchoConsumed = false;
 static volatile uint32_t g_slaveIbiDelayLoops = 0U;
 static uint8_t g_slaveIbiPayload[I3C_SLAVE_IBI_PAYLOAD_LENGTH] = {EXPERIMENT_SLAVE_IBI_DATA};
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+static volatile bool g_slavePolledPostIbiStartPending = false;
+static volatile bool g_slavePolledPostIbiActive = false;
+static volatile bool g_slavePolledPostIbiMatched = false;
+static uint8_t *g_slavePolledTxCursor = NULL;
+static uint32_t g_slavePolledTxRemaining = 0U;
+static uint32_t g_slavePolledTransferredCount = 0U;
+#endif
 static volatile bool g_slaveActivityLedActive = false;
 static volatile bool g_slaveActivityLedCompletionPending = false;
 static volatile bool g_slaveActivityLedFinal = false;
 static volatile uint32_t g_slaveActivityLedPollCount = 0U;
 static volatile uint32_t g_slaveActivityLedToggleCount = 0U;
+
+#define I3C_SLAVE_ERROR_MASK ((uint32_t)kI3C_SlaveErrorOverrunFlag | (uint32_t)kI3C_SlaveErrorUnderrunFlag | \
+                              (uint32_t)kI3C_SlaveErrorUnderrunNakFlag | (uint32_t)kI3C_SlaveErrorTermFlag | \
+                              (uint32_t)kI3C_SlaveErrorInvalidStartFlag | (uint32_t)kI3C_SlaveErrorSdrParityFlag | \
+                              (uint32_t)kI3C_SlaveErrorHdrParityFlag | (uint32_t)kI3C_SlaveErrorHdrCRCFlag | \
+                              (uint32_t)kI3C_SlaveErrorS0S1Flag | (uint32_t)kI3C_SlaveErrorOverreadFlag | \
+                              (uint32_t)kI3C_SlaveErrorOverwriteFlag)
+
+static void i3c_slave_record_trace(uint32_t type, const uint8_t *buffer, uint32_t count, uint32_t status);
 
 static bool i3c_slave_roundtrip_done(void)
 {
@@ -535,9 +569,182 @@ static void i3c_slave_reset_ibi_generation_state(void)
     g_slaveIbiDelayLoops = 0U;
     g_txBuff = g_slave_txBuff;
     g_txSize = I3C_SLAVE_TX_DATA_LENGTH;
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+    g_slavePolledPostIbiStartPending = false;
+    g_slavePolledPostIbiActive = false;
+    g_slavePolledPostIbiMatched = false;
+    g_slavePolledTxCursor = NULL;
+    g_slavePolledTxRemaining = 0U;
+    g_slavePolledTransferredCount = 0U;
+#endif
     g_slaveRetainedTrace.currentEchoedCount = 0U;
     i3c_slave_update_retained_ibi_state();
 }
+
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+static void i3c_slave_finish_polled_post_ibi(uint32_t eventMask, status_t completionStatus, uint32_t statusFlags)
+{
+    g_lastTransferWasReceive = false;
+
+    if ((completionStatus == kStatus_Success) ||
+        ((completionStatus == kStatus_I3C_Term) && (g_slavePolledTransferredCount != 0U) &&
+         (g_slavePolledTxRemaining == 0U)))
+    {
+        i3c_slave_record_trace(kSlaveTraceTxComplete, g_txBuff, g_slavePolledTransferredCount, 0U);
+        if (g_slavePostIbiEchoPending && (g_slavePolledTransferredCount != 0U))
+        {
+            g_slaveRetainedTrace.postIbiEchoTxCompletionCount++;
+            g_slaveRetainedTrace.lastTxCompletionGeneration = g_slaveRetainedTrace.currentGeneration;
+            g_slaveCompletionRearmPending = true;
+            g_slavePostIbiEchoConsumed = true;
+            g_slavePostIbiEchoArmed = false;
+            g_slavePostIbiEchoPending = false;
+            g_slaveIbiPending = false;
+            g_slaveIbiIssued = false;
+            g_slaveIbiRequestSent = false;
+            g_slavePostIbiAddressMatched = false;
+            i3c_slave_update_retained_ibi_state();
+        }
+        if (((g_slaveRetainedTrace.eventFlags & kSlaveRetainedTraceEchoArmedSeen) != 0U) &&
+            (g_slaveRetainedTrace.postEchoTxCompletionCount == 0U))
+        {
+            g_slaveRetainedTrace.postEchoTxCompletionCount = g_slavePolledTransferredCount;
+        }
+        g_slaveCompletionFlag = true;
+    }
+    else
+    {
+        if ((g_slaveRetainedTrace.eventFlags & kSlaveRetainedTraceErrorSeen) == 0U)
+        {
+            g_slaveRetainedTrace.completionErrorFlags = statusFlags;
+            g_slaveRetainedTrace.completionErrorTransferredCount = g_slavePolledTransferredCount;
+            g_slaveRetainedTrace.completionErrorWasReceive = 0U;
+        }
+        if (((g_slaveRetainedTrace.eventFlags & kSlaveRetainedTraceEchoArmedSeen) != 0U) &&
+            (g_slaveRetainedTrace.postEchoCompletionErrorStatus == 0U))
+        {
+            g_slaveRetainedTrace.postEchoCompletionErrorStatus = (uint32_t)completionStatus;
+            g_slaveRetainedTrace.postEchoCompletionErrorFlags = statusFlags;
+            g_slaveRetainedTrace.postEchoCompletionErrorWasReceive = 0U;
+        }
+        i3c_slave_record_trace(kSlaveTraceCompletionError, NULL, statusFlags, (uint32_t)completionStatus);
+        i3c_slave_fail_activity_led();
+    }
+
+    g_slavePolledPostIbiStartPending = false;
+    g_slavePolledPostIbiActive = false;
+    g_slavePolledPostIbiMatched = false;
+    g_slavePolledTxCursor = NULL;
+    g_slavePolledTxRemaining = 0U;
+    g_slavePolledTransferredCount = 0U;
+
+    i3c_slave_rearm_after_completion(eventMask);
+}
+
+static void i3c_slave_start_polled_post_ibi(void)
+{
+    uint8_t *txCursor = g_i3c_s_handle.transfer.txData;
+    uint32_t txRemaining = (uint32_t)g_i3c_s_handle.transfer.txDataSize;
+
+    if ((txCursor == NULL) || (txRemaining == 0U))
+    {
+        txCursor = g_txBuff;
+        txRemaining = g_txSize;
+    }
+
+    g_slavePolledTxCursor = txCursor;
+    g_slavePolledTxRemaining = txRemaining;
+    g_slavePolledTransferredCount = (g_txSize >= txRemaining) ? (g_txSize - txRemaining) : 0U;
+    g_slavePolledPostIbiMatched = false;
+    g_slavePolledPostIbiActive = true;
+    g_slavePolledPostIbiStartPending = false;
+
+    I3C_SlaveTransferAbort(EXAMPLE_SLAVE, &g_i3c_s_handle);
+    I3C_SlaveClearErrorStatusFlags(EXAMPLE_SLAVE, I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE));
+    I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveClearFlags);
+}
+
+static void i3c_slave_service_polled_post_ibi(uint32_t eventMask)
+{
+    uint32_t timeoutLoops = I3C_SLAVE_POLLED_POST_IBI_TIMEOUT_LOOPS;
+
+    while (g_slavePolledPostIbiActive)
+    {
+        uint32_t statusFlags = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
+        uint32_t errFlags = I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE);
+
+        if (!g_slavePolledPostIbiMatched && ((statusFlags & (uint32_t)kI3C_SlaveMatchedFlag) != 0U))
+        {
+            g_slavePolledPostIbiMatched = true;
+            g_slavePostIbiAddressMatched = true;
+            g_slavePostIbiEchoArmed = true;
+            g_slaveRetainedTrace.postIbiAddressMatchCount++;
+            g_slaveRetainedTrace.postIbiAddressMatchTxSize = g_txSize;
+            g_slaveRetainedTrace.postIbiEchoAddressMatchServeCount++;
+            g_slaveRetainedTrace.lastAddressMatchServedPostIbiEcho = 1U;
+            g_slaveRetainedTrace.lastAddressMatchGeneration = g_slaveRetainedTrace.currentGeneration;
+            g_slaveRetainedTrace.lastPostIbiEchoServeSource = kSlavePostIbiEchoSourceAddressMatch;
+            g_slaveRetainedTrace.lastTransmitTxSizeAfter = g_txSize;
+            g_slaveRetainedTrace.lastTransmitTxDataIsNull = (g_slavePolledTxCursor == NULL) ? 1U : 0U;
+            i3c_slave_update_retained_ibi_state();
+            i3c_slave_record_trace(kSlaveTraceTxPrepared, g_txBuff, g_txSize, 0U);
+            I3C_SlaveClearStatusFlags(
+                EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveMatchedFlag | (uint32_t)kI3C_SlaveBusStartFlag);
+            statusFlags = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
+        }
+
+        if (g_slavePolledPostIbiMatched && (g_slavePolledTxRemaining != 0U))
+        {
+            size_t txCount = 0U;
+
+            I3C_SlaveGetFifoCounts(EXAMPLE_SLAVE, NULL, &txCount);
+            txCount = g_i3c_s_handle.txFifoSize - txCount;
+
+            while ((g_slavePolledTxRemaining != 0U) && (txCount != 0U))
+            {
+                if (g_slavePolledTxRemaining > 1U)
+                {
+                    EXAMPLE_SLAVE->SWDATAB = *g_slavePolledTxCursor++;
+                }
+                else
+                {
+                    EXAMPLE_SLAVE->SWDATABE = *g_slavePolledTxCursor++;
+                }
+
+                g_slavePolledTxRemaining--;
+                g_slavePolledTransferredCount++;
+                txCount--;
+            }
+        }
+
+        if ((errFlags & I3C_SLAVE_ERROR_MASK) != 0U)
+        {
+            status_t completionStatus = I3C_SlaveCheckAndClearError(EXAMPLE_SLAVE, errFlags);
+            uint32_t finalStatusFlags = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
+
+            i3c_slave_finish_polled_post_ibi(eventMask, completionStatus, finalStatusFlags);
+            return;
+        }
+
+        if ((statusFlags & (uint32_t)kI3C_SlaveBusStopFlag) != 0U)
+        {
+            I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveBusStopFlag);
+            i3c_slave_finish_polled_post_ibi(
+                eventMask, (g_slavePolledTxRemaining == 0U) ? kStatus_Success : kStatus_I3C_Term, statusFlags);
+            return;
+        }
+
+        if (timeoutLoops == 0U)
+        {
+            i3c_slave_finish_polled_post_ibi(eventMask, kStatus_I3C_Timeout, statusFlags);
+            return;
+        }
+
+        timeoutLoops--;
+        __NOP();
+    }
+}
+#endif
 
 void i3c_slave_mark_post_ibi_echo_queued_complete(void)
 {
@@ -991,7 +1198,36 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                         break;
                     }
 
-#if EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+                    {
+                        uint32_t requestedTxSize = 0U;
+                        uint32_t blockIndex = g_slaveRetainedTrace.currentGeneration;
+
+                        if (((uint32_t)xfer->transferredCount >= 2U) &&
+                            (g_slave_rxBuff[0] == EXPERIMENT_SLAVE_STREAM_REQUEST_TOKEN))
+                        {
+                            requestedTxSize = g_slave_rxBuff[1];
+                        }
+                        else if ((uint32_t)xfer->transferredCount != 0U)
+                        {
+                            requestedTxSize = g_slave_rxBuff[0];
+                        }
+
+                        if (requestedTxSize > I3C_SLAVE_TX_DATA_LENGTH)
+                        {
+                            requestedTxSize = I3C_SLAVE_TX_DATA_LENGTH;
+                        }
+
+                        g_txBuff = g_slave_txBuff;
+                        g_txSize = requestedTxSize;
+                        for (uint32_t txIndex = 0U; txIndex < g_txSize; txIndex++)
+                        {
+                            g_slave_txBuff[txIndex] =
+                                (uint8_t)(((blockIndex * EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES) + txIndex) & 0xFFU);
+                        }
+                        echoedCount = requestedTxSize;
+                    }
+#elif EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT
                     g_txBuff = g_slave_txBuff;
                     g_txSize =
                         (EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT <= I3C_SLAVE_TX_DATA_LENGTH)
@@ -1114,6 +1350,13 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                                    NULL,
                                    g_slaveRetainedTrace.ibiRequestSentCount + 1U,
                                    I3C_SlaveGetStatusFlags(base));
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+            if (g_slavePostIbiEchoPending && (g_txBuff != NULL) && (g_txSize != 0U))
+            {
+                i3c_slave_start_polled_post_ibi();
+                i3c_slave_service_polled_post_ibi((uint32_t)kI3C_SlaveAllEvents);
+            }
+#endif
             break;
 
 #if defined(I3C_ASYNC_WAKE_UP_INTR_CLEAR)
@@ -1209,6 +1452,19 @@ int main(void)
 
     while (1)
     {
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+        if (g_slavePolledPostIbiStartPending)
+        {
+            i3c_slave_start_polled_post_ibi();
+        }
+
+        if (g_slavePolledPostIbiActive)
+        {
+            i3c_slave_service_polled_post_ibi(eventMask);
+            continue;
+        }
+#endif
+
         i3c_slave_service_activity_led();
         i3c_slave_flush_trace();
 
