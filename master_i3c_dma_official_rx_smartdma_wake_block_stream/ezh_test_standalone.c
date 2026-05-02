@@ -44,6 +44,7 @@
 #define I3C_LOGICAL_TOTAL_BYTES I3C_STREAM_TOTAL_BYTES
 #define I3C_LOGICAL_CHUNK_COUNT I3C_STREAM_BLOCK_COUNT
 #define I3C_LOGICAL_DATA_LENGTH I3C_STREAM_TOTAL_BYTES
+#define I3C_RX_SNAPSHOT_BYTES 16U
 #define I3C_PACKET_LENGTH 2U
 #if (I3C_STREAM_BLOCK_BYTES == 0U) || (I3C_STREAM_BLOCK_BYTES > 255U)
 #error "I3C_STREAM_BLOCK_BYTES must be in the range 1..255"
@@ -207,14 +208,14 @@ static __NO_INIT volatile uint32_t s_dma_official_total_dma0_irq_count;
 static __NO_INIT volatile uint32_t s_dma_official_total_data_irq_count;
 static __NO_INIT volatile uint32_t s_dma_official_total_protocol_irq_count;
 static __NO_INIT volatile uint32_t s_dma_official_total_rx_dma_callback_count;
-static __NO_INIT volatile uint8_t s_dma_official_rx_snapshot[I3C_LOGICAL_DATA_LENGTH];
+/* Keep only the bytes surfaced in TRACE32 signatures so large sweeps still fit SRAM. */
+static __NO_INIT volatile uint8_t s_dma_official_rx_snapshot[I3C_RX_SNAPSHOT_BYTES];
 
 AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_smartdma_wake_param_t s_smartdma_wake_param, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_seed_tail_read_param_t s_rx_seed_read_param, 4);
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_txBuff[I3C_PACKET_LENGTH], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_chunk_rxBuff[I3C_DATA_LENGTH], 4);
-AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_rxBuff[I3C_LOGICAL_DATA_LENGTH], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_ibiBuff[10U], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_ibiBuff[10U], 4);
 static uint8_t g_ibiPayloadSize;
@@ -998,7 +999,22 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
         }
     }
 
-    memcpy(&g_master_rxBuff[chunkOffset], g_chunk_rxBuff, expectedReadSize);
+    if (s_dma_official_rx_size == 0U)
+    {
+        s_dma_official_rx_first = g_chunk_rxBuff[0];
+    }
+    s_dma_official_rx_last = g_chunk_rxBuff[expectedReadSize - 1U];
+
+    if (s_dma_official_rx_size < sizeof(s_dma_official_rx_snapshot))
+    {
+        uint32_t snapshotCount = expectedReadSize;
+        uint32_t snapshotRemaining = sizeof(s_dma_official_rx_snapshot) - s_dma_official_rx_size;
+        if (snapshotCount > snapshotRemaining)
+        {
+            snapshotCount = snapshotRemaining;
+        }
+        memcpy((void *)&s_dma_official_rx_snapshot[s_dma_official_rx_size], g_chunk_rxBuff, snapshotCount);
+    }
 
     s_dma_official_rx_size += expectedReadSize;
     s_dma_official_completed_chunk_count = chunkIndex + 1U;
@@ -1174,7 +1190,6 @@ int main(void)
     g_completionStatus = kStatus_Success;
     g_ibiPayloadSize = 0U;
 
-    memset(g_master_rxBuff, 0, sizeof(g_master_rxBuff));
     memset(g_master_ibiBuff, 0, sizeof(g_master_ibiBuff));
     memset(g_ibiBuff, 0, sizeof(g_ibiBuff));
 
@@ -1279,10 +1294,6 @@ int main(void)
             SDK_DelayAtLeastUs(I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US, SystemCoreClock);
         }
     }
-
-    s_dma_official_rx_first = (s_dma_official_rx_size != 0U) ? g_master_rxBuff[0] : 0U;
-    s_dma_official_rx_last = (s_dma_official_rx_size != 0U) ? g_master_rxBuff[s_dma_official_rx_size - 1U] : 0U;
-    memcpy((void *)s_dma_official_rx_snapshot, g_master_rxBuff, sizeof(g_master_rxBuff));
 
     if (s_dma_official_total_smartdma_wake_count != I3C_LOGICAL_CHUNK_COUNT)
     {
