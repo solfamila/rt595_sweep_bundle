@@ -55,7 +55,9 @@
 #define I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US 10000U
 #endif
 #define I3C_DMA_WAKE_API_INDEX 0U
+#define I3C_DMA_RX_SEED_TAIL_API_INDEX 2U
 #define I3C_DMA_WAKE_MAILBOX_COMPLETE 1U
+#define I3C_DMA_SEED_TAIL_IBI_PRE_READ_DELAY_US 10U
 #define SMART_DMA_TRIGGER_CHANNEL 0U
 
 #ifndef EXPERIMENT_ALLOW_CM33_DMA_IRQ
@@ -137,6 +139,21 @@ typedef struct _i3c_dma_smartdma_wake_param
     uint32_t dmaIntaAddress;
 } i3c_dma_smartdma_wake_param_t;
 
+typedef struct _i3c_dma_seed_tail_read_param
+{
+    volatile uint32_t mailbox;
+    uint32_t expectedWakeCount;
+    volatile uint32_t wakeCount;
+    volatile uint32_t dmaSeedBytes;
+    volatile uint32_t smartdmaBytes;
+    volatile uint32_t dmaIntaCount;
+    uint32_t nextByteAddress;
+    uint32_t remainingCount;
+    uint32_t i3cBaseAddress;
+    uint32_t dmaIntaAddress;
+    uint32_t dmaChannelMask;
+} i3c_dma_seed_tail_read_param_t;
+
 extern uint8_t __smartdma_start__[];
 extern uint8_t __smartdma_end__[];
 
@@ -193,6 +210,7 @@ static __NO_INIT volatile uint32_t s_dma_official_total_rx_dma_callback_count;
 static __NO_INIT volatile uint8_t s_dma_official_rx_snapshot[I3C_LOGICAL_DATA_LENGTH];
 
 AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_smartdma_wake_param_t s_smartdma_wake_param, 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_seed_tail_read_param_t s_rx_seed_read_param, 4);
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_txBuff[I3C_PACKET_LENGTH], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_chunk_rxBuff[I3C_DATA_LENGTH], 4);
@@ -203,6 +221,7 @@ static uint8_t g_ibiPayloadSize;
 static i3c_master_dma_handle_t g_i3cMasterHandle;
 static dma_handle_t g_txDmaHandle;
 static dma_handle_t g_rxDmaHandle;
+static dma_handle_t g_seedReadDmaHandle;
 static volatile bool g_masterCompletionFlag;
 static volatile bool g_ibiWonFlag;
 static volatile status_t g_completionStatus = kStatus_Success;
@@ -216,6 +235,15 @@ static void i3c_master_callback(I3C_Type *base,
                                 i3c_master_dma_handle_t *handle,
                                 status_t status,
                                 void *userData);
+static uint32_t block_stream_dma_seed_byte_count(uint32_t totalSize);
+static i3c_rx_trigger_level_t block_stream_dma_seed_trigger_level(uint32_t seedByteCount);
+static void clear_dma0_channel_state(void);
+static status_t wait_for_post_ibi_read_ctrl_done(I3C_Type *base);
+static status_t wait_for_post_ibi_read_complete(I3C_Type *base);
+static status_t wait_for_seed_tail_mailbox(I3C_Type *base);
+static status_t wait_for_master_idle_simple(I3C_Type *base);
+static status_t quiesce_post_ibi_to_idle(I3C_Type *base);
+static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedReadSize);
 static void arm_smartdma_wake_probe(void);
 static status_t wait_for_smartdma_wake(uint32_t timeout);
 static void suppress_read_data_irq_bounce(void);
@@ -392,6 +420,379 @@ static uint32_t recover_master_rx_tail(uint8_t *rxBuff, uint32_t startIndex, uin
     return writeIndex - startIndex;
 }
 
+static uint32_t block_stream_dma_seed_byte_count(uint32_t totalSize)
+{
+    if (totalSize >= 6U)
+    {
+        return 6U;
+    }
+
+    if (totalSize >= 4U)
+    {
+        return 4U;
+    }
+
+    if (totalSize >= 2U)
+    {
+        return 2U;
+    }
+
+    return 1U;
+}
+
+static i3c_rx_trigger_level_t block_stream_dma_seed_trigger_level(uint32_t seedByteCount)
+{
+    if (seedByteCount >= 6U)
+    {
+        return kI3C_RxTriggerUntilThreeQuarterOrMore;
+    }
+
+    if (seedByteCount >= 4U)
+    {
+        return kI3C_RxTriggerUntilOneHalfOrMore;
+    }
+
+    if (seedByteCount >= 2U)
+    {
+        return kI3C_RxTriggerUntilOneQuarterOrMore;
+    }
+
+    return kI3C_RxTriggerOnNotEmpty;
+}
+
+static void clear_dma0_channel_state(void)
+{
+    const uint32_t channelMask = (1UL << EXAMPLE_I3C_TX_CHANNEL) | (1UL << EXAMPLE_I3C_RX_CHANNEL);
+
+    EXAMPLE_DMA->COMMON[0].INTA = channelMask;
+    EXAMPLE_DMA->COMMON[0].INTB = channelMask;
+    EXAMPLE_DMA->COMMON[0].ERRINT = channelMask;
+    EXAMPLE_DMA->COMMON[0].INTENCLR = channelMask;
+    EXAMPLE_DMA->COMMON[0].ENABLECLR = channelMask;
+}
+
+static status_t wait_for_post_ibi_read_ctrl_done(I3C_Type *base)
+{
+    uint32_t timeout = I3C_DMA_OFFICIAL_TIMEOUT;
+
+    while (timeout-- != 0U)
+    {
+        uint32_t status = I3C_MasterGetStatusFlags(base);
+        uint32_t errStatus = I3C_MasterGetErrorStatusFlags(base);
+
+        if ((status & (uint32_t)kI3C_MasterControlDoneFlag) != 0U)
+        {
+            I3C_MasterClearStatusFlags(base, (uint32_t)kI3C_MasterControlDoneFlag);
+            if (errStatus != 0U)
+            {
+                I3C_MasterClearErrorStatusFlags(base, errStatus);
+            }
+            return kStatus_Success;
+        }
+
+        if ((errStatus & ~((uint32_t)kI3C_MasterErrorNackFlag)) != 0U)
+        {
+            return I3C_MasterCheckAndClearError(base, errStatus);
+        }
+    }
+
+    return kStatus_Timeout;
+}
+
+static status_t wait_for_post_ibi_read_complete(I3C_Type *base)
+{
+    uint32_t timeout = I3C_DMA_OFFICIAL_TIMEOUT;
+
+    while (timeout-- != 0U)
+    {
+        uint32_t status = I3C_MasterGetStatusFlags(base);
+        uint32_t errStatus = I3C_MasterGetErrorStatusFlags(base);
+
+        if ((status & (uint32_t)kI3C_MasterCompleteFlag) != 0U)
+        {
+            I3C_MasterClearStatusFlags(base, (uint32_t)kI3C_MasterCompleteFlag);
+            if (errStatus != 0U)
+            {
+                I3C_MasterClearErrorStatusFlags(base, errStatus);
+            }
+            return kStatus_Success;
+        }
+
+        if ((errStatus & ~((uint32_t)kI3C_MasterErrorNackFlag)) != 0U)
+        {
+            return I3C_MasterCheckAndClearError(base, errStatus);
+        }
+    }
+
+    return kStatus_Timeout;
+}
+
+static status_t wait_for_seed_tail_mailbox(I3C_Type *base)
+{
+    uint32_t timeout = I3C_DMA_OFFICIAL_TIMEOUT;
+
+    while ((s_rx_seed_read_param.mailbox == 0U) && (timeout-- != 0U))
+    {
+        uint32_t errStatus = I3C_MasterGetErrorStatusFlags(base);
+
+        if (errStatus != 0U)
+        {
+            return I3C_MasterCheckAndClearError(base, errStatus);
+        }
+    }
+
+    return (s_rx_seed_read_param.mailbox != 0U) ? kStatus_Success : kStatus_Timeout;
+}
+
+static status_t wait_for_master_idle_simple(I3C_Type *base)
+{
+    uint32_t timeout = I3C_DMA_OFFICIAL_TIMEOUT;
+
+    while (timeout-- != 0U)
+    {
+        uint32_t errStatus = I3C_MasterGetErrorStatusFlags(base);
+
+        if ((errStatus & ~((uint32_t)kI3C_MasterErrorNackFlag)) != 0U)
+        {
+            return I3C_MasterCheckAndClearError(base, errStatus);
+        }
+
+        if ((I3C_MasterGetState(base) == kI3C_MasterStateIdle) && I3C_MasterGetBusIdleState(base))
+        {
+            return kStatus_Success;
+        }
+    }
+
+    return kStatus_Timeout;
+}
+
+static status_t quiesce_post_ibi_to_idle(I3C_Type *base)
+{
+    status_t result;
+
+    if ((I3C_MasterGetState(base) == kI3C_MasterStateIdle) && I3C_MasterGetBusIdleState(base))
+    {
+        return kStatus_Success;
+    }
+
+    result = I3C_MasterStop(base);
+    if (result == kStatus_Success)
+    {
+        result = wait_for_post_ibi_read_ctrl_done(base);
+        if ((result == kStatus_Success) && (I3C_MasterGetState(base) == kI3C_MasterStateIdle))
+        {
+            return kStatus_Success;
+        }
+    }
+    else if ((result == kStatus_I3C_InvalidReq) && (I3C_MasterGetState(base) == kI3C_MasterStateIdle))
+    {
+        return kStatus_Success;
+    }
+
+    I3C_MasterEmitRequest(base, kI3C_RequestForceExit);
+    result = wait_for_post_ibi_read_ctrl_done(base);
+    if ((result == kStatus_Success) && (I3C_MasterGetState(base) == kI3C_MasterStateIdle))
+    {
+        return kStatus_Success;
+    }
+
+    return result;
+}
+
+static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedReadSize)
+{
+    const uint32_t channelMask = (1UL << EXAMPLE_I3C_RX_CHANNEL);
+    const uint32_t seedByteCount = block_stream_dma_seed_byte_count(expectedReadSize);
+    const uint32_t tailByteCount = expectedReadSize - seedByteCount;
+    dma_transfer_config_t dmaTransfer;
+    status_t result;
+    uint32_t armCycleStart = read_cycle_counter();
+
+    SDK_DelayAtLeastUs(I3C_DMA_SEED_TAIL_IBI_PRE_READ_DELAY_US, SystemCoreClock);
+
+    memset((void *)&s_rx_seed_read_param, 0, sizeof(s_rx_seed_read_param));
+    memset(g_chunk_rxBuff, 0, sizeof(g_chunk_rxBuff));
+
+    g_dma0_dbg_irq_count = 0U;
+    g_dma0_dbg_first_intstat = 0U;
+    g_dma0_dbg_first_inta = 0U;
+    g_dma0_dbg_first_active = 0U;
+    g_dma0_dbg_last_intstat = 0U;
+    g_dma0_dbg_last_inta = 0U;
+    g_dma0_dbg_last_active = 0U;
+    g_i3c_dbg_irq_count = 0U;
+    g_i3c_dbg_irq_data_count = 0U;
+    g_i3c_dbg_irq_protocol_count = 0U;
+    g_i3c_dbg_irq_last_pending = 0U;
+    g_i3c_dbg_irq_first_data_pending = 0U;
+
+    result = quiesce_post_ibi_to_idle(EXAMPLE_MASTER);
+    if (result != kStatus_Success)
+    {
+        return result;
+    }
+
+    clear_dma0_channel_state();
+    I3C_MasterEnableDMA(EXAMPLE_MASTER, false, false, 1U);
+
+    RESET_PeripheralReset(kINPUTMUX_RST_SHIFT_RSTn);
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_AttachSignal(INPUTMUX, SMART_DMA_TRIGGER_CHANNEL, kINPUTMUX_Dma0IrqToSmartDmaInput);
+    INPUTMUX_EnableSignal(INPUTMUX, kINPUTMUX_I3c0TxToDmac0Ch25RequestEna, false);
+    INPUTMUX_EnableSignal(INPUTMUX, kINPUTMUX_I3c0RxToDmac0Ch24RequestEna, true);
+    INPUTMUX_Deinit(INPUTMUX);
+
+    NVIC_DisableIRQ(DMA0_IRQn);
+    NVIC_ClearPendingIRQ(DMA0_IRQn);
+    NVIC_DisableIRQ(I3C0_IRQn);
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
+    NVIC_ClearPendingIRQ(SDMA_IRQn);
+    NVIC_DisableIRQ(SDMA_IRQn);
+
+    DMA_EnableChannel(EXAMPLE_DMA, EXAMPLE_I3C_RX_CHANNEL);
+    DMA_CreateHandle(&g_seedReadDmaHandle, EXAMPLE_DMA, EXAMPLE_I3C_RX_CHANNEL);
+    EXAMPLE_DMA->COMMON[0].INTENCLR = channelMask;
+    NVIC_DisableIRQ(DMA0_IRQn);
+    NVIC_ClearPendingIRQ(DMA0_IRQn);
+    DMA_PrepareTransfer(&dmaTransfer,
+                        (uint32_t *)(uint32_t)&EXAMPLE_MASTER->MRDATAB,
+                        g_chunk_rxBuff,
+                        sizeof(uint8_t),
+                        seedByteCount,
+                        kDMA_PeripheralToMemory,
+                        NULL);
+    result = DMA_SubmitTransfer(&g_seedReadDmaHandle, &dmaTransfer);
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    s_rx_seed_read_param.expectedWakeCount = 1U;
+    s_rx_seed_read_param.nextByteAddress = (uint32_t)(uintptr_t)&g_chunk_rxBuff[seedByteCount];
+    s_rx_seed_read_param.remainingCount = tailByteCount;
+    s_rx_seed_read_param.i3cBaseAddress = (uint32_t)(uintptr_t)EXAMPLE_MASTER;
+    s_rx_seed_read_param.dmaIntaAddress = (uint32_t)(uintptr_t)&EXAMPLE_DMA->COMMON[0].INTA;
+    s_rx_seed_read_param.dmaChannelMask = channelMask;
+
+    if (!g_smartdmaWakeProbeInitialized)
+    {
+        POWER_DisablePD(kPDRUNCFG_APD_SMARTDMA_SRAM);
+        POWER_DisablePD(kPDRUNCFG_PPD_SMARTDMA_SRAM);
+        POWER_ApplyPD();
+
+        keep_smartdma_api_alive();
+        SMARTDMA_Init(
+            SMARTDMA_SRAM_ADDR, __smartdma_start__, (uint32_t)((uintptr_t)__smartdma_end__ - (uintptr_t)__smartdma_start__));
+        g_smartdmaWakeProbeInitialized = true;
+    }
+
+    SMARTDMA_Reset();
+    SMARTDMA_Boot(I3C_DMA_RX_SEED_TAIL_API_INDEX, &s_rx_seed_read_param, 0U);
+    s_dma_official_total_smartdma_arm_us += cycles_to_us(read_cycle_counter() - armCycleStart);
+
+    I3C_MasterClearErrorStatusFlags(EXAMPLE_MASTER, I3C_MasterGetErrorStatusFlags(EXAMPLE_MASTER));
+    I3C_MasterDisableInterrupts(EXAMPLE_MASTER,
+                                I3C_MASTER_PROTOCOL_CLEAR_MASK | (uint32_t)kI3C_MasterTxReadyFlag |
+                                    (uint32_t)kI3C_MasterRxReadyFlag);
+    I3C_MasterClearStatusFlags(EXAMPLE_MASTER, I3C_MASTER_PROTOCOL_CLEAR_MASK);
+    EXAMPLE_MASTER->MSTATUS = I3C_MSTATUS_NACKED_MASK;
+    EXAMPLE_MASTER->MDATACTRL |= I3C_MDATACTRL_FLUSHTB_MASK | I3C_MDATACTRL_FLUSHFB_MASK;
+    I3C_MasterEmitRequest(EXAMPLE_MASTER, kI3C_RequestNone);
+    I3C_MasterSetWatermarks(EXAMPLE_MASTER,
+                            kI3C_TxTriggerOnEmpty,
+                            block_stream_dma_seed_trigger_level(seedByteCount),
+                            false,
+                            false);
+
+    result = I3C_MasterStartWithRxSize(EXAMPLE_MASTER, kI3C_TypeI3CSdr, slaveAddr, kI3C_Read, (uint8_t)expectedReadSize);
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    result = wait_for_post_ibi_read_ctrl_done(EXAMPLE_MASTER);
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    DMA_StartTransfer(&g_seedReadDmaHandle);
+    I3C_MasterEnableDMA(EXAMPLE_MASTER, false, true, 1U);
+
+    armCycleStart = read_cycle_counter();
+    result = wait_for_seed_tail_mailbox(EXAMPLE_MASTER);
+    s_dma_official_total_smartdma_wait_us += cycles_to_us(read_cycle_counter() - armCycleStart);
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    result = wait_for_post_ibi_read_complete(EXAMPLE_MASTER);
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    result = I3C_MasterStop(EXAMPLE_MASTER);
+    if (result == kStatus_Success)
+    {
+        result = wait_for_post_ibi_read_ctrl_done(EXAMPLE_MASTER);
+    }
+    else if ((result == kStatus_I3C_InvalidReq) && (I3C_MasterGetState(EXAMPLE_MASTER) == kI3C_MasterStateIdle))
+    {
+        result = kStatus_Success;
+    }
+    if (result != kStatus_Success)
+    {
+        goto exit;
+    }
+
+    if (tailByteCount != 0U)
+    {
+        uint8_t reorderedData[I3C_DATA_LENGTH];
+
+        memcpy(reorderedData, g_chunk_rxBuff, expectedReadSize);
+        memcpy(g_chunk_rxBuff, &reorderedData[seedByteCount], tailByteCount);
+        memcpy(&g_chunk_rxBuff[tailByteCount], reorderedData, seedByteCount);
+    }
+
+    s_dma_official_smartdma_mailbox = s_rx_seed_read_param.mailbox;
+    s_dma_official_smartdma_dma_inta_snapshot = EXAMPLE_DMA->COMMON[0].INTA;
+    s_dma_official_smartdma_mdmactrl = EXAMPLE_MASTER->MDMACTRL;
+    s_dma_official_smartdma_mstatus = EXAMPLE_MASTER->MSTATUS;
+    s_dma_official_smartdma_mdatactrl = EXAMPLE_MASTER->MDATACTRL;
+
+    if ((s_rx_seed_read_param.mailbox == 0U) || (s_rx_seed_read_param.wakeCount != 1U) ||
+        (s_rx_seed_read_param.dmaIntaCount != 1U) || (s_rx_seed_read_param.remainingCount != 0U))
+    {
+        result = kStatus_Fail;
+        goto exit;
+    }
+
+    s_dma_official_total_smartdma_wake_count += s_rx_seed_read_param.wakeCount;
+    s_dma_official_total_smartdma_dma_inta_count += s_rx_seed_read_param.dmaIntaCount;
+
+    result = wait_for_master_idle_simple(EXAMPLE_MASTER);
+
+exit:
+    I3C_MasterEnableDMA(EXAMPLE_MASTER, false, false, 1U);
+    RESET_PeripheralReset(kINPUTMUX_RST_SHIFT_RSTn);
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_EnableSignal(INPUTMUX, kINPUTMUX_I3c0TxToDmac0Ch25RequestEna, true);
+    INPUTMUX_EnableSignal(INPUTMUX, kINPUTMUX_I3c0RxToDmac0Ch24RequestEna, false);
+    INPUTMUX_Deinit(INPUTMUX);
+    NVIC_ClearPendingIRQ(SDMA_IRQn);
+    NVIC_DisableIRQ(SDMA_IRQn);
+    NVIC_ClearPendingIRQ(DMA0_IRQn);
+    if (EXPERIMENT_ALLOW_CM33_DMA_IRQ == 0U)
+    {
+        NVIC_DisableIRQ(DMA0_IRQn);
+    }
+    clear_dma0_channel_state();
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
+    return result;
+}
+
 static void snapshot_smartdma_wake_state(void)
 {
     s_dma_official_smartdma_mailbox = s_smartdma_wake_param.mailbox;
@@ -530,50 +931,15 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     }
 #endif
 
-    memset(&masterXfer, 0, sizeof(masterXfer));
-    masterXfer.slaveAddress = slaveAddr;
-    masterXfer.data = g_chunk_rxBuff;
-    masterXfer.dataSize = expectedReadSize;
-    masterXfer.direction = kI3C_Read;
-    masterXfer.busType = kI3C_TypeI3CSdr;
-    masterXfer.flags = kI3C_TransferDefaultFlag;
-    masterXfer.ibiResponse = kI3C_IbiRespAckMandatory;
-
-    phaseCycleStart = read_cycle_counter();
-    arm_smartdma_wake_probe();
-    s_dma_official_total_smartdma_arm_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     s_dma_official_stage = kDmaOfficialStageSmartDmaWakeArmed;
 
-    NVIC_ClearPendingIRQ(I3C0_IRQn);
-    NVIC_DisableIRQ(I3C0_IRQn);
-
-    result = I3C_MasterTransferDMA(EXAMPLE_MASTER, &g_i3cMasterHandle, &masterXfer);
-    if (result != kStatus_Success)
-    {
-        mark_failure(kDmaOfficialStageSmartDmaWakeArmed, (int32_t)result);
-        return result;
-    }
-
-    suppress_read_data_irq_bounce();
-    NVIC_ClearPendingIRQ(I3C0_IRQn);
-    NVIC_EnableIRQ(I3C0_IRQn);
-
     phaseCycleStart = read_cycle_counter();
-    result = wait_for_transfer_complete(I3C_DMA_OFFICIAL_TIMEOUT);
+    result = run_chunk_seed_tail_read(slaveAddr, expectedReadSize);
     s_dma_official_total_read_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
     if (result != kStatus_Success)
     {
         mark_failure(kDmaOfficialStageSmartDmaWakeArmed,
                      (result == kStatus_Timeout) ? kDmaOfficialResultTimeoutCompletion : (int32_t)result);
-        return result;
-    }
-
-    phaseCycleStart = read_cycle_counter();
-    result = wait_for_smartdma_wake(I3C_DMA_OFFICIAL_TIMEOUT);
-    s_dma_official_total_smartdma_wait_us += cycles_to_us(read_cycle_counter() - phaseCycleStart);
-    if (result != kStatus_Success)
-    {
-        mark_failure(kDmaOfficialStageReadDone, kDmaOfficialResultTimeoutSmartDmaWake);
         return result;
     }
 
@@ -590,15 +956,13 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
 
     s_dma_official_stage = kDmaOfficialStageReadDone;
 
-    if ((s_smartdma_wake_param.mailbox != I3C_DMA_WAKE_MAILBOX_COMPLETE) || (s_smartdma_wake_param.wakeCount != 1U) ||
-        (s_smartdma_wake_param.dmaIntaCount != 1U))
+    if ((s_rx_seed_read_param.mailbox == 0U) || (s_rx_seed_read_param.wakeCount != 1U) ||
+        (s_rx_seed_read_param.dmaIntaCount != 1U) || (s_rx_seed_read_param.remainingCount != 0U))
     {
         mark_failure(kDmaOfficialStageReadDone, kDmaOfficialResultUnexpectedSmartDmaWake);
         return kStatus_Fail;
     }
 
-    s_dma_official_total_smartdma_wake_count += s_smartdma_wake_param.wakeCount;
-    s_dma_official_total_smartdma_dma_inta_count += s_smartdma_wake_param.dmaIntaCount;
     s_dma_official_total_dma0_irq_count += g_dma0_dbg_irq_count;
     s_dma_official_total_data_irq_count += g_i3c_dbg_irq_data_count;
     s_dma_official_total_protocol_irq_count += g_i3c_dbg_irq_protocol_count;
@@ -638,6 +1002,8 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
 
     s_dma_official_rx_size += expectedReadSize;
     s_dma_official_completed_chunk_count = chunkIndex + 1U;
+    NVIC_ClearPendingIRQ(I3C0_IRQn);
+    NVIC_EnableIRQ(I3C0_IRQn);
     s_dma_official_total_chunk_time_us += cycles_to_us(read_cycle_counter() - chunkCycleStart);
     return kStatus_Success;
 }

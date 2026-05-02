@@ -651,8 +651,8 @@ Interpretation:
 
 The bundle also includes
 `master_i3c_dma_official_rx_smartdma_wake_block_stream/`, which keeps the
-master on the official `fsl_i3c_dma.c` RX path while switching the slave's
-post-IBI reply path to a stream-only polled sender in
+master on the official `fsl_i3c_dma.c` request-write path while switching the
+slave's post-IBI reply path to a stream-only polled sender in
 `sdk/slave/i3c_interrupt_b2b_transfer_slave_base.c`.
 
 The original shared slave IRQ path stalled after the first FIFO window and
@@ -661,9 +661,12 @@ slave emits the post-write IBI, it starts a polled post-IBI transfer directly
 inside `kI3C_SlaveRequestSentEvent` so the slave owns the following master read
 immediately rather than waiting for the foreground loop to notice it later.
 
-This preserves the user-visible requirement for this repo: the master stays on
-the official DMA driver path and SmartDMA is still only used as the DMA wake
-observer.
+The current revision changes only the master's post-IBI read phase: it seeds
+the first `6` bytes with the normal RX DMA flow, then lets SmartDMA drain the
+remaining bytes with the same tail-reader pattern used in
+`master_i3c_sdma_seed_tail_len_sweep/`. The earlier pure official-DMA-read
+benchmark is kept below as a baseline because the seed-tail variant shifts the
+end-to-end and read-only throughput tradeoff.
 
 ### Build the exact validated repro
 
@@ -688,7 +691,7 @@ RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=32 I3C_STREAM_BLOCK_COUNT=4 I
 Validated signature:
 
 ```text
-dmaWakeBlockStreamFinal= st=0B out=1 rs=0 cs=0 sa=31 ec=4 cc=4 ci=3 ip=1 i0=4 i1=0 rx=80 mi=0FFFFFFFF tr=8 rf=0 rl=7F sm=1 sw=4 si=4 ss=3000000 smd=28 sms=1000 sdc=800000C0 cu=2BE8 wu=53 iu=27DB ru=284 au=18 su=0 xc=0A xd=1 xs=20 txc=3 di=0 idc=0 ipc=0 rxc=0
+dmaWakeBlockStreamFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=4 cc=4 ci=3 ip=1 i0=4 i1=0 rx=80 mi=0FFFFFFFF tr=0 rf=0 rl=7F sm=1 sw=4 si=4 ss=1000000 smd=12 sms=1000 sdc=800000C0 cu=2C20 wu=53 iu=27DB ru=353 au=0A3 su=1E4 xc=6 xd=0 xs=2 txc=3 di=0 idc=
 ```
 
 Interpretation:
@@ -699,7 +702,8 @@ Interpretation:
 4. `rx=80`, `rf=0`, and `rl=7F` mean the validated aggregate receive length was `128` bytes and the captured payload still ranged from `0x00` through `0x7F`.
 5. `mi=0FFFFFFFF` means no mismatch was latched anywhere in the aggregate receive buffer.
 6. `sw=4` and `si=4` mean SmartDMA still observed one DMA-completion wake and one DMA INTA acknowledgement per block.
-7. `di=0`, `idc=0`, and `rxc=0` mean CM33 still serviced no `DMA0_IRQn`, no I3C data IRQs, and no RX DMA callback on the passing path.
+7. `tr=0`, `xd=0`, and `xs=2` mean the seed-tail helper completed without taking the legacy RX tail-recovery path and finished on the SmartDMA-driven tail phase.
+8. `di=0` means CM33 still serviced no `DMA0_IRQn` on the passing path.
 
 ### Run the committed block-size and block-count benchmark
 
@@ -744,7 +748,10 @@ Reproduction notes:
 5. `chunk_time_us` comes from `cu=` and measures the full write -> IBI -> DMA read -> SmartDMA-wake cycle.
 6. `read_wait_us` comes from `ru=` and measures only the DMA read-completion wait portion of that cycle.
 
-### Benchmarked result
+The next three subsections keep the earlier pure official-DMA-read results as a
+baseline. The current DMA-seed plus SmartDMA-tail numbers follow after them.
+
+### Earlier Pure Official-DMA-Read Baseline
 
 Every benchmark point below passed with `st=0B`, `rs=0`, and
 `mi=0xFFFFFFFF`.
@@ -776,7 +783,7 @@ The largest validated point in this commit is therefore:
 3. about `33.5 KiB/s` sustained end-to-end throughput.
 4. about `194.1 KiB/s` read-phase throughput once the read has started.
 
-### 1 MiB timing breakdown
+### Earlier 1 MiB Timing Breakdown
 
 For the `32768 x 32` point, the full-cycle `cu=` time splits as follows:
 
@@ -791,7 +798,7 @@ write-plus-IBI turnaround. If other developers want more bandwidth from the
 same driver path, the next knob to turn is a larger `I3C_STREAM_BLOCK_BYTES`
 value or a protocol shape that amortizes one IBI across more payload.
 
-### Multi-width snapshot
+### Earlier Multi-Width Snapshot
 
 After extending the matrix helper to accept multiple block widths, the same
 hardware setup was exercised with this smaller width-vs-count ladder:
@@ -817,6 +824,31 @@ Observed scaling from that sweep:
 2. End-to-end throughput kept increasing with wider blocks because the fixed write-plus-IBI turnaround was amortized across more payload per block.
 3. One initial `128-byte x 256-block` run produced a transient mismatch, but three immediate reruns of that exact point passed at about `81.7 KiB/s`, so it was not treated as a stable ceiling.
 4. On the tested ladder, `240`-byte blocks reached about `108.4 KiB/s` by `4096` blocks and still did not reveal a new hard limit in the master-driver path.
+
+### Current DMA-Seed Plus SmartDMA-Tail Benchmark
+
+The current seed-tail revision was benchmarked with the same matrix runner,
+first across `32 64 128 240` byte blocks on the `4 16 64 256 1024 4096` count
+ladder and then again at `255` bytes on the same count ladder.
+
+Best passing points from that seed-tail run family are below. The earlier
+baseline columns keep the best pure official-DMA-read result for the same block
+width so the tradeoff is visible in one table.
+
+| Block bytes | Best count | Payload bytes | Seed-tail KiB/s | Seed-tail read KiB/s | Earlier baseline KiB/s | Earlier baseline read KiB/s |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 32 | 1024 | 32768 | 32.8 | 152.9 | 33.2 | 194.1 |
+| 64 | 1024 | 65536 | 55.2 | 174.4 | 55.5 | 199.7 |
+| 128 | 4096 | 524288 | 84.4 | 186.8 | 83.6 | 203.3 |
+| 240 | 4096 | 983040 | 110.6 | 194.6 | 108.4 | 204.9 |
+| 255 | 4096 | 1044480 | 113.9 | 194.7 | - | - |
+
+Observed behavior from the current seed-tail run family:
+
+1. The read phase is still slower than the earlier pure official-DMA-read path on every overlapping width, so the seed-tail variant is not a read-only bandwidth win.
+2. End-to-end throughput is slightly worse at `32` and `64` bytes, then slightly better at `128` and `240` bytes because the fixed write-plus-IBI turnaround dominates once the blocks are wide enough.
+3. The current top validated point is `255 x 4096`, which moved `1,044,480` bytes at about `113.9 KiB/s` end to end and `194.7 KiB/s` for the read phase.
+4. The single-pass sweep still showed transient early-chunk `st=5 rs=1EDC` failures at `32 x 256` and `255 x 16`, so this seed-tail variant is benchmarked but not yet hardened.
 
 ## RX Request-Semantics Probe
 
