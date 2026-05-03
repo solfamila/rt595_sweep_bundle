@@ -848,7 +848,7 @@ Observed behavior from the current seed-tail run family:
 1. The read phase is still slower than the earlier pure official-DMA-read path on every overlapping width, so the seed-tail variant is not a read-only bandwidth win.
 2. End-to-end throughput is slightly worse at `32` and `64` bytes, then slightly better at `128` and `240` bytes because the fixed write-plus-IBI turnaround dominates once the blocks are wide enough.
 3. After trimming the retained RX snapshot down to the bytes surfaced in the TRACE32 signature, the current top validated point moved to `255 x 32768`, which transferred `8,355,840` bytes at about `114.4 KiB/s` end to end and `195.0 KiB/s` for the read phase.
-4. The old `255 x 16` and `255 x 8192` early-chunk `st=5 rs=1EDC` flakes were traced to a slave polled post-IBI rearm visibility race at zero inter-chunk settle. Adding a short bounded fence after `i3c_slave_rearm_after_completion()` cleared the `255`-byte ladder, but `32 x 256` still shows a separate zero-settle failure (`st=6 rs=0xFFFFFFFFFFFFFFFE`) and remains unresolved.
+4. The old `255 x 16` and `255 x 8192` early-chunk `st=5 rs=1EDC` flakes were traced to a slave polled post-IBI rearm visibility race at zero inter-chunk settle. The remaining `32 x 256` zero-settle failure turned out to be a second slave-side issue in the same shared path: after the first post-IBI read, the slave still needed a longer explicit rearm-visibility fence, and the post-DAA receive-entry reset could replay stale generation-1 IBI state.
 
 ### Post-Fix Larger-Count 255-Byte Stability Sweep
 
@@ -871,7 +871,28 @@ The current stability conclusion at `255` bytes is therefore:
 
 1. The zero-settle `255`-byte path now sustains about `114.4 KiB/s` end to end and `195.0 KiB/s` read-only from `4096` through `32768` blocks, with `4096`, `8192`, and `16384` all passing `3/3` plus a `32768` spot-check pass.
 2. The old early `st=5 rs=1EDC` failure was a slave-side post-IBI rearm visibility race, not a monotonic size ceiling or throughput limit.
-3. The remaining hardening work has narrowed away from the `255`-byte path: `32 x 256` still fails at zero settle, but with a different stage/result signature (`st=6 rs=0xFFFFFFFFFFFFFFFE`).
+3. The `255`-byte path remains stable after the shared slave changes: a regression check at `255 x 256 @ 0 us` still passed at about `112.7 KiB/s` end to end and `194.8 KiB/s` read-only.
+
+### Post-Fix 32-Byte Zero-Settle Slice
+
+The previously unresolved `32 x 256 @ 0 us` slice was fixed in the shared
+slave implementation used by the block-stream experiment:
+
+1. The post-polled-read rearm fence moved from a short NOP loop to an explicit `SDK_DelayAtLeastUs(25U, SystemCoreClock)` guard so the next receive arm is visible before the master launches the next zero-settle write.
+2. `i3c_slave_reset_ibi_generation_state()` now also clears the hardware slave request mode back to `kI3C_SlaveEventNormal`, which stops stale IBI request state from leaking across chunk boundaries.
+3. The full IBI-state reset on `(kI3C_SlaveReceiveEvent | kI3C_SlaveHDRCommandMatchEvent)` now runs only before DAA, so post-DAA chunk receives do not clobber the next tagged generation.
+
+Validation for the fixed `32 x 256` case:
+
+| Case | Attempts | Passing attempts | End-to-end KiB/s | Read-only KiB/s | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `32 x 256 @ 0 us` | 4 | 4 | 31.3-31.8 | 149.5 | All reruns completed the full `256/256` chunks with the old `st=6` timeout and `st=7` unexpected-generation signatures gone. |
+
+The current conclusion for the small-width zero-settle path is therefore:
+
+1. The old `32 x 256` failure was not a master retry issue; it was a slave-side handoff bug at the boundary between post-IBI completion, receive rearm visibility, and generation-tag state reset.
+2. After the shared slave fix, the same `32 x 256 @ 0 us` slice now passes repeatedly with full payload validation.
+3. The `255`-byte regression check still passes, so the new guard and request-mode cleanup did not reopen the earlier large-width race.
 
 ## RX Request-Semantics Probe
 

@@ -51,8 +51,8 @@
 #define I3C_SLAVE_SESSION_RESET_TOKEN 0xFFU
 #endif
 
-#ifndef I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS
-#define I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS 1200U
+#ifndef I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_US
+#define I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_US 25U
 #endif
 
 #ifndef EXPERIMENT_SLAVE_MIN_ECHO_COUNT
@@ -94,11 +94,7 @@ static void semihost_write0(const char *message);
 
 static inline void i3c_slave_post_ibi_queued_complete_guard(void)
 {
-    for (volatile uint32_t guardLoops = I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_LOOPS; guardLoops != 0U;
-         guardLoops--)
-    {
-        __NOP();
-    }
+    SDK_DelayAtLeastUs(I3C_SLAVE_POST_IBI_QUEUED_COMPLETE_GUARD_US, SystemCoreClock);
 }
 
 static void semihost_write_hex32(uint32_t value)
@@ -578,6 +574,7 @@ static void i3c_slave_reset_ibi_generation_state(void)
     g_slavePolledTransferredCount = 0U;
 #endif
     g_slaveRetainedTrace.currentEchoedCount = 0U;
+    I3C_SlaveRequestEvent(EXAMPLE_SLAVE, kI3C_SlaveEventNormal);
     i3c_slave_update_retained_ibi_state();
 }
 
@@ -1151,7 +1148,10 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
             break;
 
         case (kI3C_SlaveReceiveEvent | kI3C_SlaveHDRCommandMatchEvent):
-            i3c_slave_reset_ibi_generation_state();
+            if ((EXAMPLE_SLAVE->SDYNADDR & I3C_SDYNADDR_DAVALID_MASK) == 0U)
+            {
+                i3c_slave_reset_ibi_generation_state();
+            }
             g_lastTransferWasReceive = true;
             xfer->rxData = g_slave_rxBuff;
             xfer->rxDataSize = I3C_SLAVE_RX_DATA_LENGTH;
@@ -1488,32 +1488,32 @@ int main(void)
     #endif
 
 #if EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX
-        if (g_slaveIbiPending && !g_slaveIbiRequestSent && !g_slaveIbiIssued)
+    if (g_slaveIbiPending && !g_slaveIbiRequestSent && !g_slaveIbiIssued)
+    {
+        if (g_slaveIbiDelayLoops != 0U)
         {
-            if (g_slaveIbiDelayLoops != 0U)
-            {
-                g_slaveIbiDelayLoops--;
-                g_slaveRetainedTrace.currentIbiDelayLoops = g_slaveIbiDelayLoops;
-            }
-            else
-            {
-                /* The request API only arms EVENT; keep retrying until the
-                 * controller reports RequestSentEvent.
-                 */
-                I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveEventSentFlag);
-                I3C_SlaveClearErrorStatusFlags(EXAMPLE_SLAVE, I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE));
-                g_slaveRetainedTrace.ibiStatusBeforeRequest = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
-                I3C_SlaveRequestIBIWithData(EXAMPLE_SLAVE, g_slaveIbiPayload, I3C_SLAVE_IBI_PAYLOAD_LENGTH);
-                i3c_slave_record_trace(kSlaveTraceIbiIssued,
-                                       NULL,
-                                       g_slaveRetainedTrace.ibiIssuedCount + 1U,
-                                       I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE));
-                g_slaveIbiIssued = true;
-                g_slaveIbiDelayLoops = 1U;
-                g_slaveRetainedTrace.lastIssuedGeneration = g_slaveRetainedTrace.currentGeneration;
-                i3c_slave_update_retained_ibi_state();
-            }
+            g_slaveIbiDelayLoops--;
+            g_slaveRetainedTrace.currentIbiDelayLoops = g_slaveIbiDelayLoops;
         }
+        else
+        {
+            /* The request API only arms EVENT, so clear any stale event/error
+             * status before issuing the next tagged IBI request.
+             */
+            I3C_SlaveClearStatusFlags(EXAMPLE_SLAVE, (uint32_t)kI3C_SlaveEventSentFlag);
+            I3C_SlaveClearErrorStatusFlags(EXAMPLE_SLAVE, I3C_SlaveGetErrorStatusFlags(EXAMPLE_SLAVE));
+            g_slaveRetainedTrace.ibiStatusBeforeRequest = I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE);
+            I3C_SlaveRequestIBIWithData(EXAMPLE_SLAVE, g_slaveIbiPayload, I3C_SLAVE_IBI_PAYLOAD_LENGTH);
+            i3c_slave_record_trace(kSlaveTraceIbiIssued,
+                                   NULL,
+                                   g_slaveRetainedTrace.ibiIssuedCount + 1U,
+                                   I3C_SlaveGetStatusFlags(EXAMPLE_SLAVE));
+            g_slaveIbiIssued = true;
+            g_slaveIbiDelayLoops = 1U;
+            g_slaveRetainedTrace.lastIssuedGeneration = g_slaveRetainedTrace.currentGeneration;
+            i3c_slave_update_retained_ibi_state();
+        }
+    }
 #endif
 
         if ((!dynamicAddrReported) && ((EXAMPLE_SLAVE->SDYNADDR & I3C_SDYNADDR_DAVALID_MASK) != 0U))
