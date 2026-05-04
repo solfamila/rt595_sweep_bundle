@@ -1226,6 +1226,14 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                             {
                                 requestedTxSize |= ((uint32_t)g_slave_rxBuff[2] << 8U);
                             }
+                            if ((uint32_t)xfer->transferredCount >= 4U)
+                            {
+                                requestedTxSize |= ((uint32_t)g_slave_rxBuff[3] << 16U);
+                            }
+                            if ((uint32_t)xfer->transferredCount >= 5U)
+                            {
+                                requestedTxSize |= ((uint32_t)g_slave_rxBuff[4] << 24U);
+                            }
                         }
                         else if ((uint32_t)xfer->transferredCount != 0U)
                         {

@@ -45,9 +45,9 @@
 #define I3C_LOGICAL_CHUNK_COUNT I3C_STREAM_BLOCK_COUNT
 #define I3C_LOGICAL_DATA_LENGTH I3C_STREAM_TOTAL_BYTES
 #define I3C_RX_SNAPSHOT_BYTES 16U
-#define I3C_PACKET_LENGTH 3U
-#if (I3C_STREAM_BLOCK_BYTES == 0U) || (I3C_STREAM_BLOCK_BYTES > 65535U)
-#error "I3C_STREAM_BLOCK_BYTES must be in the range 1..65535"
+#define I3C_PACKET_LENGTH 5U
+#if (I3C_STREAM_BLOCK_BYTES == 0U)
+#error "I3C_STREAM_BLOCK_BYTES must be non-zero"
 #endif
 #define I3C_DMA_OFFICIAL_TIMEOUT 100000000U
 #define I3C_DMA_OFFICIAL_LED_PULSE_US 120000U
@@ -892,6 +892,8 @@ static void prepare_chunk_write_payload(uint32_t chunkDataLength)
     g_master_txBuff[0] = I3C_STREAM_REQUEST_TOKEN;
     g_master_txBuff[1] = (uint8_t)(chunkDataLength & 0xFFU);
     g_master_txBuff[2] = (uint8_t)((chunkDataLength >> 8U) & 0xFFU);
+    g_master_txBuff[3] = (uint8_t)((chunkDataLength >> 16U) & 0xFFU);
+    g_master_txBuff[4] = (uint8_t)((chunkDataLength >> 24U) & 0xFFU);
 }
 
 static status_t reset_slave_session_generation(uint8_t slaveAddr)
