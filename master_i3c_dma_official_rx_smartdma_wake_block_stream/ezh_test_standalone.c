@@ -45,9 +45,9 @@
 #define I3C_LOGICAL_CHUNK_COUNT I3C_STREAM_BLOCK_COUNT
 #define I3C_LOGICAL_DATA_LENGTH I3C_STREAM_TOTAL_BYTES
 #define I3C_RX_SNAPSHOT_BYTES 16U
-#define I3C_PACKET_LENGTH 2U
-#if (I3C_STREAM_BLOCK_BYTES == 0U) || (I3C_STREAM_BLOCK_BYTES > 255U)
-#error "I3C_STREAM_BLOCK_BYTES must be in the range 1..255"
+#define I3C_PACKET_LENGTH 3U
+#if (I3C_STREAM_BLOCK_BYTES == 0U) || (I3C_STREAM_BLOCK_BYTES > 65535U)
+#error "I3C_STREAM_BLOCK_BYTES must be in the range 1..65535"
 #endif
 #define I3C_DMA_OFFICIAL_TIMEOUT 100000000U
 #define I3C_DMA_OFFICIAL_LED_PULSE_US 120000U
@@ -216,6 +216,8 @@ AT_NONCACHEABLE_SECTION_ALIGN(static i3c_dma_seed_tail_read_param_t s_rx_seed_re
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_txBuff[I3C_PACKET_LENGTH], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_chunk_rxBuff[I3C_DATA_LENGTH], 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_chunk_seed_dummyBuff[2U], 4);
+AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_chunk_tail_dummyBuff[I3C_DATA_LENGTH + 2U], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_master_ibiBuff[10U], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t g_ibiBuff[10U], 4);
 static uint8_t g_ibiPayloadSize;
@@ -236,6 +238,7 @@ static void i3c_master_callback(I3C_Type *base,
                                 i3c_master_dma_handle_t *handle,
                                 status_t status,
                                 void *userData);
+static uint32_t block_stream_dummy_seed_byte_count(uint32_t totalSize);
 static uint32_t block_stream_dma_seed_byte_count(uint32_t totalSize);
 static i3c_rx_trigger_level_t block_stream_dma_seed_trigger_level(uint32_t seedByteCount);
 static void clear_dma0_channel_state(void);
@@ -421,8 +424,43 @@ static uint32_t recover_master_rx_tail(uint8_t *rxBuff, uint32_t startIndex, uin
     return writeIndex - startIndex;
 }
 
+static uint32_t block_stream_dummy_seed_byte_count(uint32_t totalSize)
+{
+    if (totalSize > UINT8_MAX)
+    {
+        return 2U;
+    }
+
+    return 0U;
+}
+
+static uint32_t block_stream_wire_padding_byte_count(uint32_t totalSize)
+{
+    if (totalSize > UINT8_MAX)
+    {
+        return 1U;
+    }
+
+    return 0U;
+}
+
+static uint32_t block_stream_smartdma_dummy_prefix_byte_count(uint32_t totalSize)
+{
+    if (totalSize > UINT8_MAX)
+    {
+        return 2U;
+    }
+
+    return 0U;
+}
+
 static uint32_t block_stream_dma_seed_byte_count(uint32_t totalSize)
 {
+    if (totalSize > UINT8_MAX)
+    {
+        return 2U;
+    }
+
     if (totalSize >= 6U)
     {
         return 6U;
@@ -603,8 +641,15 @@ static status_t quiesce_post_ibi_to_idle(I3C_Type *base)
 static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedReadSize)
 {
     const uint32_t channelMask = (1UL << EXAMPLE_I3C_RX_CHANNEL);
+    const uint32_t dummySeedByteCount = block_stream_dummy_seed_byte_count(expectedReadSize);
+    const uint32_t wirePaddingByteCount = block_stream_wire_padding_byte_count(expectedReadSize);
+    const uint32_t smartdmaDummyPrefixByteCount = block_stream_smartdma_dummy_prefix_byte_count(expectedReadSize);
     const uint32_t seedByteCount = block_stream_dma_seed_byte_count(expectedReadSize);
-    const uint32_t tailByteCount = expectedReadSize - seedByteCount;
+    const uint32_t wireReadSize = expectedReadSize + dummySeedByteCount + wirePaddingByteCount;
+    const uint32_t tailByteCount = (dummySeedByteCount != 0U) ? (expectedReadSize + smartdmaDummyPrefixByteCount)
+                                                            : (wireReadSize - seedByteCount);
+    uint8_t *seedDestination = (dummySeedByteCount != 0U) ? g_chunk_seed_dummyBuff : g_chunk_rxBuff;
+    uint8_t *tailDestination = (smartdmaDummyPrefixByteCount != 0U) ? g_chunk_tail_dummyBuff : g_chunk_rxBuff;
     dma_transfer_config_t dmaTransfer;
     status_t result;
     uint32_t armCycleStart = read_cycle_counter();
@@ -613,6 +658,8 @@ static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedRea
 
     memset((void *)&s_rx_seed_read_param, 0, sizeof(s_rx_seed_read_param));
     memset(g_chunk_rxBuff, 0, sizeof(g_chunk_rxBuff));
+    memset(g_chunk_seed_dummyBuff, 0, sizeof(g_chunk_seed_dummyBuff));
+    memset(g_chunk_tail_dummyBuff, 0, sizeof(g_chunk_tail_dummyBuff));
 
     g_dma0_dbg_irq_count = 0U;
     g_dma0_dbg_first_intstat = 0U;
@@ -651,13 +698,14 @@ static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedRea
     NVIC_DisableIRQ(SDMA_IRQn);
 
     DMA_EnableChannel(EXAMPLE_DMA, EXAMPLE_I3C_RX_CHANNEL);
+    DMA_AbortTransfer(&g_seedReadDmaHandle);
     DMA_CreateHandle(&g_seedReadDmaHandle, EXAMPLE_DMA, EXAMPLE_I3C_RX_CHANNEL);
     EXAMPLE_DMA->COMMON[0].INTENCLR = channelMask;
     NVIC_DisableIRQ(DMA0_IRQn);
     NVIC_ClearPendingIRQ(DMA0_IRQn);
     DMA_PrepareTransfer(&dmaTransfer,
                         (uint32_t *)(uint32_t)&EXAMPLE_MASTER->MRDATAB,
-                        g_chunk_rxBuff,
+                        seedDestination,
                         sizeof(uint8_t),
                         seedByteCount,
                         kDMA_PeripheralToMemory,
@@ -669,7 +717,8 @@ static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedRea
     }
 
     s_rx_seed_read_param.expectedWakeCount = 1U;
-    s_rx_seed_read_param.nextByteAddress = (uint32_t)(uintptr_t)&g_chunk_rxBuff[seedByteCount];
+    s_rx_seed_read_param.nextByteAddress =
+        (uint32_t)(uintptr_t)&tailDestination[(dummySeedByteCount == 0U) ? seedByteCount : 0U];
     s_rx_seed_read_param.remainingCount = tailByteCount;
     s_rx_seed_read_param.i3cBaseAddress = (uint32_t)(uintptr_t)EXAMPLE_MASTER;
     s_rx_seed_read_param.dmaIntaAddress = (uint32_t)(uintptr_t)&EXAMPLE_DMA->COMMON[0].INTA;
@@ -705,7 +754,15 @@ static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedRea
                             false,
                             false);
 
-    result = I3C_MasterStartWithRxSize(EXAMPLE_MASTER, kI3C_TypeI3CSdr, slaveAddr, kI3C_Read, (uint8_t)expectedReadSize);
+    if (wireReadSize > UINT8_MAX)
+    {
+        result = I3C_MasterStart(EXAMPLE_MASTER, kI3C_TypeI3CSdr, slaveAddr, kI3C_Read);
+    }
+    else
+    {
+        result = I3C_MasterStartWithRxSize(EXAMPLE_MASTER, kI3C_TypeI3CSdr, slaveAddr, kI3C_Read,
+                                           (uint8_t)wireReadSize);
+    }
     if (result != kStatus_Success)
     {
         goto exit;
@@ -748,13 +805,17 @@ static status_t run_chunk_seed_tail_read(uint8_t slaveAddr, uint32_t expectedRea
         goto exit;
     }
 
-    if (tailByteCount != 0U)
+    if ((dummySeedByteCount == 0U) && (tailByteCount != 0U))
     {
         uint8_t reorderedData[I3C_DATA_LENGTH];
 
         memcpy(reorderedData, g_chunk_rxBuff, expectedReadSize);
         memcpy(g_chunk_rxBuff, &reorderedData[seedByteCount], tailByteCount);
         memcpy(&g_chunk_rxBuff[tailByteCount], reorderedData, seedByteCount);
+    }
+    else if (smartdmaDummyPrefixByteCount != 0U)
+    {
+        memcpy(g_chunk_rxBuff, &g_chunk_tail_dummyBuff[smartdmaDummyPrefixByteCount], expectedReadSize);
     }
 
     s_dma_official_smartdma_mailbox = s_rx_seed_read_param.mailbox;
@@ -829,7 +890,8 @@ static void prepare_chunk_write_payload(uint32_t chunkDataLength)
 {
     memset(g_master_txBuff, 0, sizeof(g_master_txBuff));
     g_master_txBuff[0] = I3C_STREAM_REQUEST_TOKEN;
-    g_master_txBuff[1] = (uint8_t)chunkDataLength;
+    g_master_txBuff[1] = (uint8_t)(chunkDataLength & 0xFFU);
+    g_master_txBuff[2] = (uint8_t)((chunkDataLength >> 8U) & 0xFFU);
 }
 
 static status_t reset_slave_session_generation(uint8_t slaveAddr)
@@ -865,13 +927,15 @@ static status_t run_chunk_roundtrip(uint8_t slaveAddr, uint32_t chunkIndex)
     i3c_master_transfer_t masterXfer;
     uint32_t chunkOffset = chunkIndex * I3C_DATA_LENGTH;
     uint32_t expectedReadSize = get_chunk_data_length(chunkIndex);
+    uint32_t requestedReadSize = expectedReadSize + block_stream_dummy_seed_byte_count(expectedReadSize) +
+                                 block_stream_wire_padding_byte_count(expectedReadSize);
     uint32_t chunkPacketSize = sizeof(g_master_txBuff);
     uint32_t rxCallbackBaseline = g_i3c_dbg_dma_callback_rx_count;
     uint32_t chunkCycleStart = read_cycle_counter();
     uint32_t phaseCycleStart;
 
     s_dma_official_current_chunk_index = chunkIndex;
-    prepare_chunk_write_payload(expectedReadSize);
+    prepare_chunk_write_payload(requestedReadSize);
     memset(g_chunk_rxBuff, 0, sizeof(g_chunk_rxBuff));
     memset(g_master_ibiBuff, 0, sizeof(g_master_ibiBuff));
     memset(g_ibiBuff, 0, sizeof(g_ibiBuff));

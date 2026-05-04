@@ -291,7 +291,15 @@ static void semihost_write0(const char *message)
 ///*For MASTER DMA RX TEST*/
 #define I3C_MASTER_DMA_RX_TEST
 #ifndef I3C_SLAVE_TX_DATA_LENGTH
+#if EXPERIMENT_SLAVE_STREAM_SOURCE
+#if (EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES > 255U)
+#define I3C_SLAVE_TX_DATA_LENGTH            (EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES + 3U)
+#else
+#define I3C_SLAVE_TX_DATA_LENGTH            EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES
+#endif
+#else
 #define I3C_SLAVE_TX_DATA_LENGTH            255U
+#endif
 #endif
 
 #define I3C_SLAVE_LED_TOGGLE_INTERVAL 250000U
@@ -1207,12 +1215,17 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
 #if EXPERIMENT_SLAVE_STREAM_SOURCE
                     {
                         uint32_t requestedTxSize = 0U;
+                        uint32_t dummySeedByteCount = 0U;
                         uint32_t blockIndex = g_slaveRetainedTrace.currentGeneration;
 
                         if (((uint32_t)xfer->transferredCount >= 2U) &&
                             (g_slave_rxBuff[0] == EXPERIMENT_SLAVE_STREAM_REQUEST_TOKEN))
                         {
                             requestedTxSize = g_slave_rxBuff[1];
+                            if ((uint32_t)xfer->transferredCount >= 3U)
+                            {
+                                requestedTxSize |= ((uint32_t)g_slave_rxBuff[2] << 8U);
+                            }
                         }
                         else if ((uint32_t)xfer->transferredCount != 0U)
                         {
@@ -1224,12 +1237,27 @@ static void i3c_slave_callback(I3C_Type *base, i3c_slave_transfer_t *xfer, void 
                             requestedTxSize = I3C_SLAVE_TX_DATA_LENGTH;
                         }
 
+#if (EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES > 255U)
+                        if (requestedTxSize > UINT8_MAX)
+                        {
+                            dummySeedByteCount = 2U;
+                        }
+#endif
+
                         g_txBuff = g_slave_txBuff;
                         g_txSize = requestedTxSize;
                         for (uint32_t txIndex = 0U; txIndex < g_txSize; txIndex++)
                         {
-                            g_slave_txBuff[txIndex] =
-                                (uint8_t)(((blockIndex * EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES) + txIndex) & 0xFFU);
+                            if (txIndex < dummySeedByteCount)
+                            {
+                                g_slave_txBuff[txIndex] = 0U;
+                            }
+                            else
+                            {
+                                g_slave_txBuff[txIndex] = (uint8_t)(
+                                    ((blockIndex * EXPERIMENT_SLAVE_STREAM_BLOCK_BYTES) + (txIndex - dummySeedByteCount)) &
+                                    0xFFU);
+                            }
                         }
                         echoedCount = requestedTxSize;
                     }

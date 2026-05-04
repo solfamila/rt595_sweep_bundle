@@ -5,7 +5,7 @@ This bundle now keeps only the two validated RT595 experiments that still matter
 - `master_i3c_sdma_seed_tail_len_sweep`
 - `master_i3c_dma_official_rx_smartdma_wake_block_stream`
 
-The obsolete RX probe, SmartDMA wake probe, and chunk-loop proof experiments were removed after the passing `255`-byte block-stream path was revalidated.
+The obsolete RX probe, SmartDMA wake probe, and chunk-loop proof experiments were removed after the retained block-stream path was revalidated and extended beyond the old `255`-byte transport ceiling.
 
 ## Included
 
@@ -80,7 +80,37 @@ That retained state means the sweep still validates the SmartDMA-driven post-IBI
 
 `master_i3c_dma_official_rx_smartdma_wake_block_stream/` keeps the master on the official DMA request-write path, then performs the read with a DMA seed followed by a SmartDMA-drained tail.
 
-For every practical passing read size in this repo, the RX seed length is `6` bytes. The transport that stays in the cleaned repo is the stable one-byte block-length path, so the currently implemented block-size ceiling is `255` bytes.
+For the legacy `<=255` path, the RX seed length remains `6` bytes. For `>255`, the retained repo now uses a three-byte request packet with a 16-bit requested wire length, two leading dummy bytes on the wire, SmartDMA consuming the payload tail, and one sacrificial trailing wire byte to compensate for the one-byte-short read behavior on the plain `I3C_MasterStart()` path.
+
+The current passing ceiling validated in this repo is `512` bytes per logical block.
+
+### Exact validated 512-byte repro
+
+Build and arm the slave:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=512 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_block_stream
+```
+
+Run the master with TRACE32:
+
+```bash
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=512 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream.sh
+```
+
+Validated signature:
+
+```text
+dmaWakeBlockStreamFinal= st=0B out=1 rs=0 cs=1EE9 sa=31 ec=4 cc=4 ci=3 ip=1 i0=4 i1=0 rx=800 mi=0FFFFFFFF tr=0 rf=0 rl=0FF sm=1 sw=4 si=4 ss=0 smd=12 sms=1000 sdc=1000040 cu=563D wu=67 iu=2947 ru=27EE au=169 su=25F0 xc=6 xd=0 xs=3 txc=3 di=0 idc=0 i
+```
+
+Interpretation:
+
+1. `st=0B`, `out=1`, and `rs=0` mean the block-stream proof reached validation and reported success.
+2. `ec=4`, `cc=4`, and `ci=3` mean all four logical blocks completed and the last chunk index was `3`.
+3. `rx=800` means the validated aggregate receive length was `2048` bytes, which matches `512 x 4`.
+4. `sm=1`, `sw=4`, and `si=4` show SmartDMA observed and acknowledged one DMA-completion wake per block.
+5. `tr=0` confirms the legacy RX tail-recovery path was not used.
 
 ### Exact validated 255-byte repro
 
@@ -113,7 +143,7 @@ Interpretation:
 
 ### Widths revalidated on hardware
 
-The current cleaned repo was rechecked on hardware with `I3C_STREAM_BLOCK_COUNT=256` and `I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0`.
+The current cleaned repo was rechecked on hardware with `I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0`.
 
 | Block bytes | Result | Aggregate RX bytes |
 | ---: | --- | ---: |
@@ -121,8 +151,10 @@ The current cleaned repo was rechecked on hardware with `I3C_STREAM_BLOCK_COUNT=
 | 64 | pass | `0x04000` |
 | 128 | pass | `0x08000` |
 | 255 | pass | `0x0FF00` |
+| 511 | pass | `0x07FC` |
+| 512 | pass | `0x0800` |
 
-The transient 256-byte transport experiment was intentionally removed from the kept repo because the stable committed transport is still the one-byte length path that tops out at `255`.
+The `511` and `512` validations use `I3C_STREAM_BLOCK_COUNT=4` on the retained two-byte request transport path. The legacy `255` regression path with `I3C_STREAM_BLOCK_COUNT=256` is still kept as the long-run stress repro.
 
 ### Benchmark and capture helpers
 
@@ -138,11 +170,12 @@ Useful overrides:
 - `RT595_BLOCK_STREAM_MATRIX_COUNTS`
 - `RT595_BLOCK_STREAM_MATRIX_SETTLES_US`
 
-The current post-fix stability conclusion at `255` bytes is:
+The current post-fix stability conclusion is:
 
-1. The zero-settle `255`-byte path now sustains about `114.4 KiB/s` end to end and about `195.0 KiB/s` read-only from `4096` through `32768` blocks.
+1. The zero-settle `255`-byte path still sustains about `114.4 KiB/s` end to end and about `195.0 KiB/s` read-only from `4096` through `32768` blocks.
 2. The old early `st=5 rs=1EDC` failure was a slave-side post-IBI rearm visibility race, not a monotonic payload ceiling.
-3. The regression check at `255 x 256 @ 0 us` still passes after the shared slave changes and after removing the failed 256-byte transport experiment.
+3. The retained block-stream implementation now also passes `511 x 4 @ 0 us` and `512 x 4 @ 0 us` using the 16-bit request length plus dummy-seed SmartDMA-tail path.
+4. The regression check at `255 x 256 @ 0 us` still passes after the shared slave changes and after extending the transport beyond `255`.
 
 ## Useful Overrides
 
@@ -159,10 +192,10 @@ The current post-fix stability conclusion at `255` bytes is:
 
 ## Short Version
 
-If you only want the current passing 255-byte block-stream repro:
+If you only want the current short passing block-stream repro:
 
 ```bash
 cd /Users/foxy/Downloads/rt595_sweep_bundle
-RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=255 I3C_STREAM_BLOCK_COUNT=256 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_block_stream
-RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=255 I3C_STREAM_BLOCK_COUNT=256 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream.sh
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=512 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' RT595_MASTER_RUN_MODE=none RT595_SLAVE_LIVE_RUN=1 ./run_experiment.sh master_i3c_dma_official_rx_smartdma_wake_block_stream
+RT595_EXTRA_MASTER_DEFINES='I3C_STREAM_BLOCK_BYTES=512 I3C_STREAM_BLOCK_COUNT=4 I3C_DMA_OFFICIAL_INTER_CHUNK_SETTLE_US=0' ./trace32/run_master_i3c_dma_official_rx_smartdma_wake_block_stream.sh
 ```
