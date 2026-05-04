@@ -1,1 +1,0 @@
-/* This experiment uses the shared SDK DMA driver path and does not need local EZH features. */

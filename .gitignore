@@ -2,3 +2,7 @@
 **/_build/
 /.local/state/
 /.local/chunk_loop_matrix_results.tsv
+/.local/*.tsv
+/.local/tmp/
+/.local/trace-captures/
+/.local/rt595-trace/trace32_exports/

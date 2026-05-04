@@ -12,9 +12,6 @@ environment:
 
 supported experiments:
   master_i3c_sdma_seed_tail_len_sweep
-  master_i3c_dma_official_rx_probe
-  master_i3c_dma_official_rx_smartdma_wake_probe
-  master_i3c_dma_official_rx_smartdma_wake_chunk_loop
   master_i3c_dma_official_rx_smartdma_wake_block_stream
 EOF
 }
@@ -42,7 +39,7 @@ resolve_experiment_dir() {
   fi
 
   case "$(basename "$resolved_dir")" in
-    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_probe|master_i3c_dma_official_rx_smartdma_wake_probe|master_i3c_dma_official_rx_smartdma_wake_chunk_loop|master_i3c_dma_official_rx_smartdma_wake_block_stream)
+    master_i3c_sdma_seed_tail_len_sweep|master_i3c_dma_official_rx_smartdma_wake_block_stream)
       printf '%s\n' "$resolved_dir"
       ;;
     *)
@@ -521,16 +518,12 @@ compile_master() {
     )
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
     defines+=(EXPERIMENT_IBI_GENERATION_TAG=1)
-  fi
-
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" ]]; then
-    defines+=(I3C_ERRATA_052123_USE_DMA_CHAIN=0)
   fi
 
   sources+=(
@@ -624,9 +617,6 @@ compile_slave() {
   local src
   local rel
   local obj
-  local master_total_bytes
-  local slave_final_tx_count
-  local slave_final_tx_generation
   local stream_block_bytes
   local -a includes
   local -a defines
@@ -662,32 +652,15 @@ compile_slave() {
     defines+=("${extra_slave_defines[@]}")
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_sdma_seed_tail_len_sweep" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
     defines+=(EXPERIMENT_SLAVE_REQUEST_IBI_AFTER_RX=1 EXPERIMENT_SLAVE_IBI_DATA=0xA5)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
     defines+=(EXPERIMENT_IBI_GENERATION_TAG=1)
   fi
 
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
-
-    master_total_bytes=$(extract_define_value "${RT595_EXTRA_MASTER_DEFINES:-}" I3C_LOGICAL_TOTAL_BYTES || true)
-    if [[ -n "$master_total_bytes" ]]; then
-      slave_final_tx_count=$((master_total_bytes % 6))
-      slave_final_tx_generation=$(((master_total_bytes + 6 - 1) / 6))
-      if (( slave_final_tx_count != 0 )); then
-        defines+=(EXPERIMENT_SLAVE_FINAL_TX_SEQUENCE_COUNT="$slave_final_tx_count")
-        defines+=(EXPERIMENT_SLAVE_FINAL_TX_GENERATION="$slave_final_tx_generation")
-      fi
-    fi
-  fi
-
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_probe" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" ]]; then
-    defines+=(EXPERIMENT_SLAVE_FIXED_TX_SEQUENCE_COUNT=6)
-  fi
-
-  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_chunk_loop" || "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
+  if [[ "$EXPERIMENT_NAME" == "master_i3c_dma_official_rx_smartdma_wake_block_stream" ]]; then
     defines+=(EXPERIMENT_SLAVE_REARM_AFTER_COMPLETION=1)
   fi
 
@@ -796,12 +769,6 @@ validate_master_output() {
   case "$experiment_name" in
     master_i3c_sdma_seed_tail_len_sweep)
       grep -q 'I3C SDMA seed tail length sweep successful' "$output_file"
-      ;;
-    master_i3c_dma_official_rx_probe)
-      grep -q 'I3C DMA official RX probe successful' "$output_file"
-      ;;
-    master_i3c_dma_official_rx_smartdma_wake_probe)
-      grep -q 'I3C DMA official RX SmartDMA wake probe successful' "$output_file"
       ;;
     master_i3c_dma_official_rx_smartdma_wake_block_stream)
       grep -q 'I3C DMA official RX SmartDMA wake block stream successful' "$output_file"
